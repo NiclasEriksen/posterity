@@ -67,7 +67,10 @@ def download_from_json_data(data: dict, file_name: str) -> bool:
             with open(json_save_path, "w") as json_file:
                 json.dump(metadata, json_file)
 
-        return True
+            return True
+
+        else:
+            return False
 
     if ".m3u8" in url:
         metadata = {
