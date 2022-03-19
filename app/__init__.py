@@ -2,7 +2,7 @@ import logging.config
 from os import environ
 from celery import Celery
 from dotenv import load_dotenv
-from flask import Flask
+from flask import Flask, redirect, request
 from flask_login import LoginManager
 from .extensions import cache
 from flask_cors import CORS
@@ -46,6 +46,10 @@ def create_app():
         serve_blueprint
     )
     cache.init_app(app)
+
+    @app.errorhandler(404)
+    def page_not_found(_e):
+        return redirect("https://" if request.is_secure else "http://" + app.config["SERVER_NAME"])
 
     with app.app_context():
         load_all_videos_from_disk(media_path)
