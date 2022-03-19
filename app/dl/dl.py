@@ -234,7 +234,11 @@ def get_ffmpeg_cmd(
 
     # Apply sound normalization
     if normalize:
-        cmd += ["-af", "loudnorm=I=-16:TP=-1.5:LRA=11"]
+        # dynamic norm
+        cmd += ["-af", "dynaudnorm"]
+
+        # linear norm
+        # cmd += ["-af", "loudnorm=I=-16:TP=-1.5:LRA=11"]
 
     cmd += ["-http_persistent", "0", "-y", save_path]
 
