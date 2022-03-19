@@ -483,6 +483,7 @@ def list_videos_from_disk(max_count=10) -> list:
     return sorted(videos, key=lambda x: x["upload_time"], reverse=True)[:max_count]
 
 
+@cache.memoize(timeout=1)
 def get_metadata_for_video(video_id: str) -> dict:
     session = db_session
     try:
