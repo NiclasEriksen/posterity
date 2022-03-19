@@ -37,6 +37,7 @@ YT_FORMATS = {
     "MP4 360p 4:3": "639",
     "MP4 240p 4:3": "393",
     "MP4 180p 4:3": "217",
+    "MP4 Mobile": "mp4-mobile",
     "Opus VBR 50kbps": "249",
     "Opus VBR 70kbps": "250",
     "Opus VBR 160kbps": "251",
@@ -58,7 +59,7 @@ YT_SIZES = {
 VID_FORMATS = ["240p", "360p", "480p", "720p", "1080p",
     "YT 1080p", "YT 720p", "YT 720p2", "YT 640p", "YT 480p", "YT 360p", "YT 240p",
     "MP4 720p", "MP4 360p", "MP4 240p", "MP4 576p",
-    "MP4 720p 4:3", "MP4 640p 4:3", "MP4 360p 4:3", "MP4 240p 4:3", "MP4 180p 4:3"
+    "MP4 720p 4:3", "MP4 640p 4:3", "MP4 360p 4:3", "MP4 240p 4:3", "MP4 180p 4:3", "MP4 Mobile"
 ]
 AUD_FORMATS = ["HLS audio 0", "HLS audio 1", "Opus VBR 50kbps", "Opus VBR 70kbps", "Opus VBR 160kbps", "AAC 48kbps", "AAC 128kbps"]
 SUB_LANGS   = ["en", "no"]
@@ -282,7 +283,6 @@ def get_content_info(url: str) -> dict:
                 if u["format_id"] in aud_ids.keys():
                     d["audio_formats"][aud_ids[u["format_id"]]] = u["url"]
 
-        
     if not len(d["video_formats"]):
         log.warning("Last ditch attempt to get video link.")
         urls = get_source_links(url)
