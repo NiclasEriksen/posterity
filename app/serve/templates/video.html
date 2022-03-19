@@ -25,6 +25,7 @@
                         controls
                         preload="auto"
                         width="640"
+                        loop="loop"
                         height="264"
                         poster=""
                         data-setup={}
@@ -128,6 +129,14 @@
 
         {% if status == 1 %}
         <script src="https://vjs.zencdn.net/7.18.1/video.min.js"></script>
+        <script>
+        var vid_element = document.getElementById("video-player");
+        if (vid_element) {
+            videojs('video-player', {}, function() {
+                this.volume(0.5);
+            });
+        }
+        </script>
         {% elif status == 0 %}
         <script src="{{ url_for('serve.static', filename='js/klippekort.js') }}"></script>
         <script>
