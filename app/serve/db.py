@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, Column, Integer, String, DateTime, ForeignKey, Float
+from sqlalchemy import create_engine, Column, Integer, String, DateTime, ForeignKey, Float, Boolean
 from sqlalchemy.orm import relationship, sessionmaker, scoped_session
 from sqlalchemy.ext.declarative import declarative_base
 from flask_login import UserMixin
@@ -46,6 +46,8 @@ class Video(Base):
     duration = Column(Float)
     source = Column(String)
     location = Column(String)
+    safe_to_store = Column(Boolean)
+    verified = Column(Boolean)
     duplicate_of_id = Column(Integer, ForeignKey("videos.id"))
     duplicate_of = relationship("Video", remote_side=[id])
     duplicates = relationship("Video", back_populates="duplicate_of")
@@ -66,6 +68,8 @@ class Video(Base):
             "duration": self.duration,
             "location": self.location,
             "video_id": self.video_id,
+            "safe_to_store": self.safe_to_store,
+            "verified": self.verified,
             "upload_time": time.mktime(self.upload_time.timetuple()) if self.upload_time else 0,
             "duplicate": self.duplicate_of.video_id if self.duplicate_of else "",
         }
@@ -96,6 +100,14 @@ class Video(Base):
         except KeyError:
             self.location = "Unknown"
         try:
+            self.verified = d["verified"]
+        except KeyError:
+            self.verified = False
+        try:
+            self.safe_to_store = d["safe_to_store"]
+        except KeyError:
+            self.safe_to_store = False
+        try:
             self.upload_time = datetime.utcfromtimestamp(d["upload_time"])
         except KeyError:
             pass
@@ -104,6 +116,26 @@ class Video(Base):
         except KeyError:
             log.error("No video id given for json, I hope this gets set manually...")
             pass
+
+
+class RegisterToken(Base):
+    __tablename__ = "tokens"
+    id = Column(Integer, primary_key=True)
+    name = Column(String)
+    token = Column(String)
+    expires = Column(DateTime)
+    uses = Column(Integer)
+
+    def spend_token(self) -> bool:
+        if self.uses > 0:
+            self.uses -= 1
+            return True
+        else:
+            log.info("No more tokens to spend!")
+            return False
+
+    def check(self, other: str) -> bool:
+        return other.strip() == self.token.strip()
 
 
 # To avoid circular imports of Video model
