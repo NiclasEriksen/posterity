@@ -217,13 +217,14 @@ def get_ffmpeg_cmd(
             if len(sub_url):    # Mapping WITH sound and WITH subtitles
                 cmd += ["-map", "2:s", "-c:s", "mov_text"]
             cmd += ["-c:a", "libopus"]
-            cmd += ["-vf", "yadif=parity=auto"]
+
         elif local_audio_channel >= 0:
             c = local_audio_channel     # Mapping with built in audio
             cmd += ["-map", "0:v", "-map", "0:a:" + str(c), "-c:a:" + str(c), "copy", "-strict",  "-2", "-c:a:" + str(c), "aac", "-ac", "2"]
         elif len(sub_url):  # No sound, only subitles
             cmd += ["-map", "1:s", "-c:s", "mov_text"]
- 
+
+        cmd += ["-vf", "yadif=parity=auto"]
         cmd += ["-c:v", "libx264", "-f", "mp4"]
     
     # Only audio, export to ogg.
