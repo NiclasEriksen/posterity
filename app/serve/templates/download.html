@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block page_title %}About Posterity{% endblock %}
+{% block metadata %}
+<meta property="og:site_name" content="Posterity video">
+<meta property="og:title" content="Download complete archive" />
+<meta property="og:description" content="Links and methods for downloading the entire Posterity archive." />
+<meta property="og:image" itemprop="image" content="{{ url_for('serve.static', filename='posterity.png') }}">
+<meta property="og:type" content="website" />
+{% endblock %}
+{% block content %}
+<section class="uk-section uk-section-small uk-section-muted uk-padding-remove-vertical">
+    <div class="uk-container">
+        <div class="uk-height-small uk-cover-container">
+            <div class="uk-overlay uk-position-cover uk-flex uk-flex-center uk-flex-middle uk-text-center">
+                <h1>Download and backups</h1>
+            </div>
+        </div>
+    </div>
+</section>
+<section class="uk-section uk-section-default uk-section-small uk-padding-remove-vertical">
+    <div class="uk-container">
+        <div class="uk-grid uk-grid-divider uk-child-width-expand@m">
+            <div class="uk-width-1-1">
+                <div class="uk-width-1-1 uk-padding-small">
+                    <h4 class="uk-heading-line">Torrent</h4>
+                </div>
+                <div class="uk-width-1-1">
+                    <p>
+                        <a href="/get_torrent" uk-icon="icon: social" class="uk-icon-link">Get the latest torrent </a> (currently unavailable).
+                    </p>
+                </div>
+                <div class="uk-width-1-1 uk-padding-small">
+                    <h4 class="uk-heading-line">Syncthing</h4>
+                </div>
+                <div class="uk-width-1-1">
+                    <p>
+                        Add this device to <a href="https://syncthing.net/" target="_blank">Syncthing</a> in order to get acccess to the shared folder. All verified videos will be immediately available and synced between all peers, think <i>"Dropbox on torrent"</i>.
+                    </p>
+                    <p>Enable "Auto Accept" when adding the server in order to get the folder immediately. For syncing to other peers, you need to enable "Introducer" as well. Your device will generally be accepted as a peer within a few hours.</p>
+                    <p class="uk-text-meta">
+                        <b>Device ID:</b> VHO7VXT-HQCSLYX-PF2QFUS-AZWTYF5-YV6BU3L-UF7PCBG-66INE7S-IJ4SXQL
+                    </p>
+                    <img src="{{ url_for('serve.static', filename='syncthing_qr.png') }}" class="uk-align-left" alt="QR code to add Syncthing device" style="max-height: 196px;">
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

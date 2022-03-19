@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="uk-container uk-width-1-1 uk-height-1-1 uk-position-relative">
+    <div class="uk-position-center uk-text-center uk-height-1-1 uk-width-1-1">
+        <div class="uk-vertical-align-middle uk-margin" style="width: 350px;">
+
+            <span uk-icon="icon: user; ratio: 4;" class="uk-padding-small"></span>
+            <h2>Register new user</h2>
+
+            <form class="uk-form" method="POST" action="/register">
+                <div class="uk-inline uk-margin-small">
+                    <span class="uk-form-icon" uk-icon="icon: tag"></span>
+                    <input class="uk-input uk-width-1-1 uk-form-width-medium uk-form-large" type="text" placeholder="Register token", name="token">
+                </div>
+                <div class="uk-inline uk-margin-small">
+                    <span class="uk-form-icon" uk-icon="icon: user"></span>
+                    <input class="uk-input uk-width-1-1 uk-form-width-medium uk-form-large" type="text" placeholder="Username", name="username" autofocus="">
+                </div>
+                <div class="uk-inline uk-margin-small">
+                    <span class="uk-form-icon" uk-icon="icon: lock"></span>
+                    <input class="uk-input uk-width-1-1 uk-form-width-medium uk-form-large" type="password" placeholder="Password", name="password">
+                </div>
+                <div class="uk-inline uk-margin-small">
+                    <span class="uk-form-icon" uk-icon="icon: sign-in" style="color: #FFF;"></span>
+                    <button class="uk-input uk-button uk-button-secondary uk-button-large" type="submit">Register</button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

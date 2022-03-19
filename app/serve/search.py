@@ -1,0 +1,70 @@
+import functools
+import os
+from werkzeug.local import LocalProxy
+from flask import current_app
+from datetime import datetime
+from elasticsearch import Elasticsearch, NotFoundError
+from elastic_transport import ConnectionError, ConnectionTimeout
+from .db import Video
+from app.extensions import cache
+
+
+es = Elasticsearch(os.environ.get("ES_SERVER_ADDRESS", "http://0.0.0.0:9200"))
+log = LocalProxy(lambda: current_app.logger)
+
+
+def catch_es_errors(f) -> []:
+    @functools.wraps(f)
+    def wrapper(*args, **kwargs) -> []:
+        try:
+            return f(*args, **kwargs)
+        except (ConnectionError, ConnectionTimeout, NotFoundError, RuntimeError, OverflowError) as e:
+            log.debug(e)
+            log.error("Error during handling of ElasticSearch request, ignoring.")
+            return []
+    return wrapper
+
+
+@catch_es_errors
+def remove_videos_index():
+    _result = es.indices.delete(index="videos", ignore=[400, 404])
+
+
+@catch_es_errors
+def remove_video_data(video: Video):
+    _result = es.delete(index="videos", id=video.video_id)
+
+
+@catch_es_errors
+def index_video_data(video: Video):
+    body = {
+        "title": video.title,
+        "orig_title": video.orig_title,
+        "url": video.url,
+        "content_warning": video.content_warning,
+        "upload_date": datetime.timestamp(video.upload_time),
+        "source": video.source,
+        "location": video.location
+    }
+
+    _result = es.index(index="videos", id=video.video_id, body=body)
+
+
+@catch_es_errors
+@cache.memoize(30)
+def search_videos(keyword: str) -> list:
+    body = {
+        "size": 100,
+        "query": {
+            "multi_match": {
+                "query": keyword,
+                "fields": ["title", "orig_title", "content_warning", "url", "source", "location"],
+                "fuzziness": "AUTO",
+                "prefix_length": 2
+            }
+        }
+    }
+
+    res = es.search(index="videos", body=body)
+
+    return res["hits"]["hits"]

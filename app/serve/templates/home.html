@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+.disabled_a {
+    pointer-events: none;
+}
+</style>
+<div class="uk-container uk-grid uk-padding-small uk-height-1-1 uk-padding-remove-top uk-margin-remove">
+    {% if current_user.is_authenticated %}
+    <div class="uk-width-1-1 uk-width-1-3@m uk-dark uk-background-muted uk-height-1-1 uk-margin">
+        <form action="" id="link-form" class="uk-form uk-padding-small uk-width-1-1 uk-height-1-1">
+            <fieldset class="uk-fieldset uk-grid">
+
+                <legend class="uk-legend">Post new video for posterity</legend>
+
+                <div class="uk-margin uk-width-1-1 uk-padding-remove-horizontal">
+                    <div class="uk-inline uk-width-1-1">
+                        <span class="uk-form-icon" uk-icon="icon: link"></span>
+                        <input class="uk-input" type="text" id="url" name="url" placeholder="URL">
+                    </div>
+                </div>
+
+                <div class="uk-margin uk-width-1-1 uk-padding-remove-horizontal">
+                    <div class="uk-inline uk-width-1-1">
+                        <span class="uk-form-icon" uk-icon="icon: quote-right"></span>
+                        <input class="uk-input" type="text" id="title" name="title" placeholder="Descriptive title">
+                    </div>
+                </div>
+
+                <div class="uk-margin uk-width-1-2 uk-width-1-1@m uk-padding-remove-horizontal">
+                    <div class="uk-form-label">Content warning</div>
+                    <div class="uk-inline uk-width-1-1">
+                        <span class="uk-form-icon" uk-icon="icon: warning"></span>
+                        <select class="uk-input uk-select" id="content_warning" name="content_warning">
+                            <option>None</option>
+                            <option>Destruction</option>
+                            <option>Violence</option>
+                            <option>Distress</option>
+                            <option>Graphic</option>
+                            <option>Implied death</option>
+                            <option>Death</option>
+                            <option>Nudity</option>
+                            <option>Children</option>
+                            <option>Animals</option>
+                            <option>Gore</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="uk-margin uk-width-1-2 uk-width-1-1@m uk-padding-remove-horizontal uk-padding-remove-right@m">
+                    <div class="uk-form-label">Source</div>
+                    <div class="uk-inline uk-width-1-1">
+                        <span class="uk-form-icon" uk-icon="icon: location"></span>
+                        <input class="uk-input" type="text" id="source" name="source" placeholder="Source of this link" value="Website">
+                    </div>
+                </div>
+
+                <div class="uk-margin uk-width-1-1 uk-padding-remove-left">
+                    <button class="uk-button uk-button-default" type="submit" id="submit-button">Save for posterity</button>
+                </div>
+            </fieldset>
+        </form>
+    </div>
+    {% endif %}
+    <div class="uk-width-1-1 {% if current_user.is_authenticated %}uk-width-2-3@m {% endif %}uk-padding-small">
+
+        <div class="uk-grid uk-grid-small uk-text-small uk-padding-small">
+            <div class="uk-width-1-1 uk-width-1-2@m uk-text-muted uk-text-center">
+                <div class=" uk-position-relative uk-container uk-height-1-1">
+                    <div class="uk-text-center uk-position-center uk-position-relative">
+                        {% if keyword|length %}Search results for <b>"{{ keyword }}"</b><br>{% endif %}
+                        {% if total_results > 0 %}
+                            Showing {{ result_offset + 1 }} to {{ result_offset + total_results }} of {{ total }} (page {{ current_page }} of {{ max_page }})
+                        {% else %}
+                            No results to show.
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="uk-container uk-width-1-1 uk-width-1-2@m uk-height-1-1">
+                <form class="uk-form uk-width-1-1" id="search_form" name="search_form" action="/" method="POST">
+                    <div class="uk-margin-remove uk-padding-small">
+                        <div class="uk-inline uk-width-1-1">
+                            <a class="uk-form-icon uk-form-icon-flip" href="" onclick="document.search_form.submit();return false;" uk-icon="icon: search"></a>
+                            <input class="uk-input" type="text" id="keyword" name="keyword" placeholder="Search phrase" value="">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <a class="uk-width-1-2 uk-input uk-button {% if current_page > 1 %}uk-button-secondary{% else %}disabled_a uk-button-muted{% endif %} uk-button-small" href="{% if current_page > 1 %}/?p={{ current_page - 1 }}{% else %}#{% endif %}">
+                <span uk-icon="icon: chevron-double-left"></span> Previous
+            </a>
+            <a class="uk-width-1-2 uk-input uk-button {% if current_page < max_page %}uk-button-secondary{% else %}disabled_a uk-button-muted{% endif %} uk-button-small" href="{% if current_page < max_page %}/?p={{ current_page + 1 }}{% else %}#{% endif %}">
+                Next <span uk-icon="icon: chevron-double-right"></span>
+            </a>
+        </div>
+
+        <table class="uk-table uk-table-small uk-table-responsive">
+            <caption class="uk-visible@m">{% if keyword|length %}Search results{% else %}Archived videos, sorted by upload date.{% endif %}</caption>
+            <thead>
+                <tr>
+                    <th class="uk-table-expand">Title</th>
+                    <th>URL</th>
+                    <th>Upload time</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for video in videos %}
+                <tr>
+                    <td><a href="/{{ video['video_id'] }}">{{ video.title }}</a></td>
+                    <td class="uk-text-muted uk-text-small" style="max-width: 120px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;"><a href="{{ video['url'] }}" target="_blank">{{ video.url[:48] }}</a></td>
+                    <td class="uk-text-muted uk-text-small">{{ video.upload_time_str }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+
+            <tfoot>
+                <tr>
+                    <td>Title</td>
+                    <td>URL</td>
+                    <td>Upload time</td>
+                </tr>
+            </tfoot>
+        </table>
+        <div class="uk-grid uk-grid-small">
+            <div class="uk-width-1-2 uk-visible@m"></div>
+            <a class="uk-width-1-2 uk-width-1-4@m uk-input uk-button {% if current_page > 1 %}uk-button-secondary{% else %}disabled_a uk-button-muted{% endif %} uk-button-small" href="{% if current_page > 1 %}/?p={{ current_page - 1 }}{% else %}#{% endif %}">
+                <span uk-icon="icon: chevron-double-left"></span> Previous
+            </a>
+            <a class="uk-width-1-2 uk-width-1-4@m uk-input uk-button {% if current_page < max_page %}uk-button-secondary{% else %}disabled_a uk-button-muted{% endif %} uk-button-small" href="{% if current_page < max_page %}/?p={{ current_page + 1 }}{% else %}#{% endif %}">
+                Next <span uk-icon="icon: chevron-double-right"></span>
+            </a>
+        </div>
+    </div>
+
+</div>
+<script src="{{ url_for('serve.static', filename='js/klippekort.js') }}"></script>
+{% endblock %}
