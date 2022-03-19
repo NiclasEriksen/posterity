@@ -235,7 +235,7 @@ def get_ffmpeg_cmd(
     # Apply sound normalization
     if normalize:
         # dynamic norm
-        cmd += ["-af", "dynaudnorm"]
+        cmd += ["-af", "dynaudnorm=p=0.85"]
 
         # linear norm
         # cmd += ["-af", "loudnorm=I=-16:TP=-1.5:LRA=11"]
