@@ -80,4 +80,6 @@ function redirectOnComplete(video_id) {
 
 
 const form = document.querySelector('#link-form');
-form.addEventListener('submit', handleFormSubmit);
+if (form) {
+    form.addEventListener('submit', handleFormSubmit);
+}
