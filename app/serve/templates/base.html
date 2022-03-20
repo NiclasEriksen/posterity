@@ -58,7 +58,7 @@
         {% if messages %}
             {% for category, message in messages %}
             <div class="{% if category == 'error' %}uk-animation-shake{% else %}uk-animation-slide-top-small{% endif %} uk-container uk-text-center uk-padding-small uk-container-small uk-background-muted uk-margin-remove uk-width-1-1" style="padding-top: 5px; padding-bottom: 5px;">
-                <b class="{% if category == 'error' %}uk-text-danger{% elif category == 'success' %}uk-text-success{% else %}uk-text-secondary{% endif %}">{{ message }}</b>
+                <b class="{% if category == 'error' %}uk-text-danger{% elif category == 'success' %}uk-text-success{% elif category == 'success' %}uk-text-warning{% else %}uk-text-secondary{% endif %}">{{ message }}</b>
             </div>
             {% endfor %}
         {% endif %}
