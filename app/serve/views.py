@@ -99,6 +99,7 @@ def edit_video_post(video_id: str):
 
     metadata["title"] = title
     metadata["content_warning"] = content_warning
+    metadata["verified"] = verified
 
     json_path = os.path.join(media_path, video_id + ".json")
     if not os.path.isfile(json_path):
@@ -106,14 +107,13 @@ def edit_video_post(video_id: str):
     else:
         with open(json_path, "w") as json_file:
             json.dump(metadata, json_file)
-        flash(f"Video info for \"{video_id}\"has been update.", "success")
-        return redirect(url_for("serve.serve_video", video_id=video_id))
+        flash(f"Video info for \"{video_id}\"has been updated.", "success")
 
     return render_template(
         "edit_video.html",
         custom_title=metadata["title"],
         content_warning=metadata["content_warning"],
-        verified=verified,
+        verified=metadata["verified"],
         video_id=video_id
     )
 
