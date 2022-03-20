@@ -26,6 +26,7 @@ class User(UserMixin, Base):
     username = Column(String(32), unique=True)
     password = Column(String(256))
     auth_level = Column(Integer)
+    autoplay_videos = Column(Boolean)
 
     def check_auth(self, level: int) -> bool:
         return self.auth_level >= level
