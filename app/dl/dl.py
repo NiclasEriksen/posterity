@@ -25,88 +25,88 @@ if not os.path.isfile(url_file_path):
 
 
 def download_from_json_data(data: dict, file_name: str) -> bool:
-    try:
-        url = data["url"]
-        title = data["title"]
-        source = data["source"]
-        cw = data["content_warning"]
-    except KeyError:
-        log.error("Corrupted data?!")
-        return False
-
-    if media_path == "":
-        log.error("No path to save video (MEDIA_FOLDER)...")
-        return False
-
     vid_save_path = os.path.join(media_path, file_name + ".mp4")
     json_save_path = os.path.join(media_path, file_name + ".json")
 
-
-    if not valid_youtube_url(url):
-        log.error("Invalid video url...")
-        return False
-    
-    existing_urls = []
-    with open(url_file_path, "r") as url_file:
-        existing_urls = url_file.read().splitlines() 
-
-    if url in existing_urls:
-        log.info("This video is already downloaded!")
-        existing_id = find_existing_video_id_by_url(url)
-        if len(existing_id):
-            metadata = {}
-            with open(os.path.join(media_path, existing_id + ".json")) as json_file:
-                metadata = json.load(json_file)
-
-            metadata["duplicate"] = existing_id
-            metadata["title"] = title
-            metadata["source"] = source
-            metadata["content_warning"] = cw
-            metadata["video_id"] = file_name
-
-            with open(json_save_path, "w") as json_file:
-                json.dump(metadata, json_file)
-
-            return True
-
-        else:
-            return False
-
-    if ".m3u8" in url:
-        metadata = {
-                "url": url,
-                "source": source,
-                "title": title,
-                "video_title": "",
-                "content_warning": cw,
-                "format": "",
-                "duration": 0,
-                "upload_time": datetime.now().timestamp(),
-                "status": STATUS_INVALID,
-                "video_id": file_name
-        }
+    metadata = {
+        "url": "",
+        "source": "",
+        "title": "",
+        "video_title": "",
+        "content_warning": "",
+        "format": "",
+        "duration": 0,
+        "upload_time": datetime.now().timestamp(),
+        "status": STATUS_DOWNLOADING,
+        "video_id": file_name
+    }
+    try:
+        metadata["url"] = data["url"]
+        metadata["title"] = data["title"]
+        metadata["source"] = data["source"]
+        metadata["content_warning"] = data["content_warning"]
+    except KeyError:
+        log.error("Corrupted data?!")
+        metadata["status"] = STATUS_INVALID
         with open(json_save_path, "w") as json_file:
             json.dump(metadata, json_file)
-
         return False
 
+    if not valid_youtube_url(metadata["url"]):
+        log.error("Invalid video url...")
+        metadata["status"] = STATUS_INVALID
+        with open(json_save_path, "w") as json_file:
+            json.dump(metadata, json_file)
+        return False
+    elif media_path == "":
+        log.error("No path to save video (MEDIA_FOLDER)...")
+        metadata["status"] = STATUS_FAILED
+        with open(json_save_path, "w") as json_file:
+            json.dump(metadata, json_file)
+        return False
 
     try:
-        d = get_content_info(url)
+        with open(url_file_path, "r") as url_file:
+            existing_urls = url_file.read().splitlines()
+    except OSError as e:
+        log.error(e)
+        log.error("Not getting URLs from disk.")
+        existing_urls = []
+
+    if metadata["url"] in existing_urls:
+        log.info("This video is already downloaded!")
+        existing_id = find_existing_video_id_by_url(metadata["url"])
+        if len(existing_id):
+            try:
+                with open(os.path.join(media_path, existing_id + ".json")) as json_file:
+                    new_metadata = json.load(json_file)
+            except OSError:
+                pass
+            else:
+                if new_metadata["status"] in [STATUS_COMPLETED, STATUS_DOWNLOADING]:
+                    new_metadata["duplicate"] = existing_id
+                    new_metadata["title"] = metadata["title"]
+                    new_metadata["source"] = metadata["source"]
+                    new_metadata["content_warning"] = metadata["content_warning"]
+                    new_metadata["video_id"] = file_name
+                    new_metadata["status"] = STATUS_COMPLETED
+
+                    with open(json_save_path, "w") as json_file:
+                        json.dump(new_metadata, json_file)
+
+                    return True
+
+    if ".m3u8" in metadata["url"]:
+        metadata["status"] = STATUS_INVALID
+        with open(json_save_path, "w") as json_file:
+            json.dump(metadata, json_file)
+        return False
+
+    try:
+        d = get_content_info(metadata["url"])
     except AgeRestrictedError:
         log.error("Need cookies for age restricted videos...")
-        metadata = {
-                "url": url,
-                "source": source,
-                "title": title,
-                "video_title": "",
-                "content_warning": cw,
-                "format": "",
-                "duration": 0,
-                "upload_time": datetime.now().timestamp(),
-                "status": STATUS_COOKIES,
-                "video_id": file_name
-        }
+        metadata["status"] = STATUS_COOKIES
         with open(json_save_path, "w") as json_file:
             json.dump(metadata, json_file)
         return False
@@ -115,21 +115,9 @@ def download_from_json_data(data: dict, file_name: str) -> bool:
     video_links = d["video_formats"]
     if not len(video_formats):
         log.error("No video stream to download.")
-        metadata = {
-                "url": url,
-                "source": source,
-                "title": title,
-                "video_title": "",
-                "content_warning": cw,
-                "format": "",
-                "duration": 0,
-                "upload_time": datetime.now().timestamp(),
-                "status": STATUS_INVALID,
-                "video_id": file_name
-        }
+        metadata["status"] = STATUS_INVALID
         with open(json_save_path, "w") as json_file:
             json.dump(metadata, json_file)
-
         return False
 
     audio_formats = list(d["audio_formats"].keys())
@@ -151,33 +139,21 @@ def download_from_json_data(data: dict, file_name: str) -> bool:
 
     cmd = get_ffmpeg_cmd(video_url, audio_url, sub_url, vid_save_path)
 
-    # print(cmd)
-
-    metadata = {
-            "url": url,
-            "source": source,
-            "title": title,
-            "video_title": video_title,
-            "content_warning": cw,
-            "format": video_formats[-1],
-            "duration": duration,
-            "upload_time": datetime.now().timestamp(),
-            "status": STATUS_DOWNLOADING,
-            "video_id": file_name
-    }
+    metadata["video_title"] = video_title
+    metadata["format"] = video_formats[-1]
+    metadata["duration"] = duration
+    metadata["status"] = STATUS_DOWNLOADING
 
     with open(json_save_path, "w") as json_file:
         json.dump(metadata, json_file)
 
     with open(url_file_path, "a") as url_file:
-        url_file.write(url + "\n")
+        url_file.write(metadata["url"] + "\n")
 
     result = subprocess.run(cmd)
 
     if result.returncode != 0:
         print(result)
-        print(vars(result))
-        print(dir(result))
         log.error("Well this all went to shit. Removing video.")
 
         try:
@@ -190,7 +166,7 @@ def download_from_json_data(data: dict, file_name: str) -> bool:
             lines = f.readlines()
         with open(url_file_path, "w") as f:
             for line in lines:
-                if line.strip("\n") != url:
+                if line.strip("\n") != metadata["url"]:
                     f.write(line)
     else:
         metadata["status"] = STATUS_COMPLETED
