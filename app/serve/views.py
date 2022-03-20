@@ -433,8 +433,8 @@ def check_status():
     scheduled_tasks = get_celery_scheduled()
     total_videos = Video.query.count()
     return {
-        "active": active_tasks if active_tasks else 0,
-        "scheduled": scheduled_tasks if scheduled_tasks else 0,
+        "active": len(active_tasks) if active_tasks else 0,
+        "scheduled": len(scheduled_tasks) if scheduled_tasks else 0,
         "total_videos": total_videos
     }
 
