@@ -7,11 +7,15 @@
 </style>
 <div class="uk-container uk-grid uk-padding-small uk-height-1-1 uk-padding-remove-top uk-margin-remove">
     {% if current_user.is_authenticated %}
-    <div class="uk-width-1-1 uk-width-1-3@m uk-dark uk-background-muted uk-height-1-1 uk-margin">
+    <div
+        class="uk-width-1-1 uk-width-1-3@m uk-dark uk-background-muted uk-height-1-1 uk-margin"
+        style="border: 1px dashed #CCC;border-top: 0;"
+    >
+
         <form action="" id="link-form" class="uk-form uk-padding-small uk-width-1-1 uk-height-1-1">
             <fieldset class="uk-fieldset uk-grid">
 
-                <legend class="uk-legend">Post new video for posterity</legend>
+                <legend class="uk-legend uk-text-center uk-width-1-1 uk-padding-remove">Post new video for posterity</legend>
 
                 <div class="uk-margin uk-width-1-1 uk-padding-remove-horizontal">
                     <div class="uk-inline uk-width-1-1">
