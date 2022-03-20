@@ -33,7 +33,7 @@ from app.extensions import cache
 init_db()
 load_dotenv()
 APPLICATION_ENV = get_environment()
-MAX_RESULT_PER_PAGE = 20
+MAX_RESULT_PER_PAGE = 25
 
 
 def catch_redis_errors(f):
