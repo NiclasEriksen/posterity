@@ -36,7 +36,7 @@ def download_task(data: dict, file_name: str):
             fd = FailedDownload()
             fd.url = data["url"]
             fd.upload_time = datetime.now()
-            fd.title = data["tutle"]
+            fd.title = data["title"]
             fd.source = data["source"]
             db_session.add(fd)
             db_session.commit(fd)
