@@ -19,7 +19,11 @@ def download_task(data: dict, file_name: str):
     import time
     dur = time.time()
     logger.info("Starting download of " + str(file_name))
-    success = download_from_json_data(data, file_name)
+    try:
+        success = download_from_json_data(data, file_name)
+    except Exception as e:
+        logger.error(e)
+        success = False
     dur = time.time() - dur
     _hours, minutes, seconds = seconds_to_time(dur)
     if success:

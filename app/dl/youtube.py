@@ -194,7 +194,10 @@ def get_content_info(url: str) -> dict:
             video = None
         else:
             if "entries" in result:
-                video = result["entries"][0]
+                try:
+                    video = result["entries"][0]
+                except IndexError:
+                    video = None
             else:
                 video = result
 
