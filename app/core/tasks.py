@@ -39,7 +39,7 @@ def download_task(data: dict, file_name: str):
             fd.title = data["title"]
             fd.source = data["source"]
             db_session.add(fd)
-            db_session.commit(fd)
+            db_session.commit()
         except Exception as e:
             logger.error(e)
             logger.error("FailedDownload not written to database.")
