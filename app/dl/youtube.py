@@ -236,7 +236,7 @@ def get_content_info(url: str) -> dict:
             log.error("There's no duration in info from YouTube.")
 
         if not d["duration"] > 0:
-            if any(u in url for u in ["www.youtube.com", "y2u.be", "://youtu.be", "twitch.com"]):
+            if any(u in url for u in ["googlevideo.com", "youtube.com", "www.youtube.com", "y2u.be", "://youtu.be", "twitch.com"]):
                 log.warning("Nope, not downloading current streams.")
                 return d
 
