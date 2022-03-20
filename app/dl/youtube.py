@@ -1,7 +1,6 @@
-import youtube_dl
-import youtube_dl.utils
+from youtube_dlc import YoutubeDL
+from youtube_dlc.utils import DownloadError
 import logging
-import validators
 import re
 import requests
 from .helpers import program_path, find_between
@@ -171,7 +170,7 @@ def get_content_info(url: str) -> dict:
     }
 
     log.info("Fetching data from YouTube link...")
-    ydl = youtube_dl.YoutubeDL({
+    ydl = YoutubeDL({
         "cookiefile": program_path("cookies.txt"),
         "subtitleslang": SUB_LANGS,
         "writesubtitles": True,
@@ -188,7 +187,7 @@ def get_content_info(url: str) -> dict:
                 url,
                 download=False
             )
-        except youtube_dl.utils.DownloadError as e:
+        except DownloadError as e:
             log.error("Error during fetching of video info, doing manual")
             video = None
         else:
