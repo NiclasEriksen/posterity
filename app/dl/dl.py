@@ -193,7 +193,8 @@ def download_from_json_data(data: dict, file_name: str) -> bool:
 
 
 def get_ffmpeg_cmd(
-    vid_url, aud_url, sub_url, save_path, local_audio_channel=-1, normalize=True
+    vid_url, aud_url, sub_url, save_path, local_audio_channel=-1, normalize=True,
+    http_persistent=True
 ) -> list:
 
     cmd = ["ffmpeg", "-i"]
@@ -232,7 +233,12 @@ def get_ffmpeg_cmd(
         # linear norm
         # cmd += ["-af", "loudnorm=I=-16:TP=-1.5:LRA=11"]
 
-    cmd += ["-http_persistent", "0", "-y", save_path]
+    if http_persistent:
+        cmd += ["-http_persistent", "1"]
+    else:
+        cmd += ["-http_persistent", "0"]
+
+    cmd += ["-y", save_path]
 
     return cmd
 
@@ -268,9 +274,9 @@ def get_celery_scheduled():
     try:
         s = inspector.scheduled()
     except:
-        s = "?"
+        s = []
 
-    print(s)
+    return s
 
 
 def get_celery_active():
@@ -279,9 +285,9 @@ def get_celery_active():
     try:
         a = inspector.active()
     except:
-        a = "?"
+        a = []
 
-    print(a)
+    return a
 
 
 

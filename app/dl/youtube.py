@@ -1,5 +1,5 @@
-from youtube_dlc import YoutubeDL
-from youtube_dlc.utils import DownloadError
+from youtube_dl import YoutubeDL
+from youtube_dl.utils import DownloadError
 import logging
 import re
 import requests
@@ -307,7 +307,10 @@ def get_content_info(url: str) -> dict:
                 print(str(v["format"]) + "   " + str(v["format_id"]) + "  " + str(v["vcodec"]))
             except:
                 continue
-        
+    else:
+        log.info(f"Found {len(d['video_formats'])} video streams.")
+        log.info(f"Found {len(d['audio_formats'])} separate audio streams.")
+
     return d
 
 
