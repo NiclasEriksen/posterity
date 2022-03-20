@@ -139,6 +139,17 @@ class RegisterToken(Base):
         return other.strip() == self.token.strip()
 
 
+class FailedDownload(Base):
+    __tablename__ = "failed"
+    id = Column(Integer, primary_key=True)
+    url = Column(String)
+    reason = Column(Integer)
+    upload_time = Column(DateTime)
+    source = Column(String)
+    title = Column(String)
+    content_warning = Column(String)
+
+
 # To avoid circular imports of Video model
 from .search import index_video_data, remove_videos_index
 

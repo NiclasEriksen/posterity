@@ -18,15 +18,38 @@ STATUS_COMPLETED = 1
 STATUS_FAILED = 2
 STATUS_INVALID = 3
 STATUS_COOKIES = 4
+from app.serve.db import db_session, Video, FailedDownload
 
 
 if not os.path.isfile(url_file_path):
     open(url_file_path, "a").close()
 
 
+def write_metadata_to_db(video_id: str, md: dict):
+    try:
+        existing = Video.query.filter_by(video_id=video_id).first()
+        if existing:
+            video = existing
+        else:
+            video = Video()
+
+        video.from_json(md)
+        db_session.add(video)
+        db_session.commit()
+    except Exception as e:
+        log.error(e)
+        log.error(f"Unable to write video {video_id} to database.")
+
+
+def write_metadata(video_id: str, md: dict):
+    json_save_path = os.path.join(media_path, video_id + ".json")
+    with open(json_save_path, "w") as json_file:
+        json.dump(md, json_file)
+    write_metadata_to_db(video_id, md)
+
+
 def download_from_json_data(data: dict, file_name: str) -> bool:
     vid_save_path = os.path.join(media_path, file_name + ".mp4")
-    json_save_path = os.path.join(media_path, file_name + ".json")
 
     metadata = {
         "url": "",
@@ -49,21 +72,18 @@ def download_from_json_data(data: dict, file_name: str) -> bool:
     except KeyError:
         log.error("Corrupted data?!")
         metadata["status"] = STATUS_INVALID
-        with open(json_save_path, "w") as json_file:
-            json.dump(metadata, json_file)
+        write_metadata(file_name, metadata)
         return False
 
     if not valid_youtube_url(metadata["url"]):
         log.error("Invalid video url...")
         metadata["status"] = STATUS_INVALID
-        with open(json_save_path, "w") as json_file:
-            json.dump(metadata, json_file)
+        write_metadata(file_name, metadata)
         return False
     elif media_path == "":
         log.error("No path to save video (MEDIA_FOLDER)...")
         metadata["status"] = STATUS_FAILED
-        with open(json_save_path, "w") as json_file:
-            json.dump(metadata, json_file)
+        write_metadata(file_name, metadata)
         return False
 
     try:
@@ -76,31 +96,24 @@ def download_from_json_data(data: dict, file_name: str) -> bool:
 
     if metadata["url"] in existing_urls:
         log.info("This video is already downloaded!")
-        existing_id = find_existing_video_id_by_url(metadata["url"])
-        if len(existing_id):
-            try:
-                with open(os.path.join(media_path, existing_id + ".json")) as json_file:
-                    new_metadata = json.load(json_file)
-            except OSError:
-                pass
-            else:
-                if new_metadata["status"] in [STATUS_COMPLETED, STATUS_DOWNLOADING]:
-                    new_metadata["duplicate"] = existing_id
-                    new_metadata["title"] = metadata["title"]
-                    new_metadata["source"] = metadata["source"]
-                    new_metadata["content_warning"] = metadata["content_warning"]
-                    new_metadata["video_id"] = file_name
-                    new_metadata["status"] = STATUS_COMPLETED
+        existing_video: Video = find_existing_video_by_url(metadata["url"])
+        if existing_video:
+            new_metadata = existing_video.to_json()
+            if new_metadata["status"] in [STATUS_COMPLETED, STATUS_DOWNLOADING]:
+                new_metadata["duplicate"] = new_metadata["video_id"]
+                new_metadata["title"] = metadata["title"]
+                new_metadata["source"] = metadata["source"]
+                new_metadata["content_warning"] = metadata["content_warning"]
+                new_metadata["video_id"] = file_name
+                new_metadata["status"] = STATUS_COMPLETED
 
-                    with open(json_save_path, "w") as json_file:
-                        json.dump(new_metadata, json_file)
+                write_metadata(file_name, new_metadata)
 
-                    return True
+                return True
 
     if ".m3u8" in metadata["url"]:
         metadata["status"] = STATUS_INVALID
-        with open(json_save_path, "w") as json_file:
-            json.dump(metadata, json_file)
+        write_metadata(file_name, metadata)
         return False
 
     try:
@@ -108,8 +121,7 @@ def download_from_json_data(data: dict, file_name: str) -> bool:
     except AgeRestrictedError:
         log.error("Need cookies for age restricted videos...")
         metadata["status"] = STATUS_COOKIES
-        with open(json_save_path, "w") as json_file:
-            json.dump(metadata, json_file)
+        write_metadata(file_name, metadata)
         return False
 
     video_formats = list(d["video_formats"].keys())
@@ -117,8 +129,7 @@ def download_from_json_data(data: dict, file_name: str) -> bool:
     if not len(video_formats):
         log.error("No video stream to download.")
         metadata["status"] = STATUS_INVALID
-        with open(json_save_path, "w") as json_file:
-            json.dump(metadata, json_file)
+        write_metadata(file_name, metadata)
         return False
 
     audio_formats = list(d["audio_formats"].keys())
@@ -145,8 +156,7 @@ def download_from_json_data(data: dict, file_name: str) -> bool:
     metadata["duration"] = duration
     metadata["status"] = STATUS_DOWNLOADING
 
-    with open(json_save_path, "w") as json_file:
-        json.dump(metadata, json_file)
+    write_metadata(file_name, metadata)
 
     with open(url_file_path, "a") as url_file:
         url_file.write(metadata["url"] + "\n")
@@ -172,8 +182,7 @@ def download_from_json_data(data: dict, file_name: str) -> bool:
     else:
         metadata["status"] = STATUS_COMPLETED
 
-    with open(json_save_path, "w") as json_file:
-        json.dump(metadata, json_file)
+    write_metadata(file_name, metadata)
 
     if result.returncode == 0:
         return True
@@ -223,6 +232,15 @@ def get_ffmpeg_cmd(
     cmd += ["-http_persistent", "0", "-y", save_path]
 
     return cmd
+
+
+def find_existing_video_by_url(url: str) -> Video | None:
+    try:
+        return Video.query.filter_by(url=url).first()
+    except Exception as e:
+        log.error(e)
+        log.error(f"Unable to get video from database.")
+        return None
 
 
 def find_existing_video_id_by_url(url: str) -> str:

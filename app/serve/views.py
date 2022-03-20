@@ -21,7 +21,8 @@ serve = Blueprint(
 logger = LocalProxy(lambda: current_app.logger)
 
 from app.dl.dl import media_path, \
-    STATUS_COMPLETED, STATUS_COOKIES, STATUS_DOWNLOADING, STATUS_FAILED, STATUS_INVALID, get_celery_scheduled, get_celery_active
+    STATUS_COMPLETED, STATUS_COOKIES, STATUS_DOWNLOADING, STATUS_FAILED, STATUS_INVALID, \
+    get_celery_scheduled, get_celery_active, write_metadata
 from app.serve.db import db_session, Video, User, init_db, load_all_videos_from_disk,\
     AUTH_LEVEL_ADMIN, AUTH_LEVEL_MOD, AUTH_LEVEL_USER
 from app import get_environment, app_config
@@ -101,13 +102,8 @@ def edit_video_post(video_id: str):
     metadata["verified"] = verified
     metadata["source"] = source
 
-    json_path = os.path.join(media_path, video_id + ".json")
-    if not os.path.isfile(json_path):
-        flash("Couldn't find json file for video, that's fucked. Changes has not been saved.", "error")
-    else:
-        with open(json_path, "w") as json_file:
-            json.dump(metadata, json_file)
-        flash(f"Video info for \"{video_id}\"has been updated.", "success")
+    write_metadata(video_id, metadata)
+    flash(f"Video info for \"{video_id}\"has been updated.", "success")
 
     return render_template(
         "edit_video.html",
@@ -491,6 +487,9 @@ def get_metadata_for_video(video_id: str) -> dict:
         video = Video.query.filter_by(video_id=video_id).first()
     except OperationalError:
         video = None
+
+    if video:
+        return video.to_json()
 
     path = os.path.join(media_path, video_id + ".json")
     try:
