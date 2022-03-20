@@ -243,53 +243,50 @@ def get_content_info(url: str) -> dict:
                 log.warning("Nope, not downloading current streams.")
                 return d
 
-        # for f in video["formats"]:
-        #     if "vcodec" in f.keys():
-        #         print(f["vcodec"])
-        #     else:
-        #         print(f["format"])
-        # print(video["formats"])
-
-        for u in [f for f in video["formats"]]:
-            if "url" in u:
-                if check_stream(u["url"]):
-                    continue
-            try:
-                x = int(u["width"])
-                y = int(u["height"])
-            except (KeyError, TypeError):
+        if "formats" not in video:
+            log.debug(video)
+            log.error("No format key in video.")
+        else:
+            for u in [f for f in video["formats"]]:
+                if "url" in u:
+                    if check_stream(u["url"]):
+                        continue
                 try:
+                    x = int(u["width"])
                     y = int(u["height"])
-                    x = height_to_width(y)
                 except (KeyError, TypeError):
-                    x, y = 0, 0
-
-            if "vcodec" in u.keys():
-                if u["format_id"] in vid_ids.keys():
-                    d["video_formats"][vid_ids[u["format_id"]]] = {"url": u["url"], "dimensions": (x, y)}
-                elif is_hls(u["format_id"]):
-                    d["video_formats"][u["format"]] = {"url": u["url"], "dimensions": (x, y)}
-                else:
                     try:
-                        int(u["format_id"])
-                    except ValueError:
-                        pass
-                    else:
-                        d["video_formats"][u["format"]] = {"url": u["url"], "dimensions": (x, y)}
-            elif "ext" in u.keys():
-                if u["ext"] == "mp4":
+                        y = int(u["height"])
+                        x = height_to_width(y)
+                    except (KeyError, TypeError):
+                        x, y = 0, 0
+
+                if "vcodec" in u.keys():
                     if u["format_id"] in vid_ids.keys():
                         d["video_formats"][vid_ids[u["format_id"]]] = {"url": u["url"], "dimensions": (x, y)}
+                    elif is_hls(u["format_id"]):
+                        d["video_formats"][u["format"]] = {"url": u["url"], "dimensions": (x, y)}
+                    else:
+                        try:
+                            int(u["format_id"])
+                        except ValueError:
+                            pass
+                        else:
+                            d["video_formats"][u["format"]] = {"url": u["url"], "dimensions": (x, y)}
+                elif "ext" in u.keys():
+                    if u["ext"] == "mp4":
+                        if u["format_id"] in vid_ids.keys():
+                            d["video_formats"][vid_ids[u["format_id"]]] = {"url": u["url"], "dimensions": (x, y)}
 
-            #print(u["format"], u["format_id"])
-            if "acodec" in u.keys():
-                if u["format_id"] in aud_ids.keys():
-                    d["audio_formats"][aud_ids[u["format_id"]]] = u["url"]
-                elif u["acodec"] != None:
-                    print(u["acodec"])
-            elif "audio" in u["format"]:
-                if u["format_id"] in aud_ids.keys():
-                    d["audio_formats"][aud_ids[u["format_id"]]] = u["url"]
+                #print(u["format"], u["format_id"])
+                if "acodec" in u.keys():
+                    if u["format_id"] in aud_ids.keys():
+                        d["audio_formats"][aud_ids[u["format_id"]]] = u["url"]
+                    elif u["acodec"] != None:
+                        print(u["acodec"])
+                elif "audio" in u["format"]:
+                    if u["format_id"] in aud_ids.keys():
+                        d["audio_formats"][aud_ids[u["format_id"]]] = u["url"]
 
     if not len(d["video_formats"]):
         log.warning("Last ditch attempt to get video link.")
