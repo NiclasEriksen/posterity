@@ -74,7 +74,7 @@ def edit_video_page(video_id: str):
         content_warning=metadata["content_warning"],
         duplicate=metadata["duplicate"],
         source=metadata["source"],
-        verified=False,
+        verified=metadata["verified"],
         video_id=video_id
     )
 
@@ -91,6 +91,7 @@ def edit_video_post(video_id: str):
     title = request.form.get("custom_title")
     content_warning = request.form.get("content_warning")
     verified = True if request.form.get("verified") == "verified_on" else False
+    source = request.form.get("source")
 
     if not len(metadata.keys()):
         return render_template("not_found.html")
@@ -98,6 +99,7 @@ def edit_video_post(video_id: str):
     metadata["title"] = title
     metadata["content_warning"] = content_warning
     metadata["verified"] = verified
+    metadata["source"] = source
 
     json_path = os.path.join(media_path, video_id + ".json")
     if not os.path.isfile(json_path):
@@ -112,6 +114,7 @@ def edit_video_post(video_id: str):
         custom_title=metadata["title"],
         content_warning=metadata["content_warning"],
         verified=metadata["verified"],
+        source=metadata["source"],
         video_id=video_id
     )
 

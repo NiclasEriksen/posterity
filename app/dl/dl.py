@@ -38,7 +38,8 @@ def download_from_json_data(data: dict, file_name: str) -> bool:
         "duration": 0,
         "upload_time": datetime.now().timestamp(),
         "status": STATUS_DOWNLOADING,
-        "video_id": file_name
+        "video_id": file_name,
+        "verified": False,
     }
     try:
         metadata["url"] = data["url"]
