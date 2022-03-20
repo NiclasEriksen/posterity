@@ -271,21 +271,31 @@ def find_existing_video_id_by_url(url: str) -> str:
 def get_celery_scheduled():
     if not inspector:
         return []
+
+    s = []
     try:
-        s = inspector.scheduled()
+        i = inspector.scheduled()
     except:
-        s = []
+        i = None
 
-    return s
-
+    if i:
+        if len(i.keys()):
+            k = list(i.keys())[0]
+            a = i[k]
 
 def get_celery_active():
     if not inspector:
         return []
+    a = []
     try:
-        a = inspector.active()
+        i = inspector.active()
     except:
-        a = []
+        i = None
+
+    if i:
+        if len(i.keys()):
+            k = list(i.keys())[0]
+            a = i[k]
 
     return a
 
