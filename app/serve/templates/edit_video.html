@@ -13,7 +13,7 @@
                     </div>
                 </div>
 
-                <div class="uk-width-1-1 uk-grid">
+                <div class="uk-container uk-grid">
                     <div class="uk-width-1-2">
                         <label class="uk-form-label">Content warning</label>
                         <div class="uk-inline uk-form-controls uk-margin-small">
@@ -22,10 +22,17 @@
                         </div>
                     </div>
                     <div class="uk-width-1-2">
+                        <label class="uk-form-label">Source</label>
+                        <div class="uk-inline uk-form-controls uk-margin-small">
+                            <span class="uk-form-icon" uk-icon="icon: location"></span>
+                            <input class="uk-input uk-width-1-1 uk-form-width-medium" type="text" placeholder="Source" name="source" value="{{ source }}">
+                        </div>
+                    </div>
+                    <div class="uk-width-1-2 uk-margin">
                         <label class="uk-form-label">Verified</label>
-                        <div class="uk-form-controls uk-form-controls-text">
-                            <label><input class="uk-radio" type="radio" id="not_verified_radio" value="verified_off" name="verified"{% if not verified %} checked{% endif %} disabled> Not verified yet</label><br>
-                            <label><input class="uk-radio" type="radio" id="verified_radio" value="verified_on" name="verified"{% if verified %} checked{% endif %} disabled> Verified</label>
+                        <div class="uk-form-controls uk-form-controls-text uk-margin-small">
+                            <label><input class="uk-radio" type="radio" id="not_verified_radio" value="verified_off" name="verified"{% if not verified %} checked{% endif %}> Not verified yet</label><br>
+                            <label><input class="uk-radio" type="radio" id="verified_radio" value="verified_on" name="verified"{% if verified %} checked{% endif %}> Verified</label>
                         </div>
                     </div>
                 </div>

@@ -61,10 +61,7 @@ def before_request_func():
 @login_required
 def edit_video_page(video_id: str):
     metadata = get_metadata_for_video(video_id)
-    # metadata = {
-    #     "title": "Test title test title",
-    #     "content_warning": "None"
-    # }
+
     if "duplicate" not in metadata:
         metadata["duplicate"] = ""
 
@@ -76,6 +73,7 @@ def edit_video_page(video_id: str):
         custom_title=metadata["title"],
         content_warning=metadata["content_warning"],
         duplicate=metadata["duplicate"],
+        source=metadata["source"],
         verified=False,
         video_id=video_id
     )
