@@ -109,10 +109,12 @@ def download_from_json_data(data: dict, file_name: str) -> bool:
                 new_metadata["status"] = STATUS_COMPLETED
 
                 write_metadata(file_name, new_metadata)
+                log.info(f"Tagged {file_name} as duplicate and linked to original.")
 
                 return True
 
     if ".m3u8" in metadata["url"]:
+        log.warning(f"Skipping .m3u8: {metadata['url']}")
         metadata["status"] = STATUS_INVALID
         write_metadata(file_name, metadata)
         return False
@@ -159,13 +161,10 @@ def download_from_json_data(data: dict, file_name: str) -> bool:
 
     write_metadata(file_name, metadata)
 
-    with open(url_file_path, "a") as url_file:
-        url_file.write(metadata["url"] + "\n")
-
     result = subprocess.run(cmd)
 
     if result.returncode != 0:
-        print(result)
+        log.error(result)
         log.error("Well this all went to shit. Removing video.")
 
         try:
@@ -174,14 +173,17 @@ def download_from_json_data(data: dict, file_name: str) -> bool:
             pass
 
         metadata["status"] = STATUS_FAILED
-        with open(url_file_path, "r") as f:
-            lines = f.readlines()
-        with open(url_file_path, "w") as f:
-            for line in lines:
-                if line.strip("\n") != metadata["url"]:
-                    f.write(line)
+        # with open(url_file_path, "r") as f:
+        #     lines = f.readlines()
+        # with open(url_file_path, "w") as f:
+        #     for line in lines:
+        #         if line.strip("\n") != metadata["url"]:
+        #             f.write(line)
     else:
         metadata["status"] = STATUS_COMPLETED
+
+    with open(url_file_path, "a") as url_file:
+        url_file.write(metadata["url"] + "\n")
 
     write_metadata(file_name, metadata)
 
