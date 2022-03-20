@@ -92,6 +92,7 @@ def is_hls(f: str) -> bool:
         return True
     return False
 
+
 def height_to_width(h: int) -> int:
     if h > 720 and h <= 1080:
         return 1920
@@ -106,6 +107,7 @@ def height_to_width(h: int) -> int:
     if h <= 240:
         return 360
     return h
+
 
 def valid_youtube_url(url: str) -> bool:
     if not len(url.split(".")) > 1:
@@ -232,7 +234,11 @@ def get_content_info(url: str) -> dict:
             d["duration"] = float(video["duration"])
         except (ValueError, KeyError):
             log.error("There's no duration in info from YouTube.")
-            pass
+
+        if not d["duration"] > 0:
+            if any(u in url for u in ["www.youtube.com", "y2u.be", "://youtu.be", "twitch.com"]):
+                log.warning("Nope, not downloading current streams.")
+                return d
 
         # for f in video["formats"]:
         #     if "vcodec" in f.keys():
