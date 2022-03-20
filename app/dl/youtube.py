@@ -301,12 +301,13 @@ def get_content_info(url: str) -> dict:
                 "thumbnail": "",
                 "title": "No title (mp4)"
             }
-
-        for v in video["formats"]:
-            try:
-                print(str(v["format"]) + "   " + str(v["format_id"]) + "  " + str(v["vcodec"]))
-            except:
-                continue
+        if video:
+            if "formats" in video:
+                for v in video["formats"]:
+                    try:
+                        print(str(v["format"]) + "   " + str(v["format_id"]) + "  " + str(v["vcodec"]))
+                    except:
+                        continue
     else:
         log.info(f"Found {len(d['video_formats'])} video streams.")
         log.info(f"Found {len(d['audio_formats'])} separate audio streams.")
