@@ -44,6 +44,12 @@ YT_FORMATS = {
     "AAC 128kbps": "140",
     "HLS audio 0": "hls-0-audio_0",
     "HLS audio 1": "hls-1-audio_0",
+    "Vimeo 360p0": "http-360p-0",
+    "Vimeo 360p1": "http-360p-1",
+    "Vimeo 480p0": "http-480p-0",
+    "Vimeo 640p0": "http-640p-0",
+    "Vimeo 720p0": "http-720p-0",
+    "Vimeo 1080p0": "http-1080p-0",
 }
 YT_SIZES = {
     "YT 1080p": (1920, 1080),
@@ -58,7 +64,8 @@ YT_SIZES = {
 VID_FORMATS = ["240p", "360p", "480p", "720p", "1080p",
     "YT 1080p", "YT 720p", "YT 720p2", "YT 640p", "YT 480p", "YT 360p", "YT 240p",
     "MP4 720p", "MP4 360p", "MP4 240p", "MP4 576p",
-    "MP4 720p 4:3", "MP4 640p 4:3", "MP4 360p 4:3", "MP4 240p 4:3", "MP4 180p 4:3", "MP4 Mobile"
+    "MP4 720p 4:3", "MP4 640p 4:3", "MP4 360p 4:3", "MP4 240p 4:3", "MP4 180p 4:3", "MP4 Mobile",
+    "Vimeo 360p0", "Vimeo 360p1", "Vimeo 480p0", "Vimeo 640p0", "Vimeo 720p0",  "Vimeo 1080p0"
 ]
 AUD_FORMATS = ["HLS audio 0", "HLS audio 1", "Opus VBR 50kbps", "Opus VBR 70kbps", "Opus VBR 160kbps", "AAC 48kbps", "AAC 128kbps"]
 SUB_LANGS   = ["en", "no"]
