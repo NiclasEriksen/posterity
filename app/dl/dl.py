@@ -3,6 +3,7 @@ import json
 import os
 import subprocess
 from datetime import datetime
+from typing import Union
 from .helpers import seconds_to_time, resource_path, unique_filename
 from .youtube import valid_youtube_url, get_content_info, AgeRestrictedError
 from app import celery
@@ -234,7 +235,7 @@ def get_ffmpeg_cmd(
     return cmd
 
 
-def find_existing_video_by_url(url: str) -> Video | None:
+def find_existing_video_by_url(url: str) -> Union[Video, None]:
     try:
         return Video.query.filter_by(url=url).first()
     except Exception as e:
