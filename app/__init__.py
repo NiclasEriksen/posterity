@@ -56,15 +56,9 @@ def create_app():
     def page_not_found(_e):
         return redirect("https://" if request.is_secure else "http://" + app.config["SERVER_NAME"])
 
-    log.info("Loading videos from disk")
-    with app.app_context():
-        load_all_videos_from_disk(media_path)
-    # init_db()
-    # load_all_videos_from_disk(media_path)
-
-    # @app.teardown_appcontext
-    # def shutdown_session(exception=None):
-    #     db_session.remove()
+    # log.info("Loading videos from disk")
+    # with app.app_context():
+    #     load_all_videos_from_disk(media_path)
 
     log.info("Starting app")
     return app

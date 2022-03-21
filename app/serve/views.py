@@ -23,7 +23,7 @@ logger = LocalProxy(lambda: current_app.logger)
 from app.dl.dl import media_path, \
     STATUS_COMPLETED, STATUS_COOKIES, STATUS_DOWNLOADING, STATUS_FAILED, STATUS_INVALID, \
     get_celery_scheduled, get_celery_active, write_metadata
-from app.serve.db import db_session, Video, User, init_db, load_all_videos_from_disk,\
+from app.serve.db import db_session, Video, User, init_db,\
     AUTH_LEVEL_ADMIN, AUTH_LEVEL_MOD, AUTH_LEVEL_USER
 from app import get_environment, app_config
 from app.serve.search import search_videos, index_video_data, remove_video_data

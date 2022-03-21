@@ -233,10 +233,4 @@ def init_db():
 
 if __name__ == "__main__":
     init_db()
-    load_all_videos_from_disk("/mnt/media/")
-    session = Session()
-    l = session.query(Video).all()
-    for v in l:
-        if v.duplicate_of:
-            print(v.video_id, v.duplicate_of.video_id)
 
