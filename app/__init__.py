@@ -10,7 +10,7 @@ celery = Celery(__name__)
 
 from .config import config as app_config
 from .dl.dl import media_path
-from .serve.db import db_session, init_db, load_all_videos_from_disk, User
+from .serve.db import db_session, init_db, load_all_videos_from_disk, User, index_all_videos_from_db
 
 
 def create_app():
@@ -57,7 +57,9 @@ def create_app():
         return redirect("https://" if request.is_secure else "http://" + app.config["SERVER_NAME"])
 
     # log.info("Loading videos from disk")
+    index_all_videos_from_db()
     # with app.app_context():
+    #     inde
     #     load_all_videos_from_disk(media_path)
 
     log.info("Starting app")

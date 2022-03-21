@@ -154,6 +154,11 @@ class FailedDownload(Base):
 from .search import index_video_data, remove_videos_index
 
 
+def index_all_videos_from_db():
+    for video in Video.query.all():
+        index_video_data(video)
+
+
 def load_all_videos_from_disk(media_path: str):
     duplicates = {}
     videos = []
