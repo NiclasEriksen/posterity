@@ -8,7 +8,7 @@ from .helpers import seconds_to_time, resource_path, unique_filename
 from .youtube import valid_youtube_url, get_content_info, AgeRestrictedError
 from app import celery
 
-log = logging.getLogger("klippekort.download")
+log = logging.getLogger("posterity.download")
 if celery:
     inspector = celery.control.inspect()
 

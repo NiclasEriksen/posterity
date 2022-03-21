@@ -55,7 +55,7 @@ def remove_session(*_args):
 
 @serve.before_request
 def before_request_func():
-    current_app.logger.name = "serve"
+    current_app.logger.name = "posterity.serve"
 
 
 @serve.route("/edit_video/<video_id>")

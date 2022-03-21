@@ -11,7 +11,7 @@ import codecs
 #CLIENTID: 1011910616755-rbvlv952parvd549q0olik45c9somivd.apps.googleusercontent.com
 #SECRET  : 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
 
-log = logging.getLogger("klippekort.youtube")
+log = logging.getLogger("posterity.youtube")
 
 
 YT_FORMATS = {
@@ -77,6 +77,50 @@ STREAMING_PATTERNS = ["yt.com", "twitch.com"]
 
 class AgeRestrictedError(Exception):
     pass
+
+
+def find_highest_quality_url(urls: list) -> str:
+    points = {
+        "1080p": 6, "1080": 5,
+        "720p": 5, "720": 4,
+        "540p": 3, "540": 3,
+        "360p": 2, "360": 2,
+        "280p": 1, "280": 1,
+        "270p": 1, "270": 1,
+        "hq": 5, "hd": 4,
+        "high": 5, "hi": 2,
+        "medium": 3, "med": 2
+    }
+    tally = {}
+    for url in urls:
+        best = 0
+        for tag, score in points.items():
+            if tag in url.lower() and score > best:
+                best = score
+
+        if ".mp4" in url:
+            best += 10
+        elif "mp4" in url:
+            best += 5
+        elif ".mkv" in url:
+            best += 3
+        elif ".ogv" in url:
+            best += 3
+        if url.lower().endswith(".m3u8") or url.endswith(".f4m"):
+            best = max(0, int(best * 0.5))
+        if "preview" in url.lower():
+            best = max(0, int(best * 0.1))
+
+        tally[url] = best
+
+    best_score = 0
+    best_url = ""
+    for url, score in tally.items():
+        if score >= best_score:
+            best_url = url
+            best_score = score
+
+    return best_url
 
 
 def check_stream(url: str) -> bool:
@@ -158,7 +202,9 @@ def get_source_links(url: str) -> str:
 
 
 def get_content_info(url: str) -> dict:
+    log.info(f"Attempting to gather content info for {url}")
     if url.lower().endswith(".mp4"):
+        log.debug(f"It's a direct mp4 link, that's nice.")
         return {
             "video_formats": {"source": {"url": url, "dimensions": (0, 0)}},
             "audio_formats": {},
@@ -209,11 +255,13 @@ def get_content_info(url: str) -> dict:
                 video = result
 
     if not video:
+        log.debug(f"YoutubeDL failed to find a video, let's see what we can do with it.")
         urls = get_source_links(url)
         if len(urls):
             log.info("Found urls in source code.")
-            log.info(urls)
-            url = urls[-1]  # Guessing last is highest quality lol
+
+            url = find_highest_quality_url(urls)
+
             return {
                 "video_formats": {"source": {"url": url, "dimensions": (0, 0)}},
                 "audio_formats": {},
@@ -227,6 +275,7 @@ def get_content_info(url: str) -> dict:
         return d
 
     else:
+        log.debug(f"YoutubeDL found a video.")
         if "thumbnail" in video:
             d["thumbnail"] = video["thumbnail"]
         if "title" in video:
@@ -285,12 +334,11 @@ def get_content_info(url: str) -> dict:
                         if u["format_id"] in vid_ids.keys():
                             d["video_formats"][vid_ids[u["format_id"]]] = {"url": u["url"], "dimensions": (x, y)}
 
-                #print(u["format"], u["format_id"])
                 if "acodec" in u.keys():
                     if u["format_id"] in aud_ids.keys():
                         d["audio_formats"][aud_ids[u["format_id"]]] = u["url"]
                     elif u["acodec"] != None:
-                        print(u["acodec"])
+                        log.error(f'Unhandled audio codec: {u["acodec"]}')
                 elif "audio" in u["format"]:
                     if u["format_id"] in aud_ids.keys():
                         d["audio_formats"][aud_ids[u["format_id"]]] = u["url"]
@@ -299,7 +347,8 @@ def get_content_info(url: str) -> dict:
         log.warning("Last ditch attempt to get video link.")
         urls = get_source_links(url)
         if len(urls):
-            url = urls[-1]  # Guessing last is highest quality lol
+            url = find_highest_quality_url(urls)
+
             return {
                 "video_formats": {"source": {"url": url, "dimensions": (0, 0)}},
                 "audio_formats": {},

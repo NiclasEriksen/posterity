@@ -22,6 +22,8 @@ def create_app():
     app.config.from_object(app_config[APPLICATION_ENV])
     app.config["SECRET_KEY"] = app_config[APPLICATION_ENV].SECRET_KEY
 
+    log = app.logger
+    log.info("Loading LoginManager")
     login_manager = LoginManager()
     login_manager.login_view = "serve.login_page"
     login_manager.init_app(app)
@@ -30,12 +32,15 @@ def create_app():
     def load_user(user_id):
         return User.query.get(int(user_id))
 
+    log.info("Loading CORS")
     CORS(app, resources={r'/api/*': {'origins': '*'}})
 
+    log.info("Loading celery")
     celery.config_from_object(app.config, force=True)
     # celery is not able to pick result_backend and hence using update
     celery.conf.update(result_backend=app.config['RESULT_BACKEND'])
 
+    log.info("Registering blueprints")
     from .core.views import core as core_blueprint
     app.register_blueprint(
         core_blueprint,
@@ -51,6 +56,7 @@ def create_app():
     def page_not_found(_e):
         return redirect("https://" if request.is_secure else "http://" + app.config["SERVER_NAME"])
 
+    log.info("Loading videos from disk")
     with app.app_context():
         load_all_videos_from_disk(media_path)
     # init_db()
@@ -60,6 +66,7 @@ def create_app():
     # def shutdown_session(exception=None):
     #     db_session.remove()
 
+    log.info("Starting app")
     return app
 
 
