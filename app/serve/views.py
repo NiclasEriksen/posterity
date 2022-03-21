@@ -9,7 +9,7 @@ from flask import Blueprint, current_app, request, abort,\
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import login_user, login_required, logout_user, current_user
 from redis.exceptions import ConnectionError
-from sqlalchemy.exc import OperationalError
+from sqlalchemy.exc import OperationalError, IntegrityError
 from werkzeug.local import LocalProxy
 
 serve = Blueprint(
@@ -529,6 +529,10 @@ def get_metadata_for_video(video_id: str) -> dict:
                 session.commit()
             except OperationalError:
                 logger.warning(f"Database connection seems bad, returning pure json data")
+            except IntegrityError:
+                logger.warning(f"Integrity error on writing to database, most likely duplicate video_id")
+            except Exception as e:
+                log.error(e)
 
             return d
 
