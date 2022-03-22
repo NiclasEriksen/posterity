@@ -264,6 +264,34 @@ def load_all_videos_from_disk(media_path: str):
     # all_videos = session.query(Video).all()
 
 
+def load_content_warning_as_tags(media_path: str):
+    for video in Video.query.all():
+        try:
+            with open(os.path.join(media_path, video.video_id + ".json")) as jf:
+                json_data = json.load(jf)
+        except (OSError, FileNotFoundError):
+            log.error(f"Problem finding json for {video.video_id}")
+            continue
+
+        if "content_warning" not in json_data:
+            log.error(f"No content warning for {video.video_id}")
+            continue
+
+        if "/" in json_data["content_warning"]:
+            cw = json_data["content_warning"].split("/")
+        else:
+            cw = [json_data["content_warning"]]
+
+        for c in cw:
+            tag = ContentTag.query.filter_by(name=c.lstrip().rstrip().capitalize())
+            if tag and tag not in video.tags:
+                video.tags.append(tag)
+
+        db_session.add(video)
+
+    db_session.commit()
+
+
 def init_db():
     # Booooom
     Base.metadata.create_all(bind=engine)
