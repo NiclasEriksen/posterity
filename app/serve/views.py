@@ -35,6 +35,7 @@ init_db()
 load_dotenv()
 APPLICATION_ENV = get_environment()
 MAX_RESULT_PER_PAGE = 25
+TORRENT_NAME = "Posterity.Ukraine.archive.torrent"
 
 
 def catch_redis_errors(f):
@@ -207,7 +208,14 @@ def about_us():
 
 @serve.route("/download_archive", methods=["GET"])
 def download_archive():
-    return render_template("download.html")
+    torrent_path = os.path.join(media_path, TORRENT_NAME)
+    try:
+        mod_date = os.path.getmtime(torrent_path)
+        last_updated = datetime.fromtimestamp(mod_date).strftime("%d.%m.%Y")
+    except OSError:
+        last_updated = "?"
+
+    return render_template("download.html", last_updated=last_updated)
 
 
 @serve.route("/download/<video_id>", methods=["GET"])
@@ -264,9 +272,9 @@ def delete_video_by_id(video_id: str) -> bool:
 
 @serve.route("/get_torrent")
 def serve_torrent():
-    torrent_path = os.path.join(media_path, "Posterity.Ukraine.archive.torrent")
+    torrent_path = os.path.join(media_path, TORRENT_NAME)
     if os.path.isfile(torrent_path):
-        return send_from_directory(media_path, "Posterity.Ukraine.archive.torrent", as_attachment=True)
+        return send_from_directory(media_path, TORRENT_NAME, as_attachment=True)
     flash("Unable to get torrent file at this time", "error")
     return redirect(url_for("serve.front_page"))
 
