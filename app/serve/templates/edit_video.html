@@ -1,50 +1,60 @@
 {% extends "base.html" %}
 {% block content %}
 
-<div class="uk-container uk-width-1-1 uk-height-1-1 uk-position-relative">
+<div class="uk-container uk-width-1-1 uk-height-1-1 uk-position-relative" xmlns="http://www.w3.org/1999/html">
     <div class="uk-position-center uk-height-1-1 uk-width-1-1">
         <div class="uk-vertical-align-middle uk-margin uk-padding" style="min-width: 50vw;">
             <form class="uk-form" method="POST" action="/edit_video/{{ video_id }}">
-                <div class="uk-width-1-1">
-                    <label class="uk-form-label">Custom title</label>
-                    <div class="uk-inline uk-form-controls uk-margin-small uk-width-1-1">
-                        <span class="uk-form-icon" uk-icon="icon: quote-right"></span>
-                        <input class="uk-input uk-width-1-1 uk-form-width-medium" type="text" placeholder="Custom title" value="{{ custom_title }}" name="custom_title" autofocus="">
+                <fieldset class="uk-fieldset">
+                    <div class="uk-width-1-1">
+                        <label class="uk-form-label">Custom title</label>
+                        <div class="uk-inline uk-form-controls uk-margin-small uk-width-1-1">
+                            <span class="uk-form-icon" uk-icon="icon: quote-right"></span>
+                            <input class="uk-input uk-width-1-1 uk-form-width-medium" type="text" placeholder="Custom title" value="{{ custom_title }}" name="custom_title" autofocus="">
+                        </div>
                     </div>
-                </div>
 
-                <div class="uk-container uk-grid">
-                    <div class="uk-width-1-2">
-                        <label class="uk-form-label">Content warning</label>
-                        <div class="uk-inline uk-form-controls uk-margin-small">
-                            <span class="uk-form-icon" uk-icon="icon: warning"></span>
-                            <input class="uk-input uk-width-1-1 uk-form-width-medium" type="text" placeholder="Content warning", name="content_warning" value="{{ content_warning }}">
+                    <div class="uk-container uk-grid">
+                        <div class="uk-width-1-2">
+                            <label class="uk-form-label">Content warning</label>
+                            <div class="uk-inline uk-form-controls uk-margin-small">
+                                <span class="uk-form-icon" uk-icon="icon: warning"></span>
+                                <input class="uk-input uk-width-1-1 uk-form-width-medium" type="text" placeholder="Content warning", name="content_warning" value="{{ content_warning }}">
+                            </div>
+                        </div>
+                        <div class="uk-width-1-2">
+                            <label class="uk-form-label">Source</label>
+                            <div class="uk-inline uk-form-controls uk-margin-small">
+                                <span class="uk-form-icon" uk-icon="icon: location"></span>
+                                <input class="uk-input uk-width-1-1 uk-form-width-medium" type="text" placeholder="Source" name="source" value="{{ source }}">
+                            </div>
+                        </div>
+                        <div class="uk-width-1-2 uk-margin">
+                            <label class="uk-form-label">Verified</label>
+                            <div class="uk-form-controls uk-form-controls-text uk-margin-small">
+                                <label><input class="uk-radio" type="radio" id="not_verified_radio" value="verified_off" name="verified"{% if not verified %} checked{% endif %}> Not verified yet</label><br>
+                                <label><input class="uk-radio" type="radio" id="verified_radio" value="verified_on" name="verified"{% if verified %} checked{% endif %}> Verified</label>
+                            </div>
                         </div>
                     </div>
-                    <div class="uk-width-1-2">
-                        <label class="uk-form-label">Source</label>
-                        <div class="uk-inline uk-form-controls uk-margin-small">
-                            <span class="uk-form-icon" uk-icon="icon: location"></span>
-                            <input class="uk-input uk-width-1-1 uk-form-width-medium" type="text" placeholder="Source" name="source" value="{{ source }}">
-                        </div>
-                    </div>
-                    <div class="uk-width-1-2 uk-margin">
-                        <label class="uk-form-label">Verified</label>
-                        <div class="uk-form-controls uk-form-controls-text uk-margin-small">
-                            <label><input class="uk-radio" type="radio" id="not_verified_radio" value="verified_off" name="verified"{% if not verified %} checked{% endif %}> Not verified yet</label><br>
-                            <label><input class="uk-radio" type="radio" id="verified_radio" value="verified_on" name="verified"{% if verified %} checked{% endif %}> Verified</label>
-                        </div>
-                    </div>
-                </div>
 
-                <div class="uk-width-1-1 uk-grid">
-                    <div class="uk-width-1-2">
-                        <a class="uk-input uk-button uk-button-muted uk-button-large" href="/{{ video_id }}"><span uk-icon="icon: close"></span> Cancel</a>
+                    <div class="uk-margin">
+                        <select class="uk-select" multiple id="tags_select" name="tags_select">
+                            {% for t in tags %}
+                            <option value="{{ t.id }}" {% if t.enabled %}selected{% endif %}>{{ t.name }}</option>
+                            {% endfor %}
+                        </select>
                     </div>
-                    <div class="uk-inline uk-width-1-2">
-                        <button class="uk-input uk-button uk-button-primary uk-button-large" type="submit"><span uk-icon="icon: close"></span> Apply changes</button>
+
+                    <div class="uk-width-1-1 uk-grid">
+                        <div class="uk-width-1-2">
+                            <a class="uk-input uk-button uk-button-muted uk-button-large" href="/{{ video_id }}"><span uk-icon="icon: close"></span> Cancel</a>
+                        </div>
+                        <div class="uk-inline uk-width-1-2">
+                            <button class="uk-input uk-button uk-button-primary uk-button-large" type="submit"><span uk-icon="icon: close"></span> Apply changes</button>
+                        </div>
                     </div>
-                </div>
+                </fieldset>
             </form>
         </div>
     </div>

@@ -23,7 +23,7 @@ logger = LocalProxy(lambda: current_app.logger)
 from app.dl.dl import media_path, \
     STATUS_COMPLETED, STATUS_COOKIES, STATUS_DOWNLOADING, STATUS_FAILED, STATUS_INVALID, \
     get_celery_scheduled, get_celery_active, write_metadata
-from app.serve.db import db_session, Video, User, init_db,\
+from app.serve.db import db_session, Video, User, ContentTag, init_db,\
     AUTH_LEVEL_ADMIN, AUTH_LEVEL_MOD, AUTH_LEVEL_USER
 from app import get_environment, app_config
 from app.serve.search import search_videos, index_video_data, remove_video_data
@@ -57,256 +57,6 @@ def remove_session(*_args):
 @serve.before_request
 def before_request_func():
     current_app.logger.name = "posterity.serve"
-
-
-@serve.route("/edit_video/<video_id>")
-@login_required
-def edit_video_page(video_id: str):
-    metadata = get_metadata_for_video(video_id)
-
-    if "duplicate" not in metadata:
-        metadata["duplicate"] = ""
-
-    if not len(metadata.keys()):
-        return render_template("not_found.html")
-
-    return render_template(
-        "edit_video.html",
-        custom_title=metadata["title"],
-        content_warning=metadata["content_warning"],
-        duplicate=metadata["duplicate"],
-        source=metadata["source"],
-        verified=metadata["verified"],
-        video_id=video_id
-    )
-
-
-@serve.route("/edit_video/<video_id>", methods=["POST"])
-@login_required
-def edit_video_post(video_id: str):
-    metadata = get_metadata_for_video(video_id)
-    # metadata = {
-    #     "title": "Test title test title",
-    #     "content_warning": "None"
-    # }
-
-    title = request.form.get("custom_title")
-    content_warning = request.form.get("content_warning")
-    verified = True if request.form.get("verified") == "verified_on" else False
-    source = request.form.get("source")
-
-    if not len(metadata.keys()):
-        return render_template("not_found.html")
-
-    metadata["title"] = title
-    metadata["content_warning"] = content_warning
-    metadata["verified"] = verified
-    metadata["source"] = source
-
-    write_metadata(video_id, metadata)
-    flash(f"Video info for \"{video_id}\"has been updated.", "success")
-
-    return render_template(
-        "edit_video.html",
-        custom_title=metadata["title"],
-        content_warning=metadata["content_warning"],
-        verified=metadata["verified"],
-        source=metadata["source"],
-        video_id=video_id
-    )
-
-
-@serve.route("/register", methods=["GET"])
-def register_user_page():
-    if current_user.is_authenticated:
-        flash(f"You already have an account. Log out in order to register a new one.")
-        return redirect(url_for("serve.front_page"))
-    return render_template("register.html")
-
-
-@serve.route("/register", methods=["POST"])
-def register_user_post():
-    username = request.form.get("username")
-    password = request.form.get("password")
-    token = request.form.get("token")
-
-    if token != app_config[APPLICATION_ENV].REGISTER_TOKEN:
-        flash(f"Invalid token for user registration.", "error")
-        logger.error(f"Invalid token for user registration.")
-        return redirect(url_for("serve.register_user_page"))
-
-    if not len(password) >= 6:
-        flash("Password needs to be 6 characters or longer.", "error")
-        return redirect(url_for("serve.register_user_page"))
-    
-    if not len(username) >= 3:
-        flash("Username needs to be 3 characters or longer.", "error")
-        return redirect(url_for("serve.register_user_page"))
-
-    existing_user = User.query.filter_by(username=username).first()
-    if existing_user:
-        flash("Username already taken, please choose another one.", "error")
-        return redirect(url_for("serve.register_user_page"))
-
-    password_hash = generate_password_hash(password)
-
-    user = User()
-    user.username = username
-    user.password = password_hash
-    user.auth_level = AUTH_LEVEL_MOD
-
-    db_session.add(user)
-    db_session.commit()
-
-    login_user(user, remember=True)
-
-    return redirect(url_for("serve.front_page"))
-
-
-@serve.route("/logout")
-@login_required
-def logout_route():
-    logout_user()
-    flash("You have been logged out.", "success")
-    return redirect(url_for("serve.front_page"))
-
-
-@serve.route("/login", methods=["GET"])
-def login_page():
-    if current_user.is_authenticated:
-        flash(f"You are already logged in.", "error")
-        return redirect(url_for("serve.front_page"))
-    get_flashed_messages()
-    return render_template("login.html")
-
-
-@serve.route("/login", methods=["POST"])
-def login_post_route():
-    username = request.form.get("username")
-    password = request.form.get("password")
-
-    user = User.query.filter_by(username=username).first()
-    if not user:
-        logger.error(f"Unable to log in with that user ({username}), it doesn't exist!")
-        flash(f"Unable to log in with that user ({username}), it doesn't exist!", "error")
-        return redirect(url_for("serve.login_page"))
-    
-    if not check_password_hash(user.password, password):
-        logger.error(f"Unable to log in with user ({username}): passwords doesn't match.")
-        flash(f"Unable to log in with that user ({username}), password is incorrect!", "error")
-        return redirect(url_for("serve.login_page"))
-    
-    flash(f"You have been logged in!", "success")
-    login_user(user, remember=True)
-    return redirect(url_for("serve.front_page"))
-
-
-@serve.route("/about", methods=["GET"])
-def about_us():
-    return render_template("about.html")
-
-
-@serve.route("/download_archive", methods=["GET"])
-def download_archive():
-    torrent_path = os.path.join(media_path, TORRENT_NAME)
-    try:
-        mod_date = os.path.getmtime(torrent_path)
-        last_updated = datetime.fromtimestamp(mod_date).strftime("%d.%m.%Y")
-    except OSError:
-        last_updated = "?"
-
-    return render_template("download.html", last_updated=last_updated)
-
-
-@serve.route("/download/<video_id>", methods=["GET"])
-def download_video(video_id=""):
-    if os.path.isfile(os.path.join(media_path, video_id + ".mp4")):
-        return send_from_directory(media_path, video_id + ".mp4", as_attachment=True)
-    return "Video file not found."
-
-
-@serve.route("/remove/<video_id>")
-@login_required
-def remove_video_route(video_id):
-    metadata = get_metadata_for_video(video_id)
-
-    success = delete_video_by_id(video_id)
-    if not success and not len(metadata.keys()):
-        flash("No video by that id, nothing to remove.", "error")
-    elif not success:
-        flash("Error during removal of video, might be some residue.", "warning")
-    else:
-        flash(f"Video \"{video_id}\" has been deleted successfully!", "success")
-    return redirect(url_for("serve.front_page"), code=302)
-
-
-def delete_video_by_id(video_id: str) -> bool:
-    success = 0
-    v = Video.query.filter_by(video_id=video_id).first()
-    if v:
-        remove_video_data(v)
-        success += 1
-        db_session.delete(v)
-        db_session.commit()
-
-    if os.path.isfile(os.path.join(media_path, video_id + ".mp4")):
-        try:
-            os.remove(os.path.join(media_path, video_id + ".mp4"))
-            success += 1
-        except OSError as e:
-            flash(f"Failed to delete .mp4 file! {str(e)}", "error")
-    if os.path.isfile(os.path.join(media_path, video_id + ".json")):
-        try:
-            os.remove(os.path.join(media_path, video_id + ".json"))
-            success += 1
-        except OSError as e:
-            flash(f"Failed to delete .json file! {str(e)}", "error")
-
-    if success < 3:
-        logger.error(f"Might be some residue after video removal for {video_id}")
-    if success > 0:
-        logger.info(f"Deleted video {video_id} successfully.")
-        return True
-    return False
-    
-
-@serve.route("/get_torrent")
-def serve_torrent():
-    torrent_path = os.path.join(media_path, TORRENT_NAME)
-    if os.path.isfile(torrent_path):
-        return send_from_directory(media_path, TORRENT_NAME, as_attachment=True)
-    flash("Unable to get torrent file at this time", "error")
-    return redirect(url_for("serve.front_page"))
-
-
-@serve.route("/favicon.ico")
-def serve_favicon():
-    return url_for("serve.static", filename="favicon.ico")
-
-
-@serve.route("/check_progress/<video_id>", methods=["GET"])
-def check_progress(video_id):
-    metadata = get_metadata_for_video(video_id)
-
-    if not len(metadata.keys()):
-        return "", 404
-
-    if "duplicate" in metadata.keys():
-        if len(metadata["duplicate"]):
-            video_id = metadata["duplicate"]
-            metadata = get_metadata_for_video(video_id)
-
-    s = metadata["status"]
-    if s == STATUS_COMPLETED:
-        return "", 200
-    if s == STATUS_DOWNLOADING:
-        return "", 206
-    if s == STATUS_FAILED:
-        return "", 200
-    if s == STATUS_INVALID or s == STATUS_COOKIES:
-        return "", 415
-
-    return abort(500)
 
 
 @serve.route("/<video_id>", methods=["GET"])
@@ -434,6 +184,293 @@ def front_page_search():
     )
 
 
+@serve.route("/edit_video/<video_id>")
+@login_required
+def edit_video_page(video_id: str):
+    metadata = get_metadata_for_video(video_id)
+
+    if "duplicate" not in metadata:
+        metadata["duplicate"] = ""
+
+    if not len(metadata.keys()):
+        return render_template("not_found.html")
+
+    available_tags = ContentTag.query.order_by(ContentTag.name).all()
+    if "tags" not in metadata:
+        metadata["tags"] = []
+
+    for at in available_tags:
+        if at.id in metadata["tags"]:
+            at.enabled = True
+        else:
+            at.enabled = False
+
+    return render_template(
+        "edit_video.html",
+        custom_title=metadata["title"],
+        content_warning=metadata["content_warning"],
+        duplicate=metadata["duplicate"],
+        source=metadata["source"],
+        verified=metadata["verified"],
+        tags=available_tags,
+        video_id=video_id
+    )
+
+
+@serve.route("/edit_video/<video_id>", methods=["POST"])
+@login_required
+def edit_video_post(video_id: str):
+    metadata = get_metadata_for_video(video_id)
+    # metadata = {
+    #     "title": "Test title test title",
+    #     "content_warning": "None"
+    # }
+
+    title = request.form.get("custom_title")
+    content_warning = request.form.get("content_warning")
+    verified = True if request.form.get("verified") == "verified_on" else False
+    source = request.form.get("source")
+    tl = request.form.getlist("tags_select")
+
+    if "tags" not in metadata:
+        metadata["tags"] = []
+
+    if not len(metadata.keys()):
+        return render_template("not_found.html")
+
+    for tag_id in tl:
+        try:
+            tag_id = int(tag_id)
+        except (TypeError, ValueError):
+            logger.error("Invalid tag value in form?")
+            continue
+        if tag_id not in metadata["tags"]:
+            metadata["tags"].append(tag_id)
+
+    metadata["title"] = title
+    metadata["content_warning"] = content_warning
+    metadata["verified"] = verified
+    metadata["source"] = source
+
+    write_metadata(video_id, metadata)
+    flash(f"Video info for \"{video_id}\"has been updated.", "success")
+
+    available_tags = ContentTag.query.order_by(ContentTag.name).all()
+
+    for at in available_tags:
+        if at.id in metadata["tags"]:
+            print(at.name)
+            at.enabled = True
+        else:
+            at.enabled = False
+
+    return render_template(
+        "edit_video.html",
+        custom_title=metadata["title"],
+        content_warning=metadata["content_warning"],
+        verified=metadata["verified"],
+        source=metadata["source"],
+        tags=available_tags,
+        video_id=video_id
+    )
+
+
+@serve.route("/register", methods=["GET"])
+def register_user_page():
+    if current_user.is_authenticated:
+        flash(f"You already have an account. Log out in order to register a new one.")
+        return redirect(url_for("serve.front_page"))
+    return render_template("register.html")
+
+
+@serve.route("/register", methods=["POST"])
+def register_user_post():
+    username = request.form.get("username")
+    password = request.form.get("password")
+    token = request.form.get("token")
+
+    if token != app_config[APPLICATION_ENV].REGISTER_TOKEN:
+        flash(f"Invalid token for user registration.", "error")
+        logger.error(f"Invalid token for user registration.")
+        return redirect(url_for("serve.register_user_page"))
+
+    if not len(password) >= 6:
+        flash("Password needs to be 6 characters or longer.", "error")
+        return redirect(url_for("serve.register_user_page"))
+    
+    if not len(username) >= 3:
+        flash("Username needs to be 3 characters or longer.", "error")
+        return redirect(url_for("serve.register_user_page"))
+
+    existing_user = User.query.filter_by(username=username).first()
+    if existing_user:
+        flash("Username already taken, please choose another one.", "error")
+        return redirect(url_for("serve.register_user_page"))
+
+    password_hash = generate_password_hash(password)
+
+    user = User()
+    user.username = username
+    user.password = password_hash
+    user.auth_level = AUTH_LEVEL_MOD
+
+    db_session.add(user)
+    db_session.commit()
+
+    login_user(user, remember=True)
+
+    return redirect(url_for("serve.front_page"))
+
+
+@serve.route("/logout")
+@login_required
+def logout_route():
+    logout_user()
+    flash("You have been logged out.", "success")
+    return redirect(url_for("serve.front_page"))
+
+
+@serve.route("/login", methods=["GET"])
+def login_page():
+    if current_user.is_authenticated:
+        flash(f"You are already logged in.", "error")
+        return redirect(url_for("serve.front_page"))
+    get_flashed_messages()
+    return render_template("login.html")
+
+
+@serve.route("/login", methods=["POST"])
+def login_post_route():
+    username = request.form.get("username")
+    password = request.form.get("password")
+
+    user = User.query.filter_by(username=username).first()
+    if not user:
+        logger.error(f"Unable to log in with that user ({username}), it doesn't exist!")
+        flash(f"Unable to log in with that user ({username}), it doesn't exist!", "error")
+        return redirect(url_for("serve.login_page"))
+    
+    if not check_password_hash(user.password, password):
+        logger.error(f"Unable to log in with user ({username}): passwords doesn't match.")
+        flash(f"Unable to log in with that user ({username}), password is incorrect!", "error")
+        return redirect(url_for("serve.login_page"))
+    
+    flash(f"You have been logged in!", "success")
+    login_user(user, remember=True)
+    return redirect(url_for("serve.front_page"))
+
+
+@serve.route("/settings", methods=["GET", "POST"])
+def settings_page():
+    tags = ContentTag.query.all()
+    if not tags:
+        tags = []
+
+    if request.method == "POST":
+        pass
+
+    return render_template("settings.html", tags=tags)
+
+
+@serve.route("/add_tag", methods=["POST"])
+def add_tag_post():
+    tag_name = request.form.get("tag_name")
+    tag_censor = request.form.get("tag_censor")
+    return_url = request.form.get("return_url")
+    if tag_name:
+        if tag_censor == "on":
+            tag_censor = True
+        else:
+            tag_censor = False
+        tag = ContentTag(tag_name)
+        tag.censor = tag_censor
+        db_session.add(tag)
+        db_session.commit()
+        flash("Tag added to database!", "success")
+    else:
+        flash("Tag name cannot be empty.", "error")
+
+    return redirect(return_url, 302)
+
+
+@serve.route("/about", methods=["GET"])
+def about_us_page():
+    return render_template("about.html")
+
+
+@serve.route("/download_archive", methods=["GET"])
+def download_archive():
+    torrent_path = os.path.join(media_path, TORRENT_NAME)
+    try:
+        mod_date = os.path.getmtime(torrent_path)
+        last_updated = datetime.fromtimestamp(mod_date).strftime("%d.%m.%Y")
+    except OSError:
+        last_updated = "?"
+
+    return render_template("download.html", last_updated=last_updated)
+
+
+@serve.route("/download/<video_id>", methods=["GET"])
+def download_video(video_id=""):
+    if os.path.isfile(os.path.join(media_path, video_id + ".mp4")):
+        return send_from_directory(media_path, video_id + ".mp4", as_attachment=True)
+    return "Video file not found."
+
+
+@serve.route("/remove/<video_id>")
+@login_required
+def remove_video_route(video_id):
+    metadata = get_metadata_for_video(video_id)
+
+    success = delete_video_by_id(video_id)
+    if not success and not len(metadata.keys()):
+        flash("No video by that id, nothing to remove.", "error")
+    elif not success:
+        flash("Error during removal of video, might be some residue.", "warning")
+    else:
+        flash(f"Video \"{video_id}\" has been deleted successfully!", "success")
+    return redirect(url_for("serve.front_page"), code=302)
+    
+
+@serve.route("/get_torrent")
+def serve_torrent():
+    torrent_path = os.path.join(media_path, TORRENT_NAME)
+    if os.path.isfile(torrent_path):
+        return send_from_directory(media_path, TORRENT_NAME, as_attachment=True)
+    flash("Unable to get torrent file at this time", "error")
+    return redirect(url_for("serve.front_page"))
+
+
+@serve.route("/favicon.ico")
+def serve_favicon():
+    return url_for("serve.static", filename="favicon.ico")
+
+
+@serve.route("/check_progress/<video_id>", methods=["GET"])
+def check_progress(video_id):
+    metadata = get_metadata_for_video(video_id)
+
+    if not len(metadata.keys()):
+        return "", 404
+
+    if "duplicate" in metadata.keys():
+        if len(metadata["duplicate"]):
+            video_id = metadata["duplicate"]
+            metadata = get_metadata_for_video(video_id)
+
+    s = metadata["status"]
+    if s == STATUS_COMPLETED:
+        return "", 200
+    if s == STATUS_DOWNLOADING:
+        return "", 206
+    if s == STATUS_FAILED:
+        return "", 200
+    if s == STATUS_INVALID or s == STATUS_COOKIES:
+        return "", 415
+
+    return abort(500)
+
+
 @serve.route("/check_status")
 @cache.cached(timeout=10)
 def check_status():
@@ -447,10 +484,39 @@ def check_status():
     }
 
 
+def delete_video_by_id(video_id: str) -> bool:
+    success = 0
+    v = Video.query.filter_by(video_id=video_id).first()
+    if v:
+        remove_video_data(v)
+        success += 1
+        db_session.delete(v)
+        db_session.commit()
+
+    if os.path.isfile(os.path.join(media_path, video_id + ".mp4")):
+        try:
+            os.remove(os.path.join(media_path, video_id + ".mp4"))
+            success += 1
+        except OSError as e:
+            flash(f"Failed to delete .mp4 file! {str(e)}", "error")
+    if os.path.isfile(os.path.join(media_path, video_id + ".json")):
+        try:
+            os.remove(os.path.join(media_path, video_id + ".json"))
+            success += 1
+        except OSError as e:
+            flash(f"Failed to delete .json file! {str(e)}", "error")
+
+    if success < 3:
+        logger.error(f"Might be some residue after video removal for {video_id}")
+    if success > 0:
+        logger.info(f"Deleted video {video_id} successfully.")
+        return True
+    return False
+
+
 def list_videos(max_count=10) -> list:
     videos = []
     try:
-
         if max_count > 0:
             db_videos = Video.query.order_by(Video.upload_time.desc()).limit(max_count).all()
         else:
@@ -540,7 +606,7 @@ def get_metadata_for_video(video_id: str) -> dict:
             except IntegrityError:
                 logger.warning(f"Integrity error on writing to database, most likely duplicate video_id")
             except Exception as e:
-                log.error(e)
+                logger.error(e)
 
             return d
 

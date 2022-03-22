@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, Column, Integer, String, DateTime, ForeignKey, Float, Boolean
+from sqlalchemy import create_engine, Column, Integer, String, DateTime, ForeignKey, Float, Boolean, Table
 from sqlalchemy.orm import relationship, sessionmaker, scoped_session
 from sqlalchemy.ext.declarative import declarative_base
 from flask_login import UserMixin
@@ -18,6 +18,12 @@ log = logging.getLogger("klippekort.download")
 AUTH_LEVEL_USER = 0
 AUTH_LEVEL_MOD = 1
 AUTH_LEVEL_ADMIN = 2
+
+tag_association_table = Table(
+    "tag_association", Base.metadata,
+    Column("video_id", ForeignKey("videos.id")),
+    Column("tag_id", ForeignKey("content_tags.id"))
+)
 
 
 class User(UserMixin, Base):
@@ -52,6 +58,7 @@ class Video(Base):
     duplicate_of_id = Column(Integer, ForeignKey("videos.id"))
     duplicate_of = relationship("Video", remote_side=[id])
     duplicates = relationship("Video", back_populates="duplicate_of")
+    tags = relationship("ContentTag", secondary=tag_association_table)
 
     @property
     def upload_time_str(self) -> str:
@@ -64,6 +71,7 @@ class Video(Base):
             "title": self.title,
             "video_title": self.orig_title,
             "content_warning": self.content_warning,
+            "tags": [t.id for t in self.tags],
             "status": self.status,
             "format": self.video_format,
             "duration": self.duration,
@@ -137,6 +145,17 @@ class RegisterToken(Base):
 
     def check(self, other: str) -> bool:
         return other.strip() == self.token.strip()
+
+
+class ContentTag(Base):
+    __tablename__ = "content_tags"
+    id = Column(Integer, primary_key=True)
+    name = Column(String)
+    censor = Column(Boolean)
+
+    def __init__(self, name: str):
+        self.name = name
+        self.censor = False
 
 
 class FailedDownload(Base):
