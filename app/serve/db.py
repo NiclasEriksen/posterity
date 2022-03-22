@@ -283,7 +283,7 @@ def load_content_warning_as_tags(media_path: str):
             cw = [json_data["content_warning"]]
 
         for c in cw:
-            tag = ContentTag.query.filter_by(name=c.lstrip().rstrip().capitalize())
+            tag = ContentTag.query.filter_by(name=c.lstrip().rstrip().capitalize()).first()
             if tag and tag not in video.tags:
                 video.tags.append(tag)
 
