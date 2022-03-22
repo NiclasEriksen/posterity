@@ -1,8 +1,8 @@
-"""Content tag relationship
+"""Initial postgresql
 
-Revision ID: dbc8234e83d4
-Revises: 62c72beebf73
-Create Date: 2022-03-22 22:06:12.396009
+Revision ID: 18f5c78c1cad
+Revises: 
+Create Date: 2022-03-22 23:27:39.086554
 
 """
 from alembic import op
@@ -10,8 +10,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'dbc8234e83d4'
-down_revision = '62c72beebf73'
+revision = '18f5c78c1cad'
+down_revision = None
 branch_labels = None
 depends_on = None
 

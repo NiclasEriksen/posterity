@@ -8,13 +8,14 @@ from datetime import datetime
 import time
 import logging
 
+DB_URL = os.environ.get("POSTERITY_DB", "")
 
-engine = create_engine('sqlite:///db.sqlite3')
+engine = create_engine(DB_URL)
 db_session = scoped_session(sessionmaker(bind=engine))
 Base = declarative_base()
 Base.query = db_session.query_property()
 
-log = logging.getLogger("klippekort.download")
+log = logging.getLogger("posterity.download")
 AUTH_LEVEL_USER = 0
 AUTH_LEVEL_MOD = 1
 AUTH_LEVEL_ADMIN = 2
@@ -125,6 +126,19 @@ class Video(Base):
         except KeyError:
             log.error("No video id given for json, I hope this gets set manually...")
             pass
+        try:
+            tags = d["tags"]
+        except KeyError:
+            pass
+        else:
+            for t in tags:
+                try:
+                    ct = ContentTag.query.filter_by(id=int(t))
+                except (TypeError, ValueError):
+                    pass
+                else:
+                    if ct and ct not in self.tags:
+                        self.tags.append(ct)
 
 
 class RegisterToken(Base):
@@ -150,7 +164,7 @@ class RegisterToken(Base):
 class ContentTag(Base):
     __tablename__ = "content_tags"
     id = Column(Integer, primary_key=True)
-    name = Column(String)
+    name = Column(String, unique=True)
     censor = Column(Boolean)
 
     def __init__(self, name: str):

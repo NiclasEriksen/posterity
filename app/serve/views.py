@@ -382,11 +382,17 @@ def add_tag_post():
             tag_censor = True
         else:
             tag_censor = False
-        tag = ContentTag(tag_name)
-        tag.censor = tag_censor
-        db_session.add(tag)
-        db_session.commit()
-        flash("Tag added to database!", "success")
+
+        existing = ContentTag.query.filter_by(name=tag_name.rstrip().lstrip())
+
+        if existing:
+            flash("Tag by that name already exists, ignored.", "warning")
+        else:
+            tag = ContentTag(tag_name.rstrip().lstrip())
+            tag.censor = tag_censor
+            db_session.add(tag)
+            db_session.commit()
+            flash("Tag added to database!", "success")
     else:
         flash("Tag name cannot be empty.", "error")
 
