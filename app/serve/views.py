@@ -77,9 +77,16 @@ def serve_video(video_id):
             metadata = new_metadata
             metadata["video_id"] = video_id
 
+
     if not len(metadata.keys()):
         logger.error("Invalid metadata from json file.")
         return render_template("not_found.html")
+
+    video = Video.query.filter_by(video_id=video_id).first()
+    if video:
+        tags = video.tags
+    else:
+        tags = []
 
     if metadata["status"] in [STATUS_FAILED, STATUS_INVALID]:
         flash("Video failed to download, this page will self destruct")
@@ -94,6 +101,7 @@ def serve_video(video_id):
         duration=int(metadata["duration"]),
         source=metadata["source"],
         content_warning=metadata["content_warning"],
+        tags=tags,
         dl_path="/download/" + dl_video_id,
         orig_url=metadata["url"],
         video_format=metadata["format"],
@@ -187,6 +195,7 @@ def front_page_search():
 @serve.route("/edit_video/<video_id>")
 @login_required
 def edit_video_page(video_id: str):
+    # video = Video.query.filter_by(video_id=video_id).first()
     metadata = get_metadata_for_video(video_id)
 
     if "duplicate" not in metadata:
@@ -199,8 +208,14 @@ def edit_video_page(video_id: str):
     if "tags" not in metadata:
         metadata["tags"] = []
 
+    # if video:
+    #     print(video.tags)
+    # print(available_tags)
+    # print(metadata["tags"])
+
     for at in available_tags:
         if at.id in metadata["tags"]:
+            print(f"{at.name} in video tags!")
             at.enabled = True
         else:
             at.enabled = False
@@ -220,11 +235,9 @@ def edit_video_page(video_id: str):
 @serve.route("/edit_video/<video_id>", methods=["POST"])
 @login_required
 def edit_video_post(video_id: str):
-    metadata = get_metadata_for_video(video_id)
-    # metadata = {
-    #     "title": "Test title test title",
-    #     "content_warning": "None"
-    # }
+    video: Video = Video.query.filter_by(video_id=video_id).first()
+    if not video:
+        return render_template("not_found.html")
 
     title = request.form.get("custom_title")
     content_warning = request.form.get("content_warning")
@@ -232,44 +245,43 @@ def edit_video_post(video_id: str):
     source = request.form.get("source")
     tl = request.form.getlist("tags_select")
 
-    if "tags" not in metadata:
-        metadata["tags"] = []
-
-    if not len(metadata.keys()):
-        return render_template("not_found.html")
-
     for tag_id in tl:
         try:
             tag_id = int(tag_id)
         except (TypeError, ValueError):
             logger.error("Invalid tag value in form?")
             continue
-        if tag_id not in metadata["tags"]:
-            metadata["tags"].append(tag_id)
+        else:
+            tag = ContentTag.query.filter_by(id=tag_id).first()
+            if tag and tag not in video.tags:
+                video.tags.append(tag)
 
-    metadata["title"] = title
-    metadata["content_warning"] = content_warning
-    metadata["verified"] = verified
-    metadata["source"] = source
 
-    write_metadata(video_id, metadata)
-    flash(f"Video info for \"{video_id}\"has been updated.", "success")
+    video.title = title
+    video.content_warning = content_warning
+    video.verified = verified
+    video.source = source
+
+    db_session.add(video)
+    db_session.commit()
+    write_metadata(video_id, video.to_json())
 
     available_tags = ContentTag.query.order_by(ContentTag.name).all()
 
     for at in available_tags:
-        if at.id in metadata["tags"]:
-            print(at.name)
+        if at in video.tags:
             at.enabled = True
         else:
             at.enabled = False
 
+    flash(f"Video info for \"{video_id}\"has been updated.", "success")
+
     return render_template(
         "edit_video.html",
-        custom_title=metadata["title"],
-        content_warning=metadata["content_warning"],
-        verified=metadata["verified"],
-        source=metadata["source"],
+        custom_title=video.title,
+        content_warning=video.content_warning,
+        verified=video.verified,
+        source=video.source,
         tags=available_tags,
         video_id=video_id
     )
@@ -383,7 +395,7 @@ def add_tag_post():
         else:
             tag_censor = False
 
-        existing = ContentTag.query.filter_by(name=tag_name.rstrip().lstrip())
+        existing = ContentTag.query.filter_by(name=tag_name.rstrip().lstrip()).first()
 
         if existing:
             flash("Tag by that name already exists, ignored.", "warning")
