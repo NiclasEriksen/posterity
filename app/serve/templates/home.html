@@ -106,9 +106,12 @@
                 <tr>
                     <td>
                         <a href="/{{ video['video_id'] }}">{{ video.title }}</a>
-                        {% for tag in video.tags %}
-                            <span class="uk-label {% if tag.censor %}uk-label-danger{% endif %}">{{ tag.name }}</span>
-                        {% endfor %}
+                        {% if video.tags|length %}
+                            <br>
+                            {% for tag in video.tags %}
+                                <span class="uk-label {% if tag.censor %}uk-label-danger{% endif %}">{{ tag.name }}</span>
+                            {% endfor %}
+                        {% endif %}
                     </td>
                     <td class="uk-text-muted uk-text-small" style="max-width: 120px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;"><a href="{{ video['url'] }}" target="_blank">{{ video.url[:48] }}</a></td>
                     <td class="uk-text-muted uk-text-small">{{ video.upload_time_str }}</td>
