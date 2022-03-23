@@ -139,6 +139,8 @@ def front_page():
 
     total_pages = total // pp + (1 if total % pp else 0)
 
+    available_tags = ContentTag.query.order_by(ContentTag.name).all()
+
     return render_template(
         "home.html", videos=videos,
         current_page=page,
@@ -147,7 +149,8 @@ def front_page():
         per_page=pp,
         total=total,
         total_results=len(videos),
-        keyword=kw
+        keyword=kw,
+        tags=available_tags
     )
 
 

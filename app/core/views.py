@@ -37,7 +37,7 @@ def post_link():
             return "No valid url."
         download_task.delay(data, fn)
         print(request.url_root + fn)
-        return "https://ras.putin.no/" + fn
+        return "https://posterity.no/" + fn
     abort(400)
     return "No data posted."
 

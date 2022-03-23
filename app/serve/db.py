@@ -71,7 +71,7 @@ class Video(Base):
             "source": self.source,
             "title": self.title,
             "video_title": self.orig_title,
-            "content_warning": self.content_warning,
+            "content_warning": "/".join([t.name for t in self.tags]),
             "tags": [t.id for t in self.tags],
             "status": self.status,
             "format": self.video_format,
@@ -139,6 +139,18 @@ class Video(Base):
                 else:
                     if ct and ct not in self.tags:
                         self.tags.append(ct)
+        try:
+            if "/" in d["content_warning"]:
+                cw = d["content_warning"].split("/")
+            else:
+                cw = [d["content_warning"]]
+        except KeyError:
+            pass
+        else:
+            for c in cw:
+                tag = ContentTag.query.filter_by(name=c.lstrip().rstrip().capitalize()).first()
+                if tag and tag not in self.tags:
+                    self.tags.append(tag)
 
 
 class RegisterToken(Base):

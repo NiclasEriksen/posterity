@@ -36,19 +36,12 @@
                     <div class="uk-inline uk-width-1-1">
                         <span class="uk-form-icon" uk-icon="icon: warning"></span>
                         <select class="uk-input uk-select" id="content_warning" name="content_warning">
-                            <option>None</option>
-                            <option>Destruction</option>
-                            <option>Violence</option>
-                            <option>Distress</option>
-                            <option>Graphic</option>
-                            <option>Implied death</option>
-                            <option>Death</option>
-                            <option>Nudity</option>
-                            <option>Children</option>
-                            <option>Animals</option>
-                            <option>Gore</option>
+                            {% for tag in tags %}
+                            <option>{{ tag.name }}</option>
+                            {% endfor %}
                         </select>
                     </div>
+                    <span class="uk-text-meta"><i>You can add more tags later</i></span>
                 </div>
 
                 <div class="uk-margin uk-width-1-2 uk-width-1-1@m uk-padding-remove-horizontal uk-padding-remove-right@m">
@@ -111,7 +104,12 @@
             <tbody>
                 {% for video in videos %}
                 <tr>
-                    <td><a href="/{{ video['video_id'] }}">{{ video.title }}</a></td>
+                    <td>
+                        <a href="/{{ video['video_id'] }}">{{ video.title }}</a>
+                        {% for tag in video.tags %}
+                            <span class="uk-label {% if tag.censor %}uk-label-danger{% endif %}">{{ tag.name }}</span>
+                        {% endfor %}
+                    </td>
                     <td class="uk-text-muted uk-text-small" style="max-width: 120px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;"><a href="{{ video['url'] }}" target="_blank">{{ video.url[:48] }}</a></td>
                     <td class="uk-text-muted uk-text-small">{{ video.upload_time_str }}</td>
                 </tr>
