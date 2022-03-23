@@ -41,6 +41,7 @@ def download_task(data: dict, file_name: str):
             db_session.add(fd)
             db_session.commit()
         except Exception as e:
+            db_session.rollback()
             logger.error(e)
             logger.error("FailedDownload not written to database.")
 

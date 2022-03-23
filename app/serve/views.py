@@ -618,8 +618,10 @@ def get_metadata_for_video(video_id: str) -> dict:
             try:
                 session.commit()
             except OperationalError:
+                session.rollback()
                 logger.warning(f"Database connection seems bad, returning pure json data")
             except IntegrityError:
+                session.rollback()
                 logger.warning(f"Integrity error on writing to database, most likely duplicate video_id")
             except Exception as e:
                 logger.error(e)
