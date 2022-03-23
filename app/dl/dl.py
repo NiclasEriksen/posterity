@@ -31,6 +31,7 @@ def write_metadata_to_db(video_id: str, md: dict):
     try:
         existing = db_session.query(Video).filter_by(video_id=video_id).first()
     except Exception as e:
+        db_session.rollback()
         log.error(e)
         existing = None
 
@@ -45,6 +46,7 @@ def write_metadata_to_db(video_id: str, md: dict):
         db_session.add(video)
         db_session.commit()
     except Exception as e:
+        db_session.rollback()
         log.error(e)
         log.error(f"Unable to write video {video_id} to database.")
 
