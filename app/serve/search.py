@@ -36,6 +36,11 @@ def remove_video_data(video: Video):
 
 
 @catch_es_errors
+def remove_video_data_by_id(video_id: str):
+    _result = es.delete(index="videos", id=video_id)
+
+
+@catch_es_errors
 def index_video_data(video: Video):
     body = {
         "title": video.title,

@@ -26,7 +26,7 @@ from app.dl.dl import media_path, \
 from app.serve.db import db_session, Video, User, ContentTag, init_db,\
     AUTH_LEVEL_ADMIN, AUTH_LEVEL_MOD, AUTH_LEVEL_USER
 from app import get_environment, app_config
-from app.serve.search import search_videos, index_video_data, remove_video_data
+from app.serve.search import search_videos, index_video_data, remove_video_data, remove_video_data_by_id
 from app.extensions import cache
 
 
@@ -133,7 +133,7 @@ def front_page():
                 videos.append(v)
             else:
                 logger.info("Found video stub in search result, removing")
-                remove_video_data(result["_id"])
+                remove_video_data_by_id(result["_id"])
                 total -= 1
 
     else:
