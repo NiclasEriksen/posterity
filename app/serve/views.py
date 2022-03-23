@@ -77,7 +77,6 @@ def serve_video(video_id):
             metadata = new_metadata
             metadata["video_id"] = video_id
 
-
     if not len(metadata.keys()):
         logger.error("Invalid metadata from json file.")
         return render_template("not_found.html")
@@ -103,6 +102,7 @@ def serve_video(video_id):
         content_warning=metadata["content_warning"],
         tags=tags,
         dl_path="/download/" + dl_video_id,
+        stream_path="/view/" + dl_video_id,
         orig_url=metadata["url"],
         video_format=metadata["format"],
         upload_time=metadata["upload_time"],
@@ -437,6 +437,17 @@ def download_video(video_id=""):
     try:
         if os.path.isfile(os.path.join(media_path, video_id + ".mp4")):
             return send_from_directory(media_path, video_id + ".mp4", as_attachment=True)
+    except OSError as e:
+        logger.error(e)
+        logger.error("Unable to serve video!")
+    return "Video file not found."
+
+
+@serve.route("/view/<video_id>", methods=["GET"])
+def view_video(video_id=""):
+    try:
+        if os.path.isfile(os.path.join(media_path, video_id + ".mp4")):
+            return send_from_directory(media_path, video_id + ".mp4")
     except OSError as e:
         logger.error(e)
         logger.error("Unable to serve video!")
