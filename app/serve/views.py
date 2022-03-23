@@ -201,7 +201,6 @@ def edit_video_page(video_id: str):
     # video = Video.query.filter_by(video_id=video_id).first()
     metadata = get_metadata_for_video(video_id)
 
-
     if not len(metadata.keys()):
         return render_template("not_found.html")
 
@@ -226,7 +225,6 @@ def edit_video_page(video_id: str):
     return render_template(
         "edit_video.html",
         custom_title=metadata["title"],
-        content_warning=metadata["content_warning"],
         duplicate=metadata["duplicate"],
         source=metadata["source"],
         verified=metadata["verified"],
@@ -243,7 +241,6 @@ def edit_video_post(video_id: str):
         return render_template("not_found.html")
 
     title = request.form.get("custom_title")
-    content_warning = request.form.get("content_warning")
     verified = True if request.form.get("verified") == "verified_on" else False
     source = request.form.get("source")
     tl = request.form.getlist("tags_select")
@@ -259,9 +256,7 @@ def edit_video_post(video_id: str):
             if tag and tag not in video.tags:
                 video.tags.append(tag)
 
-
     video.title = title
-    video.content_warning = content_warning
     video.verified = verified
     video.source = source
 
@@ -282,7 +277,6 @@ def edit_video_post(video_id: str):
     return render_template(
         "edit_video.html",
         custom_title=video.title,
-        content_warning=video.content_warning,
         verified=video.verified,
         source=video.source,
         tags=available_tags,
