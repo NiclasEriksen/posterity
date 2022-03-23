@@ -19,7 +19,8 @@ STATUS_COMPLETED = 1
 STATUS_FAILED = 2
 STATUS_INVALID = 3
 STATUS_COOKIES = 4
-from app.serve.db import db_session, Video
+from app.serve.db import db_session, Video, engine
+engine.dispose()
 
 
 if not os.path.isfile(url_file_path):
