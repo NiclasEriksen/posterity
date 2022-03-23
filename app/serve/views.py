@@ -642,4 +642,6 @@ def get_metadata_for_video(video_id: str) -> dict:
     except (FileNotFoundError, json.JSONDecodeError):
         logger.error(f"Error happened while loading JSON data for {video_id}")
         pass
+    except OSError:
+        logger.error(f"Error happened while opening files during fetching of metadata for {video_id}")
     return {}
