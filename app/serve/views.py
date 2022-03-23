@@ -584,6 +584,7 @@ def get_metadata_for_video(video_id: str) -> dict:
         video = None
 
     if video:
+        index_video_data(video)
         return video.to_json()
 
     path = os.path.join(media_path, video_id + ".json")
