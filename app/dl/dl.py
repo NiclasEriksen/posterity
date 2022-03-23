@@ -19,7 +19,7 @@ STATUS_COMPLETED = 1
 STATUS_FAILED = 2
 STATUS_INVALID = 3
 STATUS_COOKIES = 4
-from app.serve.db import db_session, Video, FailedDownload
+from app.serve.db import db_session, Video
 
 
 if not os.path.isfile(url_file_path):
@@ -28,13 +28,19 @@ if not os.path.isfile(url_file_path):
 
 def write_metadata_to_db(video_id: str, md: dict):
     try:
-        existing = Video.query.filter_by(video_id=video_id).first()
-        if existing:
-            video = existing
-        else:
-            video = Video()
+        existing = db_session.query(Video).filter_by(video_id=video_id).first()
+    except Exception as e:
+        log.error(e)
+        existing = None
 
-        video.from_json(md)
+    if existing:
+        video = existing
+    else:
+        video = Video()
+
+    video.from_json(md)
+
+    try:
         db_session.add(video)
         db_session.commit()
     except Exception as e:
