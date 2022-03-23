@@ -122,7 +122,7 @@ def front_page():
         logger.info(f"Searching for {kw}.")
         results = search_videos(kw)
         results = sorted(results, key=lambda x: x["_score"], reverse=True)
-        # logger.info(results)
+        logger.info(f"found {len(results)} results when searching.")
 
         videos = []
         total = len(results)

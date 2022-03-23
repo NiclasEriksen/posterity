@@ -200,6 +200,7 @@ from .search import index_video_data, remove_videos_index
 
 
 def index_all_videos_from_db():
+    remove_videos_index()
     for video in Video.query.all():
         index_video_data(video)
 
