@@ -126,10 +126,15 @@ def front_page():
 
         videos = []
         total = len(results)
+
         for result in results[offset:offset+MAX_RESULT_PER_PAGE]:
             v = Video.query.filter_by(video_id=result["_id"]).first()
             if v:
                 videos.append(v)
+            else:
+                logger.info("Found video stub in search result, removing")
+                remove_video_data(result["_id"])
+                total -= 1
 
     else:
         vq = Video.query
