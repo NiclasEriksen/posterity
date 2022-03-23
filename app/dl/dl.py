@@ -61,6 +61,7 @@ def download_from_json_data(data: dict, file_name: str) -> bool:
         "format": "",
         "duration": 0,
         "upload_time": datetime.now().timestamp(),
+        "safe_to_store": False,
         "status": STATUS_DOWNLOADING,
         "video_id": file_name,
         "verified": False,
