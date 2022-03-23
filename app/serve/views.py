@@ -171,7 +171,7 @@ def front_page_search():
         logger.info(f"Searching for {kw}.")
         results = search_videos(kw)
         results = sorted(results, key=lambda x: x["_score"], reverse=True)
-        logger.info(results)
+        # logger.info(results)
 
         videos = []
         total = len(results)
@@ -179,6 +179,8 @@ def front_page_search():
             v = Video.query.filter_by(video_id=result["_id"]).first()
             if v:
                 videos.append(v)
+            else:
+                remove_video_data_by_id(result["_id"])
 
     else:
         vq = Video.query
