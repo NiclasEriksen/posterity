@@ -434,8 +434,12 @@ def download_archive():
 
 @serve.route("/download/<video_id>", methods=["GET"])
 def download_video(video_id=""):
-    if os.path.isfile(os.path.join(media_path, video_id + ".mp4")):
-        return send_from_directory(media_path, video_id + ".mp4", as_attachment=True)
+    try:
+        if os.path.isfile(os.path.join(media_path, video_id + ".mp4")):
+            return send_from_directory(media_path, video_id + ".mp4", as_attachment=True)
+    except OSError as e:
+        logger.error(e)
+        logger.error("Unable to serve video!")
     return "Video file not found."
 
 
