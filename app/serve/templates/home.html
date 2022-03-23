@@ -36,6 +36,7 @@
                     <div class="uk-inline uk-width-1-1">
                         <span class="uk-form-icon" uk-icon="icon: warning"></span>
                         <select class="uk-input uk-select" id="content_warning" name="content_warning">
+                            <option>None</option>
                             {% for tag in tags %}
                             <option>{{ tag.name }}</option>
                             {% endfor %}

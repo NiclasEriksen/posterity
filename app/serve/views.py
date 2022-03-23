@@ -201,8 +201,6 @@ def edit_video_page(video_id: str):
     # video = Video.query.filter_by(video_id=video_id).first()
     metadata = get_metadata_for_video(video_id)
 
-    if "duplicate" not in metadata:
-        metadata["duplicate"] = ""
 
     if not len(metadata.keys()):
         return render_template("not_found.html")
@@ -210,6 +208,8 @@ def edit_video_page(video_id: str):
     available_tags = ContentTag.query.order_by(ContentTag.name).all()
     if "tags" not in metadata:
         metadata["tags"] = []
+    if "duplicate" not in metadata:
+        metadata["duplicate"] = ""
 
     # if video:
     #     print(video.tags)
