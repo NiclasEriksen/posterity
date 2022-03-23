@@ -50,8 +50,12 @@ def write_metadata_to_db(video_id: str, md: dict):
 
 def write_metadata(video_id: str, md: dict):
     json_save_path = os.path.join(media_path, video_id + ".json")
-    with open(json_save_path, "w") as json_file:
-        json.dump(md, json_file)
+    try:
+        with open(json_save_path, "w") as json_file:
+            json.dump(md, json_file)
+    except OSError as e:
+        log.error(e)
+        log.error(f"JSON for {video_id} was not written to disk.")
     write_metadata_to_db(video_id, md)
 
 
