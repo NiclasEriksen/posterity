@@ -133,7 +133,7 @@ class Video(Base):
         else:
             for t in tags:
                 try:
-                    ct = ContentTag.query.filter_by(id=int(t))
+                    ct = ContentTag.query.filter_by(id=int(t)).first()
                 except (TypeError, ValueError):
                     pass
                 else:
