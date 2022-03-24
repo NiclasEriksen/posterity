@@ -7,6 +7,11 @@ import json
 from datetime import datetime
 import time
 import logging
+from werkzeug.local import LocalProxy
+from flask import current_app
+
+
+log = LocalProxy(lambda: current_app.logger)
 
 DB_URL = os.environ.get("POSTERITY_DB", "")
 
@@ -15,7 +20,7 @@ db_session = scoped_session(sessionmaker(bind=engine))
 Base = declarative_base()
 Base.query = db_session.query_property()
 
-log = logging.getLogger("posterity.download")
+# log = logging.getLogger("posterity.download")
 AUTH_LEVEL_USER = 0
 AUTH_LEVEL_MOD = 1
 AUTH_LEVEL_ADMIN = 2

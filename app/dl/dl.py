@@ -7,8 +7,13 @@ from typing import Union
 from .helpers import seconds_to_time, resource_path, unique_filename
 from .youtube import valid_youtube_url, get_content_info, AgeRestrictedError
 from app import celery
+from werkzeug.local import LocalProxy
+from flask import current_app
 
-log = logging.getLogger("posterity.download")
+
+
+log = LocalProxy(lambda: current_app.logger)
+#log = logging.getLogger("posterity_dl")
 if celery:
     inspector = celery.control.inspect()
 
