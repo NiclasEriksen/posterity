@@ -4,11 +4,8 @@ from datetime import datetime
 from app import celery
 from app.dl.dl import download_from_json_data
 from app.dl.helpers import seconds_to_time
-from app.serve.db import FailedDownload, db_session, engine
 import time
 
-
-engine.dispose()
 
 logger = get_task_logger(__name__)
 
@@ -33,17 +30,17 @@ def download_task(data: dict, file_name: str):
     if success:
         logger.info(f"Download complete in {minutes} minutes, {seconds:.0f} seconds: {file_name}")
     else:
-        try:
-            fd = FailedDownload()
-            fd.url = data["url"]
-            fd.upload_time = datetime.now()
-            fd.title = data["title"]
-            fd.source = data["source"]
-            db_session.add(fd)
-            db_session.commit()
-        except Exception as e:
-            db_session.rollback()
-            logger.error(e)
-            logger.error("FailedDownload not written to database.")
+        # try:
+        #     fd = FailedDownload()
+        #     fd.url = data["url"]
+        #     fd.upload_time = datetime.now()
+        #     fd.title = data["title"]
+        #     fd.source = data["source"]
+        #     db_session.add(fd)
+        #     db_session.commit()
+        # except Exception as e:
+        #     db_session.rollback()
+        #     logger.error(e)
+        #     logger.error("FailedDownload not written to database.")
 
         logger.error(f"Download failed after {minutes} minutes, {seconds:.0f} seconds: {file_name}")

@@ -19,8 +19,6 @@ STATUS_COMPLETED = 1
 STATUS_FAILED = 2
 STATUS_INVALID = 3
 STATUS_COOKIES = 4
-from app.serve.db import db_session, Video, engine
-engine.dispose()
 
 
 if not os.path.isfile(url_file_path):
@@ -28,6 +26,7 @@ if not os.path.isfile(url_file_path):
 
 
 def write_metadata_to_db(video_id: str, md: dict):
+    from app.serve.db import db_session, Video
     try:
         existing = db_session.query(Video).filter_by(video_id=video_id).first()
     except Exception as e:
@@ -63,6 +62,7 @@ def write_metadata(video_id: str, md: dict):
 
 
 def download_from_json_data(data: dict, file_name: str) -> bool:
+    from app.serve.db import Video
     vid_save_path = os.path.join(media_path, file_name + ".mp4")
 
     metadata = {
@@ -257,7 +257,8 @@ def get_ffmpeg_cmd(
     return cmd
 
 
-def find_existing_video_by_url(url: str) -> Union[Video, None]:
+def find_existing_video_by_url(url: str):
+    from app.serve.db import Video
     try:
         return Video.query.filter_by(url=url).first()
     except Exception as e:
