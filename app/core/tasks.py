@@ -4,22 +4,23 @@ from datetime import datetime
 from app import celery
 from app.dl.dl import download_from_json_data
 from app.dl.helpers import seconds_to_time
-from app.serve.db import FailedDownload, db_session
+from app.serve.db import FailedDownload, db_session, engine
+import time
 
+
+engine.dispose()
 
 logger = get_task_logger(__name__)
 
 
-@celery.task(name='core.tasks.test',
-             soft_time_limit=60, time_limit=65)
-def test_task():
-    logger.info('running test task')
-    return True
+@celery.task(name="core.tasks.gen_thumbnail", soft_time_limit=300, time_limit=360)
+def gen_thumbnail_task(video_path: str, target_path: str):
+    dur = time.time()
+    logger.info("Generating thumbnail...")
 
 
-@celery.task(name="core.tasks.download", soft_time_limit=5400, time_limit=7200)
+@celery.task(name="core.tasks.download", soft_time_limit=7200, time_limit=10800)
 def download_task(data: dict, file_name: str):
-    import time
     dur = time.time()
     logger.info("Starting download of " + str(file_name))
     try:

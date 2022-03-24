@@ -3,7 +3,7 @@ from werkzeug.local import LocalProxy
 
 from authentication import require_appkey
 
-from .tasks import test_task, download_task
+from .tasks import download_task
 from app.dl.youtube import valid_youtube_url
 from app.dl.helpers import unique_filename
 
@@ -16,20 +16,13 @@ def before_request_func():
     current_app.logger.name = 'core'
 
 
-@core.route('/test', methods=['GET'])
-def test():
-    logger.info('app test route hit')
-    test_task.delay()
-    return 'Congratulations! Your core-app test route is running!'
-
-
 @core.route("/post_link", methods=["POST"])
 def post_link():
     logger.info("Link posted.")
     data = request.get_json()
     fn = unique_filename()
     if data:
-        if not "url" in data:
+        if "url" not in data:
             abort(400)
             return "No url in data."
         if not valid_youtube_url(data["url"]):

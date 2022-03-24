@@ -282,6 +282,17 @@ def find_existing_video_id_by_url(url: str) -> str:
     return ""
 
 
+def generate_thumbnail(
+        video_path: str,
+        save_path: str,
+        width=640,
+        height=264,
+        blur=False
+) -> bool:
+    import cv2
+
+
+
 def get_celery_scheduled():
     if not inspector:
         return []
@@ -296,6 +307,7 @@ def get_celery_scheduled():
         if len(i.keys()):
             k = list(i.keys())[0]
             a = i[k]
+
 
 def get_celery_active():
     if not inspector:
