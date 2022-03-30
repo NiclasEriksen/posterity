@@ -398,6 +398,7 @@ def login_post_route():
 
 
 @serve.route("/settings", methods=["GET", "POST"])
+@login_required
 def settings_page():
     tags = ContentTag.query.all()
     if not tags:
@@ -409,8 +410,8 @@ def settings_page():
     return render_template("settings.html", tags=tags)
 
 
-@login_required
 @serve.route("/add_tag", methods=["POST"])
+@login_required
 def add_tag_post():
     tag_name = request.form.get("tag_name")
     tag_category = request.form.get("tag_category_select")
@@ -443,8 +444,8 @@ def add_tag_post():
     return redirect(return_url, 302)
 
 
-@login_required
 @serve.route("/add_category", methods=["POST"])
+@login_required
 def add_category_post():
     category_name = request.form.get("category_name")
     return_url = request.form.get("return_url")
