@@ -49,9 +49,9 @@ def seconds_to_verbose_time(t: float) -> str:
 
     if hours > 1:
         if minutes > 1:
-            return f"{hours} hours, {minutes} minutes"
+            return f"{hours} hrs, {minutes} mins"
         elif minutes > 0:
-            return f"{hours} hours, 1 minute"
+            return f"{hours} hrs, 1 min"
         return f"{hours} hours"
     elif hours > 0:
         if minutes > 1:
@@ -61,11 +61,38 @@ def seconds_to_verbose_time(t: float) -> str:
         return "1 hour"
     else:
         if minutes > 1:
-            return f"{minutes} minutes, {seconds} seconds"
+            if seconds > 1:
+                return f"{minutes} minutes, {seconds} seconds"
+            elif seconds > 0:
+                return f"{minutes} minutes, 1 second"
+            return f"{minutes} minutes"
         elif minutes > 0:
-            return f"1 minute, {seconds} seconds"
+            if seconds > 1:
+                return f"1 minute, {seconds} seconds"
+            elif seconds > 0:
+                return "1 minute, 1 second"
+            return "1 minute"
         else:
-            return f"{seconds} seconds"
+            if seconds > 1:
+                return f"{seconds} seconds"
+            elif seconds > 0:
+                return "1 second"
+            return "Unknown"
+
+
+def seconds_to_hhmmss(t: float) -> str:
+    hours, rem = divmod(t, 3600)
+    minutes, seconds = divmod(rem, 60)
+    hours, minutes, seconds = int(hours), int(minutes), int(seconds)
+
+    if hours > 0:
+        return f"{hours}h{minutes}m{seconds}s"
+    elif minutes > 0:
+        return f"{minutes}m{seconds}s"
+    elif seconds > 0:
+        return f"{seconds}s"
+    else:
+        return "Unknown"
 
 
 def to_ms(string: str = None, precision: int = None, **kwargs) -> float:

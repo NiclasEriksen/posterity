@@ -126,7 +126,11 @@
                             <span uk-icon="icon: future; ratio: 2;"></span>
                         </div>
                         <div class="uk-width-5-6">
+                            {% if video %}
+                            <p>{{ video.duration_str_verbose }}</p>
+                            {% else %}
                             <p>{{ duration }} seconds.</p>
+                            {% endif %}
                         </div>
                     </div>
                 </div>

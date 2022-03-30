@@ -9,7 +9,7 @@ import time
 # import logging
 from werkzeug.local import LocalProxy
 from flask import current_app
-from app.dl.helpers import seconds_to_verbose_time
+from app.dl.helpers import seconds_to_verbose_time, seconds_to_hhmmss
 
 
 log = LocalProxy(lambda: current_app.logger)
@@ -70,10 +70,14 @@ class Video(Base):
 
     @property
     def upload_time_str(self) -> str:
-        return self.upload_time.strftime("%Y-%m-%d %H:%M:%S")
+        return self.upload_time.strftime("%b %d, %H:%M").lower()
 
     @property
     def duration_str(self) -> str:
+        return seconds_to_hhmmss(self.duration)
+
+    @property
+    def duration_str_verbose(self) -> str:
         return seconds_to_verbose_time(self.duration)
 
     def to_json(self) -> dict:
@@ -188,6 +192,7 @@ class ContentTag(Base):
     __tablename__ = "content_tags"
     id = Column(Integer, primary_key=True)
     name = Column(String, unique=True)
+    category = Column(Integer, default=0)
     censor = Column(Boolean)
 
     def __init__(self, name: str):

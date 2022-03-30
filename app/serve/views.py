@@ -98,6 +98,7 @@ def serve_video(video_id):
         orig_title=metadata["video_title"],
         status=metadata["status"] if "status" in metadata else 2,
         duration=int(metadata["duration"]),
+        video=video,
         source=metadata["source"],
         content_warning=metadata["content_warning"],
         tags=tags,
