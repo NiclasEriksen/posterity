@@ -113,7 +113,7 @@
                 <tr>
                     <td>
                         <a href="/{{ video['video_id'] }}">{{ video.title }}</a>
-                        {% if video.tags|length %}
+                        {% if video.tags|length or video.categories|length %}
                             <br>
                             {% for tag in video.tags %}
                             <span class="uk-label {% if tag.category > 1 %}uk-label-danger{% elif tag.category == 1 %}uk-label-warning{% endif %}">{{ tag.name }}</span>
