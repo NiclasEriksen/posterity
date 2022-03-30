@@ -44,13 +44,18 @@
                     </div>
                     <span class="uk-text-meta"><i>You can add more tags later</i></span>
                 </div>
-
-                <div class="uk-margin uk-width-1-2 uk-width-1-1@m uk-padding-remove-horizontal uk-padding-remove-right@m">
-                    <div class="uk-form-label">Source</div>
+                <div class="uk-margin uk-width-1-2 uk-width-1-1@m uk-padding-remove-horizontal">
+                    <div class="uk-form-label">Category</div>
                     <div class="uk-inline uk-width-1-1">
-                        <span class="uk-form-icon" uk-icon="icon: location"></span>
-                        <input class="uk-input" type="text" id="source" name="source" placeholder="Source of this link" value="Website">
+                        <span class="uk-form-icon" uk-icon="icon: tag"></span>
+                        <select class="uk-input uk-select" id="category" name="category">
+                            <option>None</option>
+                            {% for tag in categories %}
+                            <option>{{ tag.name }}</option>
+                            {% endfor %}
+                        </select>
                     </div>
+                    <span class="uk-text-meta"><i>You can add more categories later</i></span>
                 </div>
 
                 <div class="uk-margin uk-width-1-1 uk-padding-remove-left">

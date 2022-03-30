@@ -19,6 +19,9 @@
                     {% for tag in tags %}
                         <span class="uk-label {% if tag.censor %}uk-label-danger{% endif %}">{{ tag.name }}</span>
                     {% endfor %}
+                    {% for category in categories %}
+                        <span class="uk-label uk-label-category">{{ category.name }}</span>
+                    {% endfor %}
                 </h4>
                 {% endif %}
                 <hr>

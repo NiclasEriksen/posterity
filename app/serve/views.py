@@ -23,8 +23,8 @@ logger = LocalProxy(lambda: current_app.logger)
 from app.dl.dl import media_path, \
     STATUS_COMPLETED, STATUS_COOKIES, STATUS_DOWNLOADING, STATUS_FAILED, STATUS_INVALID, \
     get_celery_scheduled, get_celery_active, write_metadata
-from app.serve.db import db_session, Video, User, ContentTag, init_db,\
-    AUTH_LEVEL_ADMIN, AUTH_LEVEL_MOD, AUTH_LEVEL_USER
+from app.serve.db import db_session, Video, User, ContentTag, Category,\
+    init_db, AUTH_LEVEL_ADMIN, AUTH_LEVEL_MOD, AUTH_LEVEL_USER
 from app import get_environment, app_config
 from app.serve.search import search_videos, index_video_data, remove_video_data, remove_video_data_by_id
 from app.extensions import cache
@@ -84,8 +84,10 @@ def serve_video(video_id):
     video = Video.query.filter_by(video_id=video_id).first()
     if video:
         tags = video.tags
+        categories = video.categories
     else:
         tags = []
+        categories = []
 
     if metadata["status"] in [STATUS_FAILED, STATUS_INVALID]:
         flash("Video failed to download, this page will self destruct")
@@ -102,6 +104,7 @@ def serve_video(video_id):
         source=metadata["source"],
         content_warning=metadata["content_warning"],
         tags=tags,
+        categories=categories,
         dl_path="/download/" + dl_video_id,
         stream_path="/view/" + dl_video_id,
         orig_url=metadata["url"],
@@ -146,6 +149,7 @@ def front_page():
     total_pages = total // pp + (1 if total % pp else 0)
 
     available_tags = ContentTag.query.order_by(ContentTag.name).all()
+    available_categories = Category.query.order_by(Category.name).all()
 
     return render_template(
         "home.html", videos=videos,
@@ -156,7 +160,8 @@ def front_page():
         total=total,
         total_results=len(videos),
         keyword=kw,
-        tags=available_tags
+        tags=available_tags,
+        categories=available_categories
     )
 
 
@@ -203,40 +208,34 @@ def front_page_search():
     )
 
 
-@serve.route("/edit_video/<video_id>")
+@serve.route("/edit_video/<video_id>", methods=["GET"])
 @login_required
 def edit_video_page(video_id: str):
-    # video = Video.query.filter_by(video_id=video_id).first()
-    metadata = get_metadata_for_video(video_id)
-
-    if not len(metadata.keys()):
+    video: Video = Video.query.filter_by(video_id=video_id).first()
+    if not video:
         return render_template("not_found.html")
 
     available_tags = ContentTag.query.order_by(ContentTag.name).all()
-    if "tags" not in metadata:
-        metadata["tags"] = []
-    if "duplicate" not in metadata:
-        metadata["duplicate"] = ""
-
-    # if video:
-    #     print(video.tags)
-    # print(available_tags)
-    # print(metadata["tags"])
+    available_categories = Category.query.order_by(Category.name).all()
 
     for at in available_tags:
-        if at.id in metadata["tags"]:
-            print(f"{at.name} in video tags!")
+        if at in video.tags:
             at.enabled = True
         else:
             at.enabled = False
+    for ac in available_categories:
+        if ac in video.categories:
+            ac.enabled = True
+        else:
+            ac.enabled = False
 
     return render_template(
         "edit_video.html",
-        custom_title=metadata["title"],
-        duplicate=metadata["duplicate"],
-        source=metadata["source"],
-        verified=metadata["verified"],
+        custom_title=video.title,
+        verified=video.verified,
+        source=video.source,
         tags=available_tags,
+        categories=available_categories,
         video_id=video_id
     )
 
@@ -252,7 +251,9 @@ def edit_video_post(video_id: str):
     verified = True if request.form.get("verified") == "verified_on" else False
     source = request.form.get("source")
     tl = request.form.getlist("tags_select")
+    cl = request.form.getlist("categories_select")
 
+    video.tags = []
     for tag_id in tl:
         try:
             tag_id = int(tag_id)
@@ -264,6 +265,18 @@ def edit_video_post(video_id: str):
             if tag and tag not in video.tags:
                 video.tags.append(tag)
 
+    video.categories = []
+    for category_id in cl:
+        try:
+            category_id = int(category_id)
+        except (TypeError, ValueError):
+            logger.error("Invalid category value in form?")
+            continue
+        else:
+            cat = Category.query.filter_by(id=category_id).first()
+            if cat and cat not in video.categories:
+                video.categories.append(cat)
+
     video.title = title
     video.verified = verified
     video.source = source
@@ -273,12 +286,18 @@ def edit_video_post(video_id: str):
     write_metadata(video_id, video.to_json())
 
     available_tags = ContentTag.query.order_by(ContentTag.name).all()
+    available_categories = Category.query.order_by(Category.name).all()
 
     for at in available_tags:
         if at in video.tags:
             at.enabled = True
         else:
             at.enabled = False
+    for ac in available_categories:
+        if ac in video.categories:
+            ac.enabled = True
+        else:
+            ac.enabled = False
 
     flash(f"Video info for \"{video_id}\"has been updated.", "success")
 
@@ -288,6 +307,7 @@ def edit_video_post(video_id: str):
         verified=video.verified,
         source=video.source,
         tags=available_tags,
+        categories=available_categories,
         video_id=video_id
     )
 
@@ -389,13 +409,19 @@ def settings_page():
     return render_template("settings.html", tags=tags)
 
 
+@login_required
 @serve.route("/add_tag", methods=["POST"])
 def add_tag_post():
     tag_name = request.form.get("tag_name")
-    tag_censor = request.form.get("tag_censor")
+    tag_category = request.form.get("tag_category_select")
+    try:
+        tag_category = int(tag_category)
+    except (ValueError, TypeError):
+        tag_category = 0
+
     return_url = request.form.get("return_url")
     if tag_name:
-        if tag_censor == "on":
+        if tag_category > 1:
             tag_censor = True
         else:
             tag_censor = False
@@ -407,11 +433,34 @@ def add_tag_post():
         else:
             tag = ContentTag(tag_name.rstrip().lstrip())
             tag.censor = tag_censor
+            tag.category = tag_category
             db_session.add(tag)
             db_session.commit()
             flash("Tag added to database!", "success")
     else:
         flash("Tag name cannot be empty.", "error")
+
+    return redirect(return_url, 302)
+
+
+@login_required
+@serve.route("/add_category", methods=["POST"])
+def add_category_post():
+    category_name = request.form.get("category_name")
+    return_url = request.form.get("return_url")
+    if category_name:
+
+        existing = Category.query.filter_by(name=category_name.rstrip().lstrip()).first()
+
+        if existing:
+            flash("Category by that name already exists, ignored.", "warning")
+        else:
+            category = Category(category_name.rstrip().lstrip())
+            db_session.add(category)
+            db_session.commit()
+            flash("Category added to database!", "success")
+    else:
+        flash("Category name cannot be empty.", "error")
 
     return redirect(return_url, 302)
 

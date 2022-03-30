@@ -8,12 +8,26 @@
                 <input type="text" class="uk-input" name="tag_name" id="tag_name" placeholder="Tag name">
             </div>
             <div class="uk-margin">
-                <label><input class="uk-checkbox" name="tag_censor" id="tag_censor" type="checkbox" checked> Censor automatically</label>
+                <select class="uk-select" id="tag_category_select" name="tag_category_select">
+                    <option value="0" selected>Informative</option>
+                    <option value="1">Emotional</option>
+                    <option value="2">Graphic</option>
+                </select>
             </div>
             <button class="uk-button uk-button-primary" type="submit">Submit</button>
             <input type="hidden" id="return_url" name="return_url" value="/settings">
         </fieldset>
 
+    </form>
+    <h2>Add new category:</h2>
+    <form class="uk-form" method="POST" id="add_category_form" action="/add_category">
+        <fieldset class="uk-fieldset">
+            <div class="uk-margin">
+                <input type="text" class="uk-input" name="category_name" id="category_name" placeholder="Category name">
+            </div>
+            <button class="uk-button uk-button-primary" type="submit">Submit</button>
+            <input type="hidden" id="return_url_category" name="return_url" value="/settings">
+        </fieldset>
     </form>
 </div>
 {% endblock content %}

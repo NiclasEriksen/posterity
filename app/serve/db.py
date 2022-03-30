@@ -33,6 +33,12 @@ tag_association_table = Table(
     Column("tag_id", ForeignKey("content_tags.id"))
 )
 
+category_association_table = Table(
+    "category_association", Base.metadata,
+    Column("video_id", ForeignKey("videos.id")),
+    Column("category_id", ForeignKey("categories.id"))
+)
+
 
 class User(UserMixin, Base):
     __tablename__ = "users"
@@ -67,6 +73,7 @@ class Video(Base):
     duplicate_of = relationship("Video", remote_side=[id])
     duplicates = relationship("Video", back_populates="duplicate_of")
     tags = relationship("ContentTag", secondary=tag_association_table)
+    categories = relationship("Category", secondary=category_association_table)
 
     @property
     def upload_time_str(self) -> str:
@@ -88,6 +95,8 @@ class Video(Base):
             "video_title": self.orig_title,
             "content_warning": "/".join([t.name for t in self.tags]),
             "tags": [t.id for t in self.tags],
+            "categories": [c.id for c in self.categories],
+            "category": "/".join([c.name for c in self.categories]),
             "status": self.status,
             "format": self.video_format,
             "duration": self.duration,
@@ -166,6 +175,31 @@ class Video(Base):
                 tag = ContentTag.query.filter_by(name=c.lstrip().rstrip().capitalize()).first()
                 if tag and tag not in self.tags:
                     self.tags.append(tag)
+        try:
+            categories = d["categories"]
+        except KeyError:
+            pass
+        else:
+            for c in categories:
+                try:
+                    ct = Category.query.filter_by(id=int(c)).first()
+                except (TypeError, ValueError):
+                    pass
+                else:
+                    if ct and ct not in self.categories:
+                        self.categories.append(ct)
+        try:
+            if "/" in d["category"]:
+                c = d["category"].split("/")
+            else:
+                c = [d["category"]]
+        except KeyError:
+            pass
+        else:
+            for ct in c:
+                tag = Category.query.filter_by(name=ct.lstrip().rstrip().capitalize()).first()
+                if tag and tag not in self.categories:
+                    self.categories.append(tag)
 
 
 class RegisterToken(Base):
@@ -198,6 +232,15 @@ class ContentTag(Base):
     def __init__(self, name: str):
         self.name = name
         self.censor = False
+
+
+class Category(Base):
+    __tablename__ = "categories"
+    id = Column(Integer, primary_key=True)
+    name = Column(String, unique=True)
+
+    def __init__(self, name: str):
+        self.name = name
 
 
 class FailedDownload(Base):

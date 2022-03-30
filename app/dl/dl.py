@@ -95,6 +95,12 @@ def download_from_json_data(data: dict, file_name: str) -> bool:
         write_metadata(file_name, metadata)
         return False
 
+    # Separate check for category
+    try:
+        metadata["category"] = data["category"]
+    except KeyError:
+        metadata["category"] = "None"
+
     if not valid_youtube_url(metadata["url"]):
         log.error("Invalid video url...")
         metadata["status"] = STATUS_INVALID
