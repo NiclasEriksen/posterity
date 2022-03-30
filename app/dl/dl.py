@@ -87,7 +87,6 @@ def download_from_json_data(data: dict, file_name: str) -> bool:
     try:
         metadata["url"] = data["url"]
         metadata["title"] = data["title"]
-        metadata["source"] = data["source"]
         metadata["content_warning"] = data["content_warning"]
     except KeyError:
         log.error("Corrupted data?!")
@@ -100,6 +99,11 @@ def download_from_json_data(data: dict, file_name: str) -> bool:
         metadata["category"] = data["category"]
     except KeyError:
         metadata["category"] = "None"
+
+    try:
+        metadata["source"] = data["source"]
+    except KeyError:
+        metadata["source"] = "Unknown"
 
     if not valid_youtube_url(metadata["url"]):
         log.error("Invalid video url...")
