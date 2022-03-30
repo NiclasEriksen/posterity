@@ -232,6 +232,7 @@ class ContentTag(Base):
     def __init__(self, name: str):
         self.name = name
         self.censor = False
+        self.category = 0
 
 
 class Category(Base):
