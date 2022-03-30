@@ -42,6 +42,32 @@ def time_to_seconds(h: int = 0, m: int = 0, s: float = 0.0) -> float:
     return float(h * 3600 + m * 60 + s)
 
 
+def seconds_to_verbose_time(t: float) -> str:
+    hours, rem = divmod(t, 3600)
+    minutes, seconds = divmod(rem, 60)
+    hours, minutes, seconds = int(hours), int(minutes), int(seconds)
+
+    if hours > 1:
+        if minutes > 1:
+            return f"{hours} hours, {minutes} minutes"
+        elif minutes > 0:
+            return f"{hours} hours, 1 minute"
+        return f"{hours} hours"
+    elif hours > 0:
+        if minutes > 1:
+            return f"1 hour, {minutes} minutes"
+        elif minutes > 0:
+            return f"1 hour, 1 minute"
+        return "1 hour"
+    else:
+        if minutes > 1:
+            return f"{minutes} minutes, {seconds} seconds"
+        elif minutes > 0:
+            return f"1 minute, {seconds} seconds"
+        else:
+            return f"{seconds} seconds"
+
+
 def to_ms(string: str = None, precision: int = None, **kwargs) -> float:
     """
     Convert a string to milliseconds.

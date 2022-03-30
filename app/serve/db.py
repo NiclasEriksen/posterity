@@ -6,12 +6,14 @@ import os
 import json
 from datetime import datetime
 import time
-import logging
+# import logging
 from werkzeug.local import LocalProxy
 from flask import current_app
+from app.dl.helpers import seconds_to_verbose_time
 
 
 log = LocalProxy(lambda: current_app.logger)
+# log = logging.getLogger("posterity.db")
 
 DB_URL = os.environ.get("POSTERITY_DB", "")
 
@@ -69,6 +71,10 @@ class Video(Base):
     @property
     def upload_time_str(self) -> str:
         return self.upload_time.strftime("%Y-%m-%d %H:%M:%S")
+
+    @property
+    def duration_str(self) -> str:
+        return seconds_to_verbose_time(self.duration)
 
     def to_json(self) -> dict:
         return {
@@ -205,7 +211,12 @@ from .search import index_video_data, remove_videos_index
 
 
 def index_all_videos_from_db():
-    remove_videos_index()
+    try:
+        remove_videos_index()
+    except Exception as e:
+        log.error(e)
+        return
+
     for video in Video.query.all():
         index_video_data(video)
 

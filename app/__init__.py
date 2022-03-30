@@ -57,9 +57,9 @@ def create_app():
         return redirect("https://" if request.is_secure else "http://" + app.config["SERVER_NAME"])
 
     # log.info("Loading videos from disk")
-    index_all_videos_from_db()
+    with app.app_context():
+        index_all_videos_from_db()
     # with app.app_context():
-    #     inde
     #     load_all_videos_from_disk(media_path)
 
     log.info("Starting app")
