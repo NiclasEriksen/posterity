@@ -14,16 +14,14 @@
         <div class="uk-container uk-padding-small uk-height-1-1 uk-padding-remove-top">
             <div class="uk-card uk-card-default uk-card-body uk-width-1-1 uk-text-center">
                 <h2 class="uk-card-title">{{ custom_title }}</h2>
-                {% if tags|length %}
                 <h4>
                     {% for tag in tags %}
-                        <span class="uk-label {% if tag.category > 1 %}uk-label-danger{% elif tag.category == 1 %}uk-label-warning{% endif %}">{{ tag.name }}</span>
+                    <span class="uk-label {% if tag.category > 1 %}uk-label-danger{% elif tag.category == 1 %}uk-label-warning{% endif %}">{{ tag.name }}</span>
                     {% endfor %}
                     {% for category in categories %}
-                        <span class="uk-label uk-label-category">{{ category.name }}</span>
+                    <span class="uk-label uk-label-category">{{ category.name }}</span>
                     {% endfor %}
                 </h4>
-                {% endif %}
                 <hr>
                 <div class="uk-width-1-1 uk-height-1-1">
                     <div class="uk-text-center uk-width-1-1 video-content">
