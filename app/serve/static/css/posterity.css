@@ -1,4 +1,20 @@
 .uk-label-category {
-    background-color: #CCC;
-    color: #000;
+    background-color: #DDD;
+    color: #333;
+}
+
+.label-small {
+    font-size: .70rem;
+    padding: 0 4px;
+    line-height: 1.0rem;
+}
+
+.content-tag-option-0 {
+    color: #00819e!important;
+}
+.content-tag-option-1 {
+    color: #e6ac00!important;
+}
+.content-tag-option-2 {
+    color: #cf2900!important;
 }
