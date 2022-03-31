@@ -1,6 +1,124 @@
+.posterity-dark-mode {
+    --primary: #2C97DE;
+    --primary-light: #6caed9;
+    --info: var(--primary);
+    --success: #2DBDA8;
+    --warning: #EFC663;
+    --danger: #E16070;
+    --bg: #232830;
+    --grey: #EEE;
+    --light-grey: #C2C8CF;
+    --dark-grey: #2E353D;
+    --charcoal: #353C45;
+    --white: #FFF;
+}
+
+body, html {
+    background-color: var(--bg);
+    color: var(--grey);
+}
+
+::selection {
+    background: var(--primary-light);
+}
+::-moz-selection {
+    background: var(--primary-light);
+}
+
+.uk-section-muted {
+    background: var(--charcoal);
+}
+.uk-section-default {
+    background: var(--bg);
+}
+
+.uk-h1, .uk-h2, .uk-h3, .uk-h4, .uk-h5, .uk-h6, .uk-heading-2xlarge, .uk-heading-large, .uk-heading-medium, .uk-heading-small, .uk-heading-xlarge, h1, h2, h3, h4, h5, h6 {
+    color: var(--grey);
+}
+
+.uk-input, .uk-select, .uk-textarea {
+    background: var(--dark-grey)!important;
+    border-color: var(--light-grey);
+    color: var(--light-grey);
+}
+.uk-input:focus, .uk-select:focus, .uk-textarea:focus {
+    color: var(--grey);
+    background: var(--bg)!important;
+    border-color: var(--primary);
+}
+
+.uk-text-muted {
+    color: var(--light-grey)!important;
+}
+
+.uk-button-default {
+    color: var(--light-grey);
+    border-color: var(--light-grey);
+}
+.uk-button-default:hover {
+    color: var(--grey);
+    border-color: var(--grey);
+}
+
+.uk-text-success {
+    color: var(--success)!important;
+}
+.uk-text-primary {
+    color: var(--primary)!important;
+}
+.uk-text-danger {
+    color: var(--danger)!important;
+}
+.uk-text-warning {
+    color: var(--warning)!important;
+}
+
+.uk-form-label {
+    color: var(--grey);
+}
+
+.uk-link, a {
+    color: var(--primary);
+}
+.uk-link:hover, a:hover {
+    color: var(--primary-light);
+}
+
+.uk-label {
+    background: var(--primary);
+    color: var(--grey);
+}
+
+.uk-label-danger {
+    background: var(--danger);
+    color: var(--white);
+}
+.uk-label-warning {
+    background: var(--warning);
+    color: var(--charcoal);
+}
+.uk-table caption, .uk-table th {
+    color: var(--light-grey);
+}
+
+
 .uk-label-category {
-    background-color: #DDD;
+    background-color: var(--light-grey);
     color: #333;
+}
+
+.uk-background-muted {
+    background-color: var(--charcoal);
+}
+.uk-background-secondary {
+    background-color: var(--dark-grey);
+}
+.uk-light, .uk-light a {
+    color: var(--grey);
+}
+
+.uk-light .uk-text-muted {
+    color: var(--light-grey)!important;
 }
 
 .label-small {
