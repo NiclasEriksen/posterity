@@ -123,7 +123,6 @@ def front_page():
     offset = max(0, page - 1) * pp
 
     if len(kw):
-        print(kw)
         logger.info(f"Searching for {kw}.")
         results = search_videos(kw)
         results = sorted(results, key=lambda x: x["_score"], reverse=True)
@@ -447,7 +446,7 @@ def download_archive():
     return render_template("download.html", last_updated=last_updated)
 
 
-@serve.route("/download/<video_id>", methods=["GET"])
+@serve.route("/download/<video_id>")
 def download_video(video_id=""):
     try:
         if os.path.isfile(os.path.join(media_path, video_id + ".mp4")):
@@ -458,7 +457,7 @@ def download_video(video_id=""):
     return "Video file not found."
 
 
-@serve.route("/view/<video_id>", methods=["GET"])
+@serve.route("/view/<video_id>")
 def view_video(video_id=""):
     try:
         if os.path.isfile(os.path.join(media_path, video_id + ".mp4")):
@@ -467,6 +466,29 @@ def view_video(video_id=""):
         logger.error(e)
         logger.error("Unable to serve video!")
     return "Video file not found."
+
+
+@serve.route("/preview/<video_id>")
+def get_preview_image_url(video_id=""):
+    video = Video.query.filter_by(video_id=video_id).first()
+    if video:
+        for ct in video.tags:
+            if ct.category > 1:
+                return url_for("serve.static", filename=f"preview/{video_id}_blurred.png")
+        return url_for("serve.static", filename=f"preview/{video_id}.png")
+    return url_for("serve.static", filename="no_preview.png")
+
+
+@cache.memoize(timeout=360)
+@serve.route("/thumbnail/<video_id>")
+def get_thumbnail_image_url(video_id=""):
+    video = Video.query.filter_by(video_id=video_id).first()
+    if video:
+        for ct in video.tags:
+            if ct.category > 1:
+                return url_for("serve.static", filename=f"thumbnails/{video_id}_blurred.png")
+        return url_for("serve.static", filename=f"thumbnails/{video_id}.png")
+    return url_for("serve.static", filename="no_thumbnail.png")
 
 
 @serve.route("/remove/<video_id>")
