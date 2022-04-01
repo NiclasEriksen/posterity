@@ -34,7 +34,7 @@ from app.extensions import cache
 init_db()
 load_dotenv()
 APPLICATION_ENV = get_environment()
-MAX_RESULT_PER_PAGE = 25
+MAX_RESULT_PER_PAGE = 30
 TORRENT_NAME = "Posterity.Ukraine.archive.torrent"
 
 
