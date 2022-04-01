@@ -20,6 +20,7 @@
     --tag-emotional: var(--warning);
     --tag-graphic: #cf2900;
     --tag-graphic: var(--danger);
+    --category: var(--light-grey);
 }
 
 body, html {
@@ -145,8 +146,11 @@ body, html {
 
 
 .uk-label-category {
-    background-color: var(--light-grey);
-    color: #333;
+    background-color: var(--category);
+    color: var(--dark-grey);
+}
+.uk-text-category {
+    color: var(--category);
 }
 
 .uk-background-muted {
