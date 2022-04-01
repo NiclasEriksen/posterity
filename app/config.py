@@ -21,8 +21,14 @@ class BaseConfig(object):
     REGISTER_TOKEN = environ.get("REGISTER_TOKEN")
     RESULT_BACKEND = environ.get('RESULT_BACKEND')
     SERVER_NAME = environ.get("SERVER_NAME")
-    THUMBNAIL_FOLDER = path.join(basedir, "app", "serve", "static", "thumbnails")
-    PREVIEW_FOLDER = path.join(basedir, "app", "serve", "static", "preview")
+    THUMBNAIL_FOLDER = environ.get(
+        'THUMBNAIL_FOLDER',
+        path.join(basedir, "app", "serve", "static", "thumbnails")
+    )
+    PREVIEW_FOLDER = environ.get(
+        'PREVIEW_FOLDER',
+        path.join(basedir, "app", "serve", "static", "preview")
+    )
     # APPLICATION_ROOT = "/"
     LOG_INFO_FILE = path.join(basedir, 'log', 'info.log')
     LOG_CELERY_FILE = path.join(basedir, 'log', 'celery.log')

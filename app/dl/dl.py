@@ -6,6 +6,7 @@ from datetime import datetime
 from typing import Union
 from .helpers import seconds_to_time, resource_path, unique_filename
 from .youtube import valid_youtube_url, get_content_info, AgeRestrictedError
+from .metadata import generate_video_images, technical_info
 from app import celery
 from werkzeug.local import LocalProxy
 from flask import current_app
@@ -18,6 +19,8 @@ if celery:
     inspector = celery.control.inspect()
 
 media_path = os.environ.get("MEDIA_FOLDER", "")
+thumbnail_path = os.environ.get("THUMBNAIL_FOLDER", "")
+preview_path = os.environ.get("PREVIEW_FOLDER", "")
 url_file_path = os.path.join(media_path, "urls.store")
 STATUS_DOWNLOADING = 0
 STATUS_COMPLETED = 1
@@ -210,6 +213,18 @@ def download_from_json_data(data: dict, file_name: str) -> bool:
         #             f.write(line)
     else:
         metadata["status"] = STATUS_COMPLETED
+        # info = technical_info(vid_save_path)
+        if len(thumbnail_path) and len(preview_path):
+            generate_video_images(
+                vid_save_path,
+                os.path.join(thumbnail_path, file_name + "_thumb.png"),
+                os.path.join(preview_path, file_name + "_preview.png"),
+                os.path.join(thumbnail_path, file_name + "_thumb_blurred.png"),
+                os.path.join(preview_path, file_name + "_preview_blurred.png"),
+                start=5 if duration >= 10.0 else 0,
+                blur_amount=0.75,
+                desaturate=True
+            )
 
     with open(url_file_path, "a") as url_file:
         url_file.write(metadata["url"] + "\n")
@@ -296,17 +311,6 @@ def find_existing_video_id_by_url(url: str) -> str:
             except json.JSONDecodeError:
                 continue
     return ""
-
-
-def generate_thumbnail(
-        video_path: str,
-        save_path: str,
-        width=640,
-        height=264,
-        blur=False
-) -> bool:
-    import cv2
-
 
 
 def get_celery_scheduled():
