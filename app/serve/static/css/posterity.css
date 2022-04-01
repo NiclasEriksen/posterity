@@ -15,8 +15,11 @@
     --white: #FFF;
     --black: #13181f;
     --tag-informative: #00819e;
+    --tag-informative: var(--primary);
     --tag-emotional: #e6ac00;
+    --tag-emotional: var(--warning);
     --tag-graphic: #cf2900;
+    --tag-graphic: var(--danger);
 }
 
 body, html {
