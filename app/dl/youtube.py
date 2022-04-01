@@ -42,6 +42,7 @@ YT_FORMATS = {
     "Opus VBR 160kbps": "251",
     "AAC 48kbps": "139",
     "AAC 128kbps": "140",
+    "mp4a Twitter": "mp4a.40.2",
     "HLS audio 0": "hls-0-audio_0",
     "HLS audio 1": "hls-1-audio_0",
     "Vimeo 360p0": "http-360p-0",
@@ -67,7 +68,7 @@ VID_FORMATS = ["240p", "360p", "480p", "720p", "1080p",
     "MP4 720p 4:3", "MP4 640p 4:3", "MP4 360p 4:3", "MP4 240p 4:3", "MP4 180p 4:3", "MP4 Mobile",
     "Vimeo 360p0", "Vimeo 360p1", "Vimeo 480p0", "Vimeo 640p0", "Vimeo 720p0",  "Vimeo 1080p0"
 ]
-AUD_FORMATS = ["HLS audio 0", "HLS audio 1", "Opus VBR 50kbps", "Opus VBR 70kbps", "Opus VBR 160kbps", "AAC 48kbps", "AAC 128kbps"]
+AUD_FORMATS = ["mp4a Twitter", "HLS audio 0", "HLS audio 1", "Opus VBR 50kbps", "Opus VBR 70kbps", "Opus VBR 160kbps", "AAC 48kbps", "AAC 128kbps"]
 SUB_LANGS   = ["en", "no"]
 DEFAULT_AUDIO = "Opus VBR 70kbps"
 DEFAULT_VIDEO = "MP4 720p"
