@@ -488,14 +488,13 @@ def view_video(video_id=""):
 def get_preview_image_url(video_id=""):
     video = Video.query.filter_by(video_id=video_id).first()
     if video:
-        if os.path.isfile(os.path.join(current_app.config["PREVIEW_FOLDER"], video_id + "_blurred.png")):
+        if os.path.isfile(os.path.join(current_app.config["PREVIEW_FOLDER"], video_id + "_preview_blurred.png")):
             for ct in video.tags:
                 if ct.category > 1:
-                    return send_from_directory(current_app.config["PREVIEW_FOLDER"], video_id + "_blurred.png")
-        if os.path.isfile(os.path.join(current_app.config["PREVIEW_FOLDER"], video_id + ".png")):
-            return send_from_directory(current_app.config["PREVIEW_FOLDER"], video_id + ".png")
+                    return send_from_directory(current_app.config["PREVIEW_FOLDER"], video_id + "_preview_blurred.png")
+        if os.path.isfile(os.path.join(current_app.config["PREVIEW_FOLDER"], video_id + "_preview.png")):
+            return send_from_directory(current_app.config["PREVIEW_FOLDER"], video_id + "_preview.png")
 
-    print("Sender bilde")
     return serve.send_static_file("no_preview.png")
 
 
@@ -506,8 +505,8 @@ def get_thumbnail_image_url(video_id=""):
     if video:
         for ct in video.tags:
             if ct.category > 1:
-                return url_for("serve.static", filename=f"thumbnails/{video_id}_blurred.png")
-        return url_for("serve.static", filename=f"thumbnails/{video_id}.png")
+                return url_for("serve.static", filename=f"thumbnails/{video_id}_thumb_blurred.png")
+        return url_for("serve.static", filename=f"thumbnails/{video_id}_thumb.png")
     return url_for("serve.static", filename="no_thumbnail.png")
 
 

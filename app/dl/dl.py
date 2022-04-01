@@ -214,17 +214,21 @@ def download_from_json_data(data: dict, file_name: str) -> bool:
     else:
         metadata["status"] = STATUS_COMPLETED
         # info = technical_info(vid_save_path)
-        if len(thumbnail_path) and len(preview_path):
-            generate_video_images(
-                vid_save_path,
-                os.path.join(thumbnail_path, file_name + "_thumb.png"),
-                os.path.join(preview_path, file_name + "_preview.png"),
-                os.path.join(thumbnail_path, file_name + "_thumb_blurred.png"),
-                os.path.join(preview_path, file_name + "_preview_blurred.png"),
-                start=5 if duration >= 10.0 else 0,
-                blur_amount=0.75,
-                desaturate=True
-            )
+        try:
+            if len(thumbnail_path) and len(preview_path):
+                generate_video_images(
+                    vid_save_path,
+                    os.path.join(thumbnail_path, file_name + "_thumb.png"),
+                    os.path.join(preview_path, file_name + "_preview.png"),
+                    os.path.join(thumbnail_path, file_name + "_thumb_blurred.png"),
+                    os.path.join(preview_path, file_name + "_preview_blurred.png"),
+                    start=5 if duration >= 10.0 else 0,
+                    blur_amount=0.75,
+                    desaturate=True
+                )
+        except Exception as e:
+            print(e)
+            print("FAILED THUMBNAIL GENERATION")
 
     with open(url_file_path, "a") as url_file:
         url_file.write(metadata["url"] + "\n")
