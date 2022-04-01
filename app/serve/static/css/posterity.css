@@ -98,10 +98,10 @@ body, html {
 }
 
 .uk-link, a, .uk-icon-link {
-    color: var(--primary);
+    color: var(--primary-light);
 }
 .uk-link:hover, a:hover, .uk-icon-link:hover {
-    color: var(--primary-light);
+    color: var(--primary);
 }
 
 .uk-label {
