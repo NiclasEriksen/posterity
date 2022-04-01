@@ -112,7 +112,7 @@
                 {% for video in videos %}
                 <tr>
                     <td>
-                        <a href="/{{ video['video_id'] }}">{{ video.title }}</a>
+                        <a href="/{{ video['video_id'] }}" class="uk-text-bold">{{ video.title }}</a>
                         {% if video.tags|length or video.categories|length %}
                             <br>
                             {% for tag in video.tags %}
