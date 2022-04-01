@@ -503,11 +503,14 @@ def get_preview_image_url(video_id=""):
 def get_thumbnail_image_url(video_id=""):
     video = Video.query.filter_by(video_id=video_id).first()
     if video:
-        for ct in video.tags:
-            if ct.category > 1:
-                return url_for("serve.static", filename=f"thumbnails/{video_id}_thumb_blurred.png")
-        return url_for("serve.static", filename=f"thumbnails/{video_id}_thumb.png")
-    return url_for("serve.static", filename="no_thumbnail.png")
+        if os.path.isfile(os.path.join(current_app.config["THUMBNAIL_FOLDER"], video_id + "_thumb_blurred.png")):
+            for ct in video.tags:
+                if ct.category > 1:
+                    return send_from_directory(current_app.config["THUMBNAIL_FOLDER"], video_id + "_thumb_blurred.png")
+        if os.path.isfile(os.path.join(current_app.config["THUMBNAIL_FOLDER"], video_id + "_thumb.png")):
+            return send_from_directory(current_app.config["THUMBNAIL_FOLDER"], video_id + "_thumb.png")
+
+    return serve.send_static_file("no_thumbnail.png")
 
 
 @serve.route("/get_torrent")

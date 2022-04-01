@@ -127,7 +127,13 @@
                 {% for video in videos %}
                 <tr>
                     <td>
-                        <div>
+                        <div class="list-thumbnail">
+                            <span style="height: 100%; display: inline-block; vertical-align: middle;"></span>
+                            <a href="/{{ video['video_id'] }}">
+                                <img src="/thumbnail/{{ video.video_id }}.png" class="thumbnail-rounded">
+                            </a>
+                        </div>
+                        <div style="min-height: 64px; vertical-align: middle;">
                             <a href="/{{ video['video_id'] }}" class="uk-text-bold video-link">{{ video.title }}</a>
                             {% if video.tags|length or video.categories|length %}
                                 <br>

@@ -198,3 +198,26 @@ body, html {
 .video-link:hover {
     color: var(--light-grey);
 }
+
+.list-thumbnail {
+    width: 72px;
+    height: 72px;
+    float: left;
+    text-align: center;
+    margin-right: 4px;
+}
+
+.thumbnail-rounded {
+    max-width: 64px;
+    max-height: 64px;
+    vertical-align: middle;
+    border: 2px solid var(--charcoal);
+    border-radius: 3px;
+    -webkit-transition : border 500ms ease-out;
+    -moz-transition : border 500ms ease-out;
+    -o-transition : border 500ms ease-out;
+    transition : border 500ms ease-out;
+}
+.thumbnail-rounded:hover {
+    border: 2px solid var(--light-grey);
+}
