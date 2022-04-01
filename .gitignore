@@ -3,7 +3,7 @@
 alembic.ini
 *.sql
 preview/*
-thumbnails/*
+app/serve/static/thumbnails/*.jpg
 
 #ffmpeg/youtube
 cookies.txt
