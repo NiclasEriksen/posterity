@@ -182,6 +182,9 @@ body, html {
 .content-tag-option-2 {
     color: var(--tag-graphic)!important;
 }
+.category-option {
+    color: var(--category)!important;
+}
 
 .video-card {
     padding-left: 0;
