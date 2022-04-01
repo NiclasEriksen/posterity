@@ -82,6 +82,10 @@ body, html {
     color: var(--grey);
     border-color: var(--grey);
 }
+.uk-button-default:disabled {
+    color: var(--light-grey);
+    border-color: var(--charcoal)!important;
+}
 .uk-button-primary {
     color: var(--white);
     background-color: var(--primary);

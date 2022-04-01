@@ -7,21 +7,21 @@ function handleFormSubmit(event) {
 
     var submit_btn = document.getElementById("submit-button");
     submit_btn.disabled = true;
+    submit_btn.textContent = "Waiting for download task...";
 
     var request = new XMLHttpRequest(); 
     request.open('POST', '/api/v1/core/post_link', true);
     request.setRequestHeader('Content-Type', 'application/json; charset=UTF-8'); 
     request.onload = function() {
         if (this.status >= 200 && this.status < 400) {
-            console.log("Uhm??");
             var url_segments = this.response.split("/");
             if (url_segments.length > 0) {
-                console.log(this.response);
                 redirectOnProgress(url_segments[url_segments.length - 1]);
             }
         } else {
-            console.log("Error...");
+            console.log("Error when posting video link...");
             submit_btn.disabled = false;
+            submit_btn.textContent = "Save for posterity";
             console.log(this.response);
         }
     }
@@ -56,6 +56,7 @@ function redirectOnProgress(video_id) {
             var submit_btn = document.getElementById("submit-button");
             console.log("Error...");
             submit_btn.disabled = false;
+            submit_btn.textContent = "Save for posterity";
             console.log(this.response);
         }
     }
