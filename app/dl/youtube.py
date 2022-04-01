@@ -73,7 +73,7 @@ SUB_LANGS   = ["en", "no"]
 DEFAULT_AUDIO = "Opus VBR 70kbps"
 DEFAULT_VIDEO = "MP4 720p"
 DEFAULT_LANG  = "en"
-STREAMING_PATTERNS = ["yt.com", "twitch.com", "twimg.com", "twitter.com"]
+STREAMING_PATTERNS = ["yt.com", "twitch.com"]
 
 
 class AgeRestrictedError(Exception):
