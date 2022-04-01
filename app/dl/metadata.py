@@ -10,8 +10,8 @@ load_dotenv()
 def generate_video_images(
     video_path: str, thumbnail_path: str, preview_path: str,
     blurred_thumb_path: str, blurred_preview_path: str,
-    preview_size: tuple = (1280, 720), thumbnail_size: tuple = (64, 64),
-    blur_amount: float = 0.33, desaturate: bool = False, start: float = 0.0
+    preview_size: tuple = (640, 360), thumbnail_size: tuple = (64, 64),
+    blur_amount: float = 0.66, desaturate: bool = False, start: float = 0.0
 ):
 
     raw_frame = NamedTemporaryFile(suffix=".png")
