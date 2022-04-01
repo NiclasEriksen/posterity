@@ -32,6 +32,18 @@ body, html {
     background: var(--bg);
 }
 
+.uk-card-default {
+    background-color: var(--bg);
+}
+.uk-card-default .uk-card-title {
+    color: var(--grey);
+}
+
+.uk-hr, hr, .uk-grid-divider>:not(.uk-first-column)::before {
+    border-color: var(--dark-grey);
+}
+
+
 .uk-h1, .uk-h2, .uk-h3, .uk-h4, .uk-h5, .uk-h6, .uk-heading-2xlarge, .uk-heading-large, .uk-heading-medium, .uk-heading-small, .uk-heading-xlarge, h1, h2, h3, h4, h5, h6 {
     color: var(--grey);
 }
@@ -59,6 +71,14 @@ body, html {
     color: var(--grey);
     border-color: var(--grey);
 }
+.uk-button-primary {
+    color: var(--white);
+    background-color: var(--primary);
+}
+.uk-button-danger {
+    color: var(--white);
+    background-color: var(--danger);
+}
 
 .uk-text-success {
     color: var(--success)!important;
@@ -77,10 +97,10 @@ body, html {
     color: var(--grey);
 }
 
-.uk-link, a {
+.uk-link, a, .uk-icon-link {
     color: var(--primary);
 }
-.uk-link:hover, a:hover {
+.uk-link:hover, a:hover, .uk-icon-link:hover {
     color: var(--primary-light);
 }
 
