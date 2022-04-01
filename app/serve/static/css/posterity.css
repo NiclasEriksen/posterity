@@ -14,6 +14,9 @@
     --charcoal: #353C45;
     --white: #FFF;
     --black: #13181f;
+    --tag-informative: #00819e;
+    --tag-emotional: #e6ac00;
+    --tag-graphic: #cf2900;
 }
 
 body, html {
@@ -164,13 +167,13 @@ body, html {
 }
 
 .content-tag-option-0 {
-    color: #00819e!important;
+    color: var(--tag-informative)!important;
 }
 .content-tag-option-1 {
-    color: #e6ac00!important;
+    color: var(--tag-emotional)!important;
 }
 .content-tag-option-2 {
-    color: #cf2900!important;
+    color: var(--tag-graphic)!important;
 }
 
 .video-card {
