@@ -109,10 +109,12 @@ def find_highest_quality_url(urls: list) -> str:
             best += 3
         if (
             url.lower().endswith(".m3u8") or
-            url.endswith(".f4m") or
+            url.lower().endswith(".f4m") or
             ".m3u8?" in url.lower() or
             ".m3u8&" in url.lower()
         ):
+            best = max(0, int(best * 0.25))
+        elif ".m3u8" in url.lower():
             best = max(0, int(best * 0.5))
         if "preview" in url.lower():
             best = max(0, int(best * 0.1))
