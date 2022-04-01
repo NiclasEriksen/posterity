@@ -2,8 +2,9 @@
 # POSTERITY
 alembic.ini
 *.sql
-preview/*
 app/serve/static/thumbnails/*.jpg
+app/serve/static/preview/*.jpg
+app/serve/static/preview/*.png
 
 #ffmpeg/youtube
 cookies.txt
