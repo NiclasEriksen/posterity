@@ -2,6 +2,9 @@ import os
 import ffmpeg
 from tempfile import NamedTemporaryFile
 from PIL import Image, ImageFilter, ImageOps, UnidentifiedImageError
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 def generate_video_images(
@@ -155,21 +158,53 @@ def technical_info(video_path: str) -> dict:
     return info
 
 
+def generate_all_images(
+    media_path: str, thumbnail_path: str, preview_path: str, only_new=True
+):
+    videos = []
+    for file_name in os.listdir(media_path):
+        if file_name.endswith(".mp4"):
+            videos.append((file_name.split(".mp4")[0], os.path.join(media_path, file_name)))
+
+    for (video_id, video_path) in videos:
+        info = technical_info(video_path)
+        generate_video_images(
+            video_path,
+            os.path.join(thumbnail_path, video_id + "_thumb.png"),
+            os.path.join(thumbnail_path, video_id + "_preview.png"),
+            os.path.join(thumbnail_path, video_id + "_thumb_blurred.png"),
+            os.path.join(thumbnail_path, video_id + "_preview_blurred.png"),
+            start=5 if info["duration"] > 10.0 else 0,
+            blur_amount=0.75,
+            desaturate=True
+        )
+
+
 if __name__ == "__main__":
-    from pprint import pprint
+    # from pprint import pprint
     # pprint(technical_info("/home/fredspipa/Videos/bagdad.mp4"))
     # pprint(technical_info("/home/fredspipa/Videos/awkw.mp4"))
     # pprint(technical_info("/home/fredspipa/Videos/shortlegcat.mp4"))
     # pprint(technical_info("/home/fredspipa/Videos/traktor.mp4"))
     # pprint(technical_info("/home/fredspipa/Videos/Serotonin/Serotonin.mlt"))
     # pprint(technical_info("/home/fredspipa/Videos/whatimret.mp4"))
-    generate_video_images(
-        "/home/fredspipa/Videos/whatimret.mp4",
-        "/home/fredspipa/Videos/thumb.png",
-        "/home/fredspipa/Videos/preview.png",
-        "/home/fredspipa/Videos/thumb_blurred.png",
-        "/home/fredspipa/Videos/preview_blurred.png",
-        start=5,
-        blur_amount=0.75,
-        desaturate=True
-    )
+    # generate_video_images(
+    #     "/home/fredspipa/Videos/whatimret.mp4",
+    #     "/home/fredspipa/Videos/thumb.png",
+    #     "/home/fredspipa/Videos/preview.png",
+    #     "/home/fredspipa/Videos/thumb_blurred.png",
+    #     "/home/fredspipa/Videos/preview_blurred.png",
+    #     start=5,
+    #     blur_amount=0.75,
+    #     desaturate=True
+    # )
+    media_path = os.environ.get("MEDIA_FOLDER", "")
+    thumbnail_path = os.environ.get("THUMBNAIL_FOLDER", "")
+    preview_path = os.environ.get("PREVIEW_FOLDER", "")
+    if len(media_path) and len(thumbnail_path) and len(preview_path):
+        generate_all_images(
+            media_path,
+            thumbnail_path,
+            preview_path,
+            only_new=False
+        )
