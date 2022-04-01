@@ -59,61 +59,6 @@ def before_request_func():
     current_app.logger.name = "posterity.serve"
 
 
-@serve.route("/<video_id>", methods=["GET"])
-def serve_video(video_id):
-    logger.info(f"Requested video '{video_id}'.")
-
-    metadata = get_metadata_for_video(video_id)
-
-    dl_video_id = video_id
-
-    if "duplicate" in metadata.keys():
-        if len(metadata["duplicate"]):
-            new_video_id = metadata["duplicate"]
-            new_metadata = get_metadata_for_video(new_video_id)
-            new_metadata["title"] = metadata["title"]
-            new_metadata["content_warning"] = metadata["content_warning"]
-            dl_video_id = new_metadata["video_id"]
-            metadata = new_metadata
-            metadata["video_id"] = video_id
-
-    if not len(metadata.keys()):
-        logger.error("Invalid metadata from json file.")
-        return render_template("not_found.html")
-
-    video = Video.query.filter_by(video_id=video_id).first()
-    if video:
-        tags = video.tags
-        categories = video.categories
-    else:
-        tags = []
-        categories = []
-
-    if metadata["status"] in [STATUS_FAILED, STATUS_INVALID]:
-        flash("Video failed to download, this page will self destruct")
-        logger.warning("Doing 'burn-after-read' on video")
-        _success = delete_video_by_id(video_id)
-
-    return render_template(
-        "video.html",
-        custom_title=metadata["title"],
-        orig_title=metadata["video_title"],
-        status=metadata["status"] if "status" in metadata else 2,
-        duration=int(metadata["duration"]),
-        video=video,
-        source=metadata["source"],
-        content_warning=metadata["content_warning"],
-        tags=tags,
-        categories=categories,
-        dl_path="/download/" + dl_video_id,
-        stream_path="/view/" + dl_video_id,
-        orig_url=metadata["url"],
-        video_format=metadata["format"],
-        upload_time=metadata["upload_time"],
-        video_id=video_id
-    )
-
-
 @serve.route("/", methods=["GET"])
 def front_page():
     page = request.args.get("p", type=int, default=1)
@@ -169,6 +114,61 @@ def front_page_search():
     kw = request.form.get("keyword", default="")
 
     return redirect(url_for("serve.front_page", p=page, q=kw))
+
+
+@serve.route("/<video_id>", methods=["GET"])
+def serve_video(video_id):
+    logger.info(f"Requested video '{video_id}'.")
+
+    metadata = get_metadata_for_video(video_id)
+
+    dl_video_id = video_id
+
+    if "duplicate" in metadata.keys():
+        if len(metadata["duplicate"]):
+            new_video_id = metadata["duplicate"]
+            new_metadata = get_metadata_for_video(new_video_id)
+            new_metadata["title"] = metadata["title"]
+            new_metadata["content_warning"] = metadata["content_warning"]
+            dl_video_id = new_metadata["video_id"]
+            metadata = new_metadata
+            metadata["video_id"] = video_id
+
+    if not len(metadata.keys()):
+        logger.error("Invalid metadata from json file.")
+        return render_template("not_found.html")
+
+    video = Video.query.filter_by(video_id=video_id).first()
+    if video:
+        tags = video.tags
+        categories = video.categories
+    else:
+        tags = []
+        categories = []
+
+    if metadata["status"] in [STATUS_FAILED, STATUS_INVALID]:
+        flash("Video failed to download, this page will self destruct")
+        logger.warning("Doing 'burn-after-read' on video")
+        _success = delete_video_by_id(video_id)
+
+    return render_template(
+        "video.html",
+        custom_title=metadata["title"],
+        orig_title=metadata["video_title"],
+        status=metadata["status"] if "status" in metadata else 2,
+        duration=int(metadata["duration"]),
+        video=video,
+        source=metadata["source"],
+        content_warning=metadata["content_warning"],
+        tags=tags,
+        categories=categories,
+        dl_path="/download/" + dl_video_id,
+        stream_path="/view/" + dl_video_id,
+        orig_url=metadata["url"],
+        video_format=metadata["format"],
+        upload_time=metadata["upload_time"],
+        video_id=video_id
+    )
 
 
 @serve.route("/edit_video/<video_id>", methods=["GET"])
@@ -434,6 +434,21 @@ def about_us_page():
     return render_template("about.html")
 
 
+@serve.route("/remove/<video_id>")
+@login_required
+def remove_video_route(video_id):
+    metadata = get_metadata_for_video(video_id)
+
+    success = delete_video_by_id(video_id)
+    if not success and not len(metadata.keys()):
+        flash("No video by that id, nothing to remove.", "error")
+    elif not success:
+        flash("Error during removal of video, might be some residue.", "warning")
+    else:
+        flash(f"Video \"{video_id}\" has been deleted successfully!", "success")
+    return redirect(url_for("serve.front_page"), code=302)
+
+
 @serve.route("/download_archive", methods=["GET"])
 def download_archive():
     torrent_path = os.path.join(media_path, TORRENT_NAME)
@@ -468,19 +483,24 @@ def view_video(video_id=""):
     return "Video file not found."
 
 
-@serve.route("/preview/<video_id>")
+#@cache.memoize(timeout=360)
+@serve.route("/preview/<video_id>.png")
 def get_preview_image_url(video_id=""):
     video = Video.query.filter_by(video_id=video_id).first()
     if video:
-        for ct in video.tags:
-            if ct.category > 1:
-                return url_for("serve.static", filename=f"preview/{video_id}_blurred.png")
-        return url_for("serve.static", filename=f"preview/{video_id}.png")
-    return url_for("serve.static", filename="no_preview.png")
+        if os.path.isfile(os.path.join(current_app.config["PREVIEW_FOLDER"], video_id + "_blurred.png")):
+            for ct in video.tags:
+                if ct.category > 1:
+                    return send_from_directory(current_app.config["PREVIEW_FOLDER"], video_id + "_blurred.png")
+        if os.path.isfile(os.path.join(current_app.config["PREVIEW_FOLDER"], video_id + ".png")):
+            return send_from_directory(current_app.config["PREVIEW_FOLDER"], video_id + ".png")
+
+    print("Sender bilde")
+    return serve.send_static_file("no_preview.png")
 
 
 @cache.memoize(timeout=360)
-@serve.route("/thumbnail/<video_id>")
+@serve.route("/thumbnail/<video_id>.png")
 def get_thumbnail_image_url(video_id=""):
     video = Video.query.filter_by(video_id=video_id).first()
     if video:
@@ -490,21 +510,6 @@ def get_thumbnail_image_url(video_id=""):
         return url_for("serve.static", filename=f"thumbnails/{video_id}.png")
     return url_for("serve.static", filename="no_thumbnail.png")
 
-
-@serve.route("/remove/<video_id>")
-@login_required
-def remove_video_route(video_id):
-    metadata = get_metadata_for_video(video_id)
-
-    success = delete_video_by_id(video_id)
-    if not success and not len(metadata.keys()):
-        flash("No video by that id, nothing to remove.", "error")
-    elif not success:
-        flash("Error during removal of video, might be some residue.", "warning")
-    else:
-        flash(f"Video \"{video_id}\" has been deleted successfully!", "success")
-    return redirect(url_for("serve.front_page"), code=302)
-    
 
 @serve.route("/get_torrent")
 def serve_torrent():
@@ -602,7 +607,6 @@ def list_videos(max_count=10) -> list:
 
     if not len(db_videos):
         logger.warning("No videos from database?!")
-        return list_videos_from_disk(max_count=max_count)
 
     for v in db_videos:
         d = v.to_json()
@@ -610,22 +614,6 @@ def list_videos(max_count=10) -> list:
         videos.append(d)
 
     return videos
-
-
-def list_videos_from_disk(max_count=10) -> list:
-    videos = []
-    for f in os.listdir(media_path):
-        if f.endswith(".json"):
-            try:
-                with open(os.path.join(media_path, f)) as jf:
-                    d = json.load(jf)
-                    d["video_id"] = f.split(".json")[0]
-                    d["upload_time"] = datetime.utcfromtimestamp(d["upload_time"]).strftime("%Y-%m-%d %H:%M:%S")
-                    videos.append(d)
-            except json.JSONDecodeError:
-                continue
-
-    return sorted(videos, key=lambda x: x["upload_time"], reverse=True)[:max_count]
 
 
 @cache.memoize(timeout=1)
