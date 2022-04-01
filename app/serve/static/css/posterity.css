@@ -44,6 +44,12 @@ body, html {
     border-color: var(--dark-grey);
 }
 
+.uk-table-small td {
+    padding: 6px 8px;
+}
+.uk-table-small tr {
+    border-bottom: 1px dotted var(--dark-grey);
+}
 
 .uk-h1, .uk-h2, .uk-h3, .uk-h4, .uk-h5, .uk-h6, .uk-heading-2xlarge, .uk-heading-large, .uk-heading-medium, .uk-heading-small, .uk-heading-xlarge, h1, h2, h3, h4, h5, h6 {
     color: var(--grey);

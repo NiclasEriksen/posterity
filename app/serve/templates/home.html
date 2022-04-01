@@ -143,10 +143,10 @@
                         <a href="{{ video['url'] }}" target="_blank">{{ video.url[:48] }}</a>
                     </td>
                     <td class="uk-text-muted uk-text-small">
-                        {{ video.duration_str }}
+                        <span uk-icon="icon: future; ratio: 0.6"></span><span> {{ video.duration_str }}</span>
                     </td>
                     <td class="uk-text-muted uk-text-small">
-                        {{ video.upload_time_str }}
+                        <span uk-icon="icon: calendar; ratio: 0.6"></span> {{ video.upload_time_str }}
                     </td>
                 </tr>
                 {% endfor %}
