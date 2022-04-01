@@ -1,4 +1,13 @@
+
+# POSTERITY
+alembic.ini
 *.sql
+preview/*
+thumbnails/*
+
+#ffmpeg/youtube
+cookies.txt
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -30,10 +39,6 @@ MANIFEST
 #Pycharm
 .idea/
 
-#ffmpeg/youtube
-cookies.txt
-
-alembic.ini
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
