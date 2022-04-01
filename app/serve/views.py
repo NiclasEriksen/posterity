@@ -123,22 +123,20 @@ def front_page():
     offset = max(0, page - 1) * pp
 
     if len(kw):
+        print(kw)
         logger.info(f"Searching for {kw}.")
         results = search_videos(kw)
         results = sorted(results, key=lambda x: x["_score"], reverse=True)
-        logger.info(f"found {len(results)} results when searching.")
+        # logger.info(results)
 
         videos = []
         total = len(results)
-
-        for result in results[offset:offset+MAX_RESULT_PER_PAGE]:
+        for result in results[offset:offset + MAX_RESULT_PER_PAGE]:
             v = Video.query.filter_by(video_id=result["_id"]).first()
             if v:
                 videos.append(v)
             else:
-                logger.info("Found video stub in search result, removing")
                 remove_video_data_by_id(result["_id"])
-                total -= 1
 
     else:
         vq = Video.query
@@ -168,44 +166,10 @@ def front_page():
 @serve.route("/", methods=["POST"])
 def front_page_search():
     page = request.args.get("p", type=int, default=1)
-    pp = request.args.get("pp", type=int, default=MAX_RESULT_PER_PAGE)
+    # pp = request.args.get("pp", type=int, default=MAX_RESULT_PER_PAGE)
     kw = request.form.get("keyword", default="")
 
-    offset = max(0, page - 1) * pp
-
-    if len(kw):
-        logger.info(f"Searching for {kw}.")
-        results = search_videos(kw)
-        results = sorted(results, key=lambda x: x["_score"], reverse=True)
-        # logger.info(results)
-
-        videos = []
-        total = len(results)
-        for result in results[offset:offset + MAX_RESULT_PER_PAGE]:
-            v = Video.query.filter_by(video_id=result["_id"]).first()
-            if v:
-                videos.append(v)
-            else:
-                remove_video_data_by_id(result["_id"])
-
-    else:
-        vq = Video.query
-        total = vq.count()
-
-        videos = vq.order_by(Video.upload_time.desc()).offset(offset).limit(pp).all()
-
-    total_pages = total // pp + (1 if total % pp else 0)
-
-    return render_template(
-        "home.html", videos=videos,
-        current_page=page,
-        result_offset=offset,
-        max_page=total_pages,
-        per_page=pp,
-        total=total,
-        total_results=len(videos),
-        keyword=kw
-    )
+    return redirect(url_for("serve.front_page", p=page, q=kw))
 
 
 @serve.route("/edit_video/<video_id>", methods=["GET"])
