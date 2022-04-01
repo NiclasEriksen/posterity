@@ -13,8 +13,9 @@ from flask import current_app
 
 
 
-log = LocalProxy(lambda: current_app.logger)
-#log = logging.getLogger("posterity_dl")
+#log = LocalProxy(lambda: current_app.logger)
+log = logging.getLogger("posterity_dl.dl")
+
 if celery:
     inspector = celery.control.inspect()
 

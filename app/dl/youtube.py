@@ -11,7 +11,7 @@ import codecs
 #CLIENTID: 1011910616755-rbvlv952parvd549q0olik45c9somivd.apps.googleusercontent.com
 #SECRET  : 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
 
-log = logging.getLogger("posterity.youtube")
+log = logging.getLogger("posterity_dl.yt")
 
 
 YT_FORMATS = {
