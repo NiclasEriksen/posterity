@@ -87,6 +87,10 @@ class Video(Base):
     def duration_str_verbose(self) -> str:
         return seconds_to_verbose_time(self.duration)
 
+    @property
+    def tags_by_category(self) -> list:
+        return sorted(self.tags, key=lambda x: x.category, reverse=True)
+
     def to_json(self) -> dict:
         return {
             "url": self.url,
