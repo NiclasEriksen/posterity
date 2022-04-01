@@ -12,8 +12,8 @@
 {% endblock %}
 {% block content %}
         <div class="uk-container uk-padding-small uk-height-1-1 uk-padding-remove-top">
-            <div class="uk-card uk-card-default uk-card-body uk-width-1-1 uk-text-center">
-                <h2 class="uk-card-title">{{ custom_title }}</h2>
+            <div class="uk-card uk-card-default uk-card-body video-card uk-width-1-1 uk-text-center">
+                <h2>{{ custom_title }}</h2>
                 {% for tag in tags %}
                 <span class="uk-label {% if tag.category > 1 %}uk-label-danger{% elif tag.category == 1 %}uk-label-warning{% endif %}">{{ tag.name }}</span>
                 {% endfor %}
@@ -55,7 +55,7 @@
                 </div>
                 {% elif status == 1 %}
                 <div class="uk-width-1-1 uk-background-muted uk-text-center uk-padding-small">
-                    <a href="{{ dl_path }}" class="uk-link-heading"><h3 class="uk-text-primary uk-margin-remove-bottom">Click here to download MP4 file</h3></a>
+                    <a href="{{ dl_path }}"><h3 class="uk-text-primary uk-margin-remove-bottom">Click here to download MP4 file</h3></a>
                 </div>
                 {% elif status == 3 %}
                 <div class="uk-width-1-1 uk-background-muted uk-text-center uk-padding-small">

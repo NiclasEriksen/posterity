@@ -166,3 +166,9 @@ body, html {
 .content-tag-option-2 {
     color: #cf2900!important;
 }
+
+.video-card {
+    padding-left: 0;
+    padding-right: 0;
+    padding-bottom: 0;
+}
