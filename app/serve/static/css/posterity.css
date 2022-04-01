@@ -11,6 +11,7 @@
     --dark-grey: #2E353D;
     --charcoal: #353C45;
     --white: #FFF;
+    --black: #13181f;
 }
 
 body, html {
@@ -57,12 +58,12 @@ body, html {
 }
 
 .uk-input, .uk-select, .uk-textarea {
-    background: var(--dark-grey)!important;
+    background: var(--bg)!important;
     border-color: var(--light-grey);
     color: var(--light-grey);
 }
 .uk-input:focus, .uk-select:focus, .uk-textarea:focus {
-    background: var(--bg)!important;
+    background: var(--black)!important;
     color: var(--grey);
     border-color: var(--primary);
 }
@@ -114,12 +115,13 @@ body, html {
 
 .uk-label {
     background: var(--primary);
-    color: var(--grey);
+    color: var(--white);
 }
 
 .uk-label-danger {
     background: var(--danger);
-    color: var(--white);
+    color: var(--black);
+    font-weight: 700;
 }
 .uk-label-warning {
     background: var(--warning);
