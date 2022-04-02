@@ -127,17 +127,18 @@
                 {% for video in videos %}
                 <tr>
                     <td>
-                        <div class="list-thumbnail">
-                            <span style="height: 100%; display: inline-block; vertical-align: middle;"></span>
-                            <a href="/{{ video['video_id'] }}">
-                                <img src="/thumbnail/{{ video.video_id }}.png" class="thumbnail-rounded">
-                            </a>
-                        </div>
-                        <div style="min-height: 72px; position: relative; left: 78px;">
-                            <div style="position: absolute;top: 50%;-ms-transform: translateY(-50%);transform: translateY(-50%);">
+                        <a href="/{{ video['video_id'] }}">
+                            <div class="list-thumbnail">
+                                <span style="height: 100%; display: inline-block; vertical-align: middle;"></span>
+                                    <img src="/thumbnail/{{ video.video_id }}.png" class="thumbnail-rounded">
+                            </div>
+                        </a>
+                        <div style="min-height: 72px; position: relative; margin-left: 72px;">
+                            <div class="video-title-container">
                                 <a href="/{{ video['video_id'] }}" class="uk-text-bold video-link">{{ video.title }}</a>
+                            </div>
+                            <div class="video-tag-container">
                                 {% if video.tags|length or video.categories|length %}
-                                    <br>
                                     {% for tag in video.tags_by_category %}
                                     <span class="uk-label label-small {% if tag.category > 1 %}uk-label-danger{% elif tag.category == 1 %}uk-label-warning{% endif %}">{{ tag.name }}</span>
                                     {% endfor %}

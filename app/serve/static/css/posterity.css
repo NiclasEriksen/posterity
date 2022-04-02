@@ -192,19 +192,22 @@ body, html {
     padding-bottom: 0;
 }
 
+
 .video-link {
     color: var(--grey);
 }
+
 .video-link:hover {
     color: var(--light-grey);
 }
 
 .list-thumbnail {
     width: 72px;
+    max-width: 72px;
     height: 72px;
     float: left;
     text-align: center;
-    margin-right: 4px;
+    margin-right: 8px;
 }
 
 .thumbnail-rounded {
