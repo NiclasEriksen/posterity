@@ -484,8 +484,7 @@ def view_video(video_id=""):
 
 
 @serve.route("/preview/<video_id>.png")
-@cache.memoize(timeout=360)
-def get_preview_image_url(video_id=""):
+def get_preview_image(video_id=""):
     video = Video.query.filter_by(video_id=video_id).first()
     if video:
         if os.path.isfile(os.path.join(current_app.config["PREVIEW_FOLDER"], video_id + "_preview_blurred.png")):
@@ -499,8 +498,7 @@ def get_preview_image_url(video_id=""):
 
 
 @serve.route("/thumbnail/<video_id>.png")
-@cache.memoize(timeout=360)
-def get_thumbnail_image_url(video_id=""):
+def get_thumbnail_image(video_id=""):
     video = Video.query.filter_by(video_id=video_id).first()
     if video:
         if os.path.isfile(os.path.join(current_app.config["THUMBNAIL_FOLDER"], video_id + "_thumb_blurred.png")):

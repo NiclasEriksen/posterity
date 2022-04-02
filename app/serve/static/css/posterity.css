@@ -202,18 +202,15 @@ body, html {
 }
 
 .list-thumbnail {
-    width: 72px;
-    max-width: 72px;
-    height: 72px;
+    min-height: 64px;
+    min-width: 64px;
     float: left;
-    text-align: center;
     margin-right: 8px;
 }
 
 .thumbnail-rounded {
     max-width: 64px;
     max-height: 64px;
-    vertical-align: middle;
     border: 2px solid var(--charcoal);
     border-radius: 3px;
     -webkit-transition : border 500ms ease-out;

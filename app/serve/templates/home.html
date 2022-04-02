@@ -75,7 +75,6 @@
     </div>
     {% endif %}
     <div class="uk-width-1-1 {% if current_user.is_authenticated %}uk-width-3-4@l {% endif %}uk-padding-small">
-
         <div class="uk-grid uk-grid-small uk-text-small uk-padding-small">
             <div class="uk-width-1-1 uk-width-1-2@l uk-text-muted uk-text-center">
                 <div class=" uk-position-relative uk-container uk-height-1-1">
@@ -126,30 +125,26 @@
             <tbody>
                 {% for video in videos %}
                 <tr>
-                    <td>
-                        <a href="/{{ video['video_id'] }}">
-                            <div class="list-thumbnail">
-                                <span style="height: 100%; display: inline-block; vertical-align: middle;"></span>
-                                    <img src="/thumbnail/{{ video.video_id }}.png" class="thumbnail-rounded">
-                            </div>
-                        </a>
-                        <div style="min-height: 72px; position: relative; margin-left: 72px;">
-                            <div class="video-title-container">
-                                <a href="/{{ video['video_id'] }}" class="uk-text-bold video-link">{{ video.title }}</a>
-                            </div>
-                            <div class="video-tag-container">
-                                {% if video.tags|length or video.categories|length %}
-                                    {% for tag in video.tags_by_category %}
-                                    <span class="uk-label label-small {% if tag.category > 1 %}uk-label-danger{% elif tag.category == 1 %}uk-label-warning{% endif %}">{{ tag.name }}</span>
-                                    {% endfor %}
-                                    {% for category in video.categories %}
-                                    <span class="uk-label label-small uk-label-category">{{ category.name }}</span>
-                                    {% endfor %}
-                                {% endif %}
-                                {% if video.status == 1 and current_user.is_authenticated %}
-                                <a href="/edit_video/{{ video.video_id }}" class="uk-icon-link" uk-icon="icon: pencil; ratio: 0.85"></a>
-                                {% endif %}
-                            </div>
+                    <td class="uk-flex uk-flex-middle">
+                        <div class="list-thumbnail uk-position-relative" style="display: table-cell;">
+                            <img src="/thumbnail/{{ video.video_id }}.png" class="thumbnail-rounded uk-position-absolute uk-position-center">
+                            <a href="/{{ video['video_id'] }}">
+                            </a>
+                        </div>
+                        <div style="display: table-cell;">
+                            <a href="/{{ video['video_id'] }}" class="uk-text-bold video-link">{{ video.title }}</a>
+                            {% if video.tags|length or video.categories|length %}
+                                <br>
+                                {% for tag in video.tags_by_category %}
+                                <span class="uk-label label-small {% if tag.category > 1 %}uk-label-danger{% elif tag.category == 1 %}uk-label-warning{% endif %}">{{ tag.name }}</span>
+                                {% endfor %}
+                                {% for category in video.categories %}
+                                <span class="uk-label label-small uk-label-category">{{ category.name }}</span>
+                                {% endfor %}
+                            {% endif %}
+                            {% if video.status == 1 and current_user.is_authenticated %}
+                            <a href="/edit_video/{{ video.video_id }}" class="uk-icon-link" uk-icon="icon: pencil; ratio: 0.85"></a>
+                            {% endif %}
                         </div>
                     </td>
                     <td class="uk-text-muted uk-text-small" style="max-width: 15vw;">
