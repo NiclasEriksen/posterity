@@ -28,6 +28,7 @@ from app.serve.db import db_session, Video, User, ContentTag, Category,\
 from app import get_environment, app_config
 from app.serve.search import search_videos, index_video_data, remove_video_data, remove_video_data_by_id
 from app.extensions import cache
+from app.core.tasks import gen_images_task
 
 
 # Setup
@@ -217,6 +218,11 @@ def edit_video_post(video_id: str):
     db_session.add(video)
     db_session.commit()
     write_metadata_to_disk(video_id, video.to_json())
+
+    try:
+        _task_id = gen_images_task.delay(video.to_json())
+    except Exception as e:
+        logger.error(e)
 
     available_tags = ContentTag.query.order_by(ContentTag.name).all()
     available_categories = Category.query.order_by(Category.name).all()

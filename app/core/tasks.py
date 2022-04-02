@@ -1,3 +1,5 @@
+import os.path
+
 from celery.utils.log import get_task_logger
 from datetime import datetime
 
@@ -38,9 +40,39 @@ def update_video(video_id: str, status: int, data: dict = {}) -> bool:
 
 
 @celery.task(name="core.tasks.gen_thumbnail", soft_time_limit=300, time_limit=360)
-def gen_thumbnail_task(video_path: str, target_path: str):
+def gen_images_task(metadata: dict):
+    from app.dl.metadata import generate_video_images
+    from app.dl.dl import media_path, thumbnail_path, preview_path
     dur = time.time()
     log.info("Generating thumbnail...")
+
+    try:
+        video_id = metadata["video_id"]
+        duration = metadata["duration"]
+        content_warning = metadata["content_warning"]
+    except KeyError:
+        log.error("Missing data... cant do shit.")
+        return
+
+    vid_save_path = os.path.join(media_path, video_id + ".mp4")
+    if not os.path.isfile(vid_save_path):
+        log.error("No video file to generate images for.")
+        return
+
+    generate_video_images(
+        vid_save_path,
+        os.path.join(thumbnail_path, video_id + "_thumb.png"),
+        os.path.join(preview_path, video_id + "_preview.png"),
+        os.path.join(thumbnail_path, video_id + "_thumb_blurred.png"),
+        os.path.join(preview_path, video_id + "_preview_blurred.png"),
+        start=5 if duration >= 10.0 else 0,
+        blur_amount=0.75,
+        desaturate=True,
+        content_text=content_warning if content_warning.lower().strip() != "none" else ""
+    )
+    dur = time.time() - dur
+    _hours, minutes, seconds = seconds_to_time(dur)
+    log.info(f"Images generated in {minutes} minutes, {seconds:.2f} seconds: {video_id}")
 
 
 @celery.task(name="core.tasks.download", soft_time_limit=7200, time_limit=10800)    #, base=SQLAlchemyTask)
