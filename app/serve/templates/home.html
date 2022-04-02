@@ -117,7 +117,7 @@
             <thead>
                 <tr>
                     <th class="uk-table-expand">Video</th>
-                    <th class="uk-table-shrink">Status/Source</th>
+                    <th class="uk-table-shrink uk-visible@s">Status/Source</th>
                     <th class="uk-table-shrink">Duration</th>
                     <th class="uk-table-shrink">Uploaded</th>
                 </tr>
@@ -125,10 +125,10 @@
             <tbody>
                 {% for video in videos %}
                 <tr>
-                    <td class="uk-flex uk-flex-middle">
+                    <td class="uk-flex uk-flex-middle" style="min-height: 64px;">
                         <div class="list-thumbnail uk-position-relative" style="display: table-cell;">
                             <a href="/{{ video['video_id'] }}">
-                            <img src="/thumbnail/{{ video.video_id }}.png" class="thumbnail-rounded uk-position-absolute uk-position-center">
+                                <img src="/thumbnail/{{ video.video_id }}.png" class="thumbnail-rounded uk-position-absolute uk-position-center">
                             </a>
                         </div>
                         <div style="display: table-cell;">
@@ -147,7 +147,7 @@
                             {% endif %}
                         </div>
                     </td>
-                    <td class="uk-text-muted uk-text-small" style="max-width: 15vw;">
+                    <td class="uk-text-muted uk-text-small uk-visible@s" style="max-width: 15vw;">
                         <div style="overflow: hidden; white-space: nowrap; text-overflow: ellipsis;">
                             {% if video.status == 0 %}
                             <span class="uk-text-primary" uk-icon="icon: download; ratio: 0.9"></span>
