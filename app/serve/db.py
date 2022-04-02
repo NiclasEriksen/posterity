@@ -91,13 +91,24 @@ class Video(Base):
     def tags_by_category(self) -> list:
         return sorted(self.tags, key=lambda x: x.category, reverse=True)
 
+    @property
+    def content_tags_string(self) -> str:
+        return "/".join([t.name for t in self.tags_by_category])
+
+    @property
+    def content_tags_readable(self) -> str:
+        return ", ".join([t.name for t in self.tags_by_category])
+
+    def content_tags_readable_priority(self, priority: int) -> str:
+        return ", ".join([t.name for t in self.tags_by_category if t.category >= priority])
+
     def to_json(self) -> dict:
         return {
             "url": self.url,
             "source": self.source,
             "title": self.title,
             "video_title": self.orig_title,
-            "content_warning": "/".join([t.name for t in self.tags]),
+            "content_warning": self.content_tags_string,
             "tags": [t.id for t in self.tags],
             "categories": [c.id for c in self.categories],
             "category": "/".join([c.name for c in self.categories]),

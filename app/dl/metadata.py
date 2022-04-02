@@ -1,17 +1,43 @@
 import os
 import ffmpeg
+import json
 from tempfile import NamedTemporaryFile
-from PIL import Image, ImageFilter, ImageOps, UnidentifiedImageError
+from PIL import Image, ImageFilter, ImageOps, UnidentifiedImageError, \
+    ImageDraw, ImageFont
 from dotenv import load_dotenv
 
 load_dotenv()
+TEXT_MARGIN = 12
+TEXT_PADDING = 8
+FONT_SIZE_SMALL = 24
+FONT_SIZE_MEDIUM = 32
+FONT_SIZE_LARGE = 42
+overlay_font_small = ImageFont.truetype(
+    os.path.join(
+        os.path.dirname(os.path.realpath(__file__)),
+        "Faustina-SemiBold.ttf"
+    ), FONT_SIZE_SMALL
+)
+overlay_font_medium = ImageFont.truetype(
+    os.path.join(
+        os.path.dirname(os.path.realpath(__file__)),
+        "Faustina-SemiBold.ttf"
+    ), FONT_SIZE_MEDIUM
+)
+overlay_font_large = ImageFont.truetype(
+    os.path.join(
+        os.path.dirname(os.path.realpath(__file__)),
+        "Faustina-SemiBold.ttf"
+    ), FONT_SIZE_LARGE
+)
 
 
 def generate_video_images(
     video_path: str, thumbnail_path: str, preview_path: str,
     blurred_thumb_path: str, blurred_preview_path: str,
     preview_size: tuple = (640, 360), thumbnail_size: tuple = (64, 64),
-    blur_amount: float = 0.66, desaturate: bool = False, start: float = 0.0
+    blur_amount: float = 0.66, desaturate: bool = False, start: float = 0.0,
+    content_text: str = ""
 ):
 
     raw_frame = NamedTemporaryFile(suffix=".png")
@@ -51,6 +77,40 @@ def generate_video_images(
     if desaturate:
         preview_blurred = ImageOps.grayscale(preview_blurred)
         thumb_blurred = ImageOps.grayscale(thumb_blurred)
+
+    if len(content_text):
+        preview_draw = ImageDraw.Draw(img)
+        preview_blurred_draw = ImageDraw.Draw(preview_blurred)
+
+        ratio = min([
+            min(1.0, max(0.0, img.size[0] / preview_size[0])),
+            min(1.0, max(0.0, img.size[1] / preview_size[1]))
+        ])
+        padding = int(TEXT_PADDING * ratio)
+        if ratio > 0.75:
+            size = FONT_SIZE_LARGE
+            font = overlay_font_large
+        elif ratio > 0.5:
+            size = FONT_SIZE_MEDIUM
+            font = overlay_font_medium
+        else:
+            size = FONT_SIZE_SMALL
+            font = overlay_font_small
+
+        if "/" in content_text:
+            lines = content_text.split("/")
+        else:
+            lines = [content_text]
+
+        for i, line in enumerate(lines):
+            preview_draw.text(
+                (TEXT_MARGIN, i * (size + padding) + TEXT_MARGIN),
+                line, color=(0, 0, 0), font=font
+            )
+            preview_blurred_draw.text(
+                (TEXT_MARGIN, i * (size + padding) + TEXT_MARGIN),
+                line, color=(0, 0, 0), font=font
+            )
 
     preview = img.convert("P", palette=Image.ADAPTIVE, colors=256)
     preview_blurred = preview_blurred.convert("P", palette=Image.ADAPTIVE, colors=256)
@@ -168,6 +228,19 @@ def generate_all_images(
 
     for (video_id, video_path) in videos:
         info = technical_info(video_path)
+
+        json_path = os.path.join(media_path, video_id + ".json")
+        try:
+            with open(json_path) as f:
+                d = json.load(f)
+        except (FileNotFoundError, json.JSONDecodeError, OSError):
+            continue
+
+        if "content_warning" in d.keys():
+            content_text = d["content_warning"] if d["content_warning"].lower() != "none" else ""
+        else:
+            content_text = ""
+
         generate_video_images(
             video_path,
             os.path.join(thumbnail_path, video_id + "_thumb.png"),
@@ -176,7 +249,8 @@ def generate_all_images(
             os.path.join(preview_path, video_id + "_preview_blurred.png"),
             start=5 if info["duration"] > 10.0 else 0,
             blur_amount=0.75,
-            desaturate=True
+            desaturate=True,
+            content_text=content_text
         )
 
 
