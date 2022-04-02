@@ -483,8 +483,8 @@ def view_video(video_id=""):
     return "Video file not found."
 
 
-#@cache.memoize(timeout=360)
 @serve.route("/preview/<video_id>.png")
+@cache.memoize(timeout=360)
 def get_preview_image_url(video_id=""):
     video = Video.query.filter_by(video_id=video_id).first()
     if video:
@@ -498,8 +498,8 @@ def get_preview_image_url(video_id=""):
     return serve.send_static_file("no_preview.png")
 
 
-@cache.memoize(timeout=360)
 @serve.route("/thumbnail/<video_id>.png")
+@cache.memoize(timeout=360)
 def get_thumbnail_image_url(video_id=""):
     video = Video.query.filter_by(video_id=video_id).first()
     if video:
