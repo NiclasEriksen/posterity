@@ -2,14 +2,14 @@
 {% block page_title %}Video: {{ custom_title }}{% endblock %}
 {% block metadata %}
 <meta property="og:site_name" content="Posterity video">
-<meta property="og:title" content="{{ custom_title }}" />
-<meta property="og:description" content="Content warning: {{ content_warning }}" />
-<meta property="og:image" itemprop="image" content="/preview/{{ video_id }}.png">
+<meta property="og:title" content="{{ video.title }}" />
+<meta property="og:description" content="Content warning: {{ video.content_tags_readable_priority(1) }}" />
+<meta property="og:image" itemprop="image" content="/preview/{{ video.video_id }}.png">
 <meta property="og:type" content="video.movie" />
 <meta property="og:video" content="{{ stream_path }}" />
-<meta property="og:video:duration" content="{{ duration }}" />
-<meta property="og:video:tag" content="{{ content_warning }}" />
-<meta property="og:video:release_date" content="{{ upload_time }}">
+<meta property="og:video:duration" content="{{ video.duration }}" />
+<meta property="og:video:tag" content="{{ video.content_tags_readable }}" />
+<meta property="og:video:release_date" content="{{ video.upload_time }}">
 {% endblock %}
 {% block content %}
         <div class="uk-container uk-padding-remove uk-padding-small@m uk-height-1-1 uk-padding-remove-top">
