@@ -38,21 +38,17 @@ def write_metadata_to_db(video_id: str, md: dict):
     try:
         with session_scope() as db_session:
             existing = db_session.query(Video).filter_by(video_id=video_id).first()
-    except Exception as e:
-        log.error(e)
-        existing = None
 
-    if existing:
-        video = existing
-    else:
-        video = Video()
+            if existing:
+                video = existing
+            else:
+                video = Video()
 
-    video.from_json(md)
+            video.from_json(md)
 
-    try:
-        with session_scope() as db_session:
             db_session.add(video)
             db_session.commit()
+
     except Exception as e:
         log.error(e)
         log.error(f"Unable to write video {video_id} to database.")

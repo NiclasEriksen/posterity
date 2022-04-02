@@ -147,7 +147,7 @@
             });
         }
         </script>
-        {% elif status == 0 %}
+        {% elif video.status == 0 %}
         <script src="{{ url_for('serve.static', filename='js/klippekort.js') }}"></script>
         <script>
             redirectOnComplete('{{ video.video_id }}');

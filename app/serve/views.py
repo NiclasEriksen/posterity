@@ -495,12 +495,13 @@ def serve_favicon():
 
 @serve.route("/check_progress/<video_id>", methods=["GET"])
 def check_progress(video_id):
-    metadata = get_metadata_for_video(video_id)
 
-    if not len(metadata.keys()):
+    video = Video.query.filter_by(video_id=video_id).first()
+
+    if not video:
         return "", 404
 
-    s = metadata["status"]
+    s = video.status
     if s == STATUS_COMPLETED:
         return "", 200
     if s == STATUS_DOWNLOADING:
