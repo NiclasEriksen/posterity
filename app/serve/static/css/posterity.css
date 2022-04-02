@@ -227,8 +227,8 @@ body, html {
   height: 24px;
   width: 24px;
   border-radius: 50%;
-  -webkit-animation: video-spin 3s infinite linear;
-  animation: video-spin 3s infinite linear;
+  -webkit-animation: video-spin 6s infinite ease-in;
+  animation: video-spin 6s infinite ease-in;
 }
 
 @-webkit-keyframes video-spin {
