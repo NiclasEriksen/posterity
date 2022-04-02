@@ -163,7 +163,7 @@ def serve_video(video_id):
         tags=tags,
         categories=categories,
         dl_path="/download/" + dl_video_id,
-        stream_path="/view/" + dl_video_id,
+        stream_path=f"/view/{dl_video_id}.mp4",
         orig_url=metadata["url"],
         video_format=metadata["format"],
         upload_time=metadata["upload_time"],
@@ -472,7 +472,7 @@ def download_video(video_id=""):
     return "Video file not found."
 
 
-@serve.route("/view/<video_id>")
+@serve.route("/view/<video_id>.mp4")
 def view_video(video_id=""):
     try:
         if os.path.isfile(os.path.join(media_path, video_id + ".mp4")):
