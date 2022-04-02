@@ -7,7 +7,7 @@
 <meta property="og:image" itemprop="image" content="/preview/{{ video.video_id }}.png">
 <meta property="og:type" content="video.movie" />
 <meta property="og:video" content="{{ stream_path }}" />
-<meta property="og:video:duration" content="{{ video.duration }}" />
+<meta property="og:video:duration" content="{{ video.duration_str }}" />
 <meta property="og:video:tag" content="{{ video.content_tags_readable }}" />
 <meta property="og:video:release_date" content="{{ video.upload_time }}">
 {% endblock %}
