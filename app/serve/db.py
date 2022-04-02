@@ -123,23 +123,37 @@ class Video(Base):
 
     @property
     def format_str(self) -> str:
-        return f"{self.video_format} / {self.audio_format}"
+        if self.video_format and self.audio_format:
+            return f"{self.video_format} / {self.audio_format}"
+        return f"{self.video_format} / {self.audio_format}" if self.audio_format else str(self.video_format)
 
     @property
     def bit_rate_str(self) -> str:
-        return f"{self.bit_rate / 1000:.1f} kbit/s"
+        try:
+            kbps = self.bit_rate / 1000
+        except (TypeError, ValueError):
+            kbps = 0.0
+        return f"{kbps:.1f} kbit/s"
 
     @property
     def frame_rate_str(self) -> str:
-        return f"{int(self.frame_rate)} FPS"
+        try:
+            fr = int(self.frame_rate)
+        except (TypeError, ValueError):
+            fr = 0
+        return f"{fr} FPS"
 
     @property
     def dimensions_str(self) -> str:
-        return f"{self.width}x{self.height}"
+        if self.width and self.height:
+            return f"{self.width}x{self.height}"
+        return "No size"
 
     @property
     def file_size_str(self) -> str:
-        return convert_file_size(self.file_size)
+        if self.file_size:
+            return convert_file_size(self.file_size)
+        return "?B"
 
     def to_json(self) -> dict:
         return {
