@@ -45,6 +45,7 @@ def gen_thumbnail_task(video_path: str, target_path: str):
 
 @celery.task(name="core.tasks.download", soft_time_limit=7200, time_limit=10800)    #, base=SQLAlchemyTask)
 def download_task(data: dict, file_name: str):
+    from app.serve.search import index_video_data
     from app.dl.dl import (
         download_from_json_data,
         find_duplicate_video_by_url,
@@ -93,6 +94,7 @@ def download_task(data: dict, file_name: str):
     dur = time.time() - dur
     _hours, minutes, seconds = seconds_to_time(dur)
     if success:
+        index_video_data(video)
         log.info(f"Download complete in {minutes} minutes, {seconds:.0f} seconds: {file_name}")
     else:
         log.error(f"Download failed after {minutes} minutes, {seconds:.0f} seconds: {file_name}")

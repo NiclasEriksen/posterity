@@ -130,6 +130,8 @@ def serve_video(video_id):
         flash("Video failed to download, this page will self destruct")
         logger.warning("Doing 'burn-after-read' on video")
         _success = delete_video_by_id(video_id)
+    elif video.status == STATUS_COMPLETED:
+        index_video_data(video)
 
     return render_template(
         "video.html",
