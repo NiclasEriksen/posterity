@@ -53,6 +53,7 @@ def post_link():
         try:
             video = Video()
             video.from_json(data)
+            video.status = 0
             db_session.add(video)
             db_session.commit()
         except Exception as e:
@@ -69,9 +70,6 @@ def post_link():
             print(e)
             abort(400)
             return "Error during adding of download task."
-
-        print("MAKING VIDEO")
-        print(task_id)
 
         logger.info(f"Started new download task with id: {task_id}")
         return "https://posterity.no/" + fn
