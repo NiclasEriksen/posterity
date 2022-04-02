@@ -102,6 +102,8 @@ def generate_video_images(
         else:
             lines = [content_text]
 
+        lines = [l for l in lines if l.strip().lower() != "none"]
+
         for i, line in enumerate(lines):
             preview_draw.text(
                 (TEXT_MARGIN, i * (size + padding) + TEXT_MARGIN),
@@ -237,7 +239,7 @@ def generate_all_images(
             continue
 
         if "content_warning" in d.keys():
-            content_text = d["content_warning"] if d["content_warning"].lower() != "none" else ""
+            content_text = d["content_warning"] if d["content_warning"].lower().strip() != "none" else ""
         else:
             content_text = ""
 
