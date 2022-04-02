@@ -226,7 +226,7 @@ def download_from_json_data(data: dict, file_name: str) -> bool:
                     start=5 if duration >= 10.0 else 0,
                     blur_amount=0.75,
                     desaturate=True,
-                    content_text=metadata["content_warning"]
+                    content_text=metadata["content_warning"] if metadata["content_warning"].lower().strip() != "none" else ""
                 )
         except Exception as e:
             print(e)
