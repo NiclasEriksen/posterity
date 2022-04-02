@@ -7,6 +7,7 @@ import json
 from datetime import datetime
 import time
 # import logging
+from contextlib import contextmanager
 from werkzeug.local import LocalProxy
 from flask import current_app
 from app.dl.helpers import seconds_to_verbose_time, seconds_to_hhmmss
@@ -40,6 +41,19 @@ category_association_table = Table(
 )
 
 
+@contextmanager
+def session_scope():
+    session = db_session
+    try:
+        yield session
+        session.commit()
+    except:
+        session.rollback()
+        raise
+    finally:
+        session.close()
+
+
 class User(UserMixin, Base):
     __tablename__ = "users"
     id = Column(Integer, primary_key=True)
@@ -64,10 +78,15 @@ class Video(Base):
     content_warning = Column(String)
     upload_time = Column(DateTime)
     video_format = Column(String)
+    audio_format = Column(String)
+    width = Column(Integer, default=0)
+    height = Column(Integer, default=0)
+    bit_rate = Column(Integer, default=0)
+    frame_rate = Column(Float, default=0.0)
+    file_size = Column(Float, default=0.0)
     duration = Column(Float)
     source = Column(String)
     location = Column(String)
-    safe_to_store = Column(Boolean)
     verified = Column(Boolean)
     duplicate_of_id = Column(Integer, ForeignKey("videos.id"))
     duplicate_of = relationship("Video", remote_side=[id])
@@ -113,11 +132,15 @@ class Video(Base):
             "categories": [c.id for c in self.categories],
             "category": "/".join([c.name for c in self.categories]),
             "status": self.status,
-            "format": self.video_format,
+            "format": f"{self.video_format} / {self.audio_format}",
+            "width": self.width if self.width else 0,
+            "height": self.height if self.height else 0,
+            "bit_rate": self.bit_rate if self.bit_rate else 0,
+            "frame_rate": self.frame_rate if self.frame_rate else 0.0,
+            "file_size": self.file_size if self.file_size else 0,
             "duration": self.duration,
             "location": self.location,
             "video_id": self.video_id,
-            "safe_to_store": self.safe_to_store,
             "verified": self.verified,
             "upload_time": time.mktime(self.upload_time.timetuple()) if self.upload_time else 0,
             "duplicate": self.duplicate_of.video_id if self.duplicate_of else "",
@@ -141,9 +164,13 @@ class Video(Base):
         except KeyError:
             self.content_warning = "Unknown"
         try:
-            self.video_format = d["format"]
-        except KeyError:
+            formats = d["format"].split(" / ")
+            self.video_format = formats[0]
+            if len(formats) > 1:
+                self.audio_format = formats[1]
+        except (KeyError, IndexError, AttributeError):
             self.video_format = "Unknown"
+            self.audio_format = "Unknown"
         try:
             self.location = d["location"]
         except KeyError:
@@ -153,9 +180,25 @@ class Video(Base):
         except KeyError:
             self.verified = False
         try:
-            self.safe_to_store = d["safe_to_store"]
+            self.width = d["width"]
         except KeyError:
-            self.safe_to_store = False
+            self.width = 0
+        try:
+            self.height = d["height"]
+        except KeyError:
+            self.height = 0
+        try:
+            self.bit_rate = d["bit_rate"]
+        except KeyError:
+            self.bit_rate = 0
+        try:
+            self.frame_rate = d["frame_rate"]
+        except KeyError:
+            self.frame_rate = 0.0
+        try:
+            self.file_size = d["file_size"]
+        except KeyError:
+            self.file_size = 0
         try:
             self.upload_time = datetime.utcfromtimestamp(d["upload_time"])
         except KeyError:

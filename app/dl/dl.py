@@ -35,11 +35,11 @@ if not os.path.isfile(url_file_path):
 
 
 def write_metadata_to_db(video_id: str, md: dict):
-    from app.serve.db import db_session, Video
+    from app.serve.db import session_scope, Video
     try:
-        existing = db_session.query(Video).filter_by(video_id=video_id).first()
+        with session_scope() as db_session:
+            existing = db_session.query(Video).filter_by(video_id=video_id).first()
     except Exception as e:
-        db_session.rollback()
         log.error(e)
         existing = None
 
@@ -51,10 +51,10 @@ def write_metadata_to_db(video_id: str, md: dict):
     video.from_json(md)
 
     try:
-        db_session.add(video)
-        db_session.commit()
+        with session_scope() as db_session:
+            db_session.add(video)
+            db_session.commit()
     except Exception as e:
-        db_session.rollback()
         log.error(e)
         log.error(f"Unable to write video {video_id} to database.")
 
@@ -120,17 +120,11 @@ def download_from_json_data(data: dict, file_name: str) -> bool:
         write_metadata(file_name, metadata)
         return False
 
-    try:
-        with open(url_file_path, "r") as url_file:
-            existing_urls = url_file.read().splitlines()
-    except OSError as e:
-        log.error(e)
-        log.error("Not getting URLs from disk.")
-        existing_urls = []
+    existing_urls = []
 
     if metadata["url"] in existing_urls:
         log.info("This video is already downloaded!")
-        existing_video: Video = find_existing_video_by_url(metadata["url"])
+        existing_video: Video = find_duplicate_video_by_url(metadata["url"])
         if existing_video:
             new_metadata = existing_video.to_json()
             if new_metadata["status"] in [STATUS_COMPLETED, STATUS_DOWNLOADING]:
@@ -202,19 +196,13 @@ def download_from_json_data(data: dict, file_name: str) -> bool:
 
         try:
             os.remove(vid_save_path)
-        except FileNotFoundError:
+        except (FileNotFoundError, OSError):
             pass
 
         metadata["status"] = STATUS_FAILED
-        # with open(url_file_path, "r") as f:
-        #     lines = f.readlines()
-        # with open(url_file_path, "w") as f:
-        #     for line in lines:
-        #         if line.strip("\n") != metadata["url"]:
-        #             f.write(line)
+
     else:
         metadata["status"] = STATUS_COMPLETED
-        # info = technical_info(vid_save_path)
         try:
             if len(thumbnail_path) and len(preview_path):
                 generate_video_images(
@@ -231,9 +219,6 @@ def download_from_json_data(data: dict, file_name: str) -> bool:
         except Exception as e:
             print(e)
             print("FAILED THUMBNAIL GENERATION")
-
-    with open(url_file_path, "a") as url_file:
-        url_file.write(metadata["url"] + "\n")
 
     write_metadata(file_name, metadata)
 
@@ -303,20 +288,17 @@ def find_existing_video_by_url(url: str):
         return None
 
 
-def find_existing_video_id_by_url(url: str) -> str:
-    for f in os.listdir(media_path):
-        if f.endswith(".json"):
-            try:
-                with open(os.path.join(media_path, f)) as jf:
-                    d = json.load(jf)
-                    if d["url"] == url:
-                        if "duplicate" in d.keys():
-                            if len(d["duplicate"]):
-                                continue
-                        return f.split(".json")[0]
-            except json.JSONDecodeError:
-                continue
-    return ""
+def find_duplicate_video_by_url(url: str):
+    from add.serve.db import Video, db_session
+
+    try:
+        video = db_session.query(Video).filter(Video.url.contains(url)).first()
+        if video:
+            return video
+
+    except Exception as e:
+        log.error(e)
+    return None
 
 
 def get_celery_scheduled():
@@ -351,6 +333,38 @@ def get_celery_active():
 
     return a
 
+
+def parse_input_data(data: dict) -> dict:
+    metadata = {
+        "url": "",
+        "source": "",
+        "title": "",
+        "video_title": "",
+        "content_warning": "",
+        "category": "",
+        "file_size": 0,
+        "bit_rate": 0,
+        "frame_rate": 0.0,
+        "width": 0,
+        "height": 0,
+        "format": "",
+        "duration": 0,
+        "upload_time": datetime.now().timestamp(),
+        "status": STATUS_DOWNLOADING,
+        "video_id": file_name,
+        "verified": False,
+    }
+    try:
+        metadata["url"] = data["url"]
+        metadata["title"] = data["title"]
+        metadata["content_warning"] = data["content_warning"]
+    except KeyError:
+        log.error("Corrupted data?!")
+        metadata["status"] = STATUS_INVALID
+        write_metadata(file_name, metadata)
+        return False
+
+    return metadata
 
 
 if __name__ == "__main__":

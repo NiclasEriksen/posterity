@@ -2,12 +2,19 @@ from celery.utils.log import get_task_logger
 from datetime import datetime
 
 from app import celery
-from app.dl.dl import download_from_json_data
 from app.dl.helpers import seconds_to_time
+# from app.serve.db import session_scope
 import time
 
 
 logger = get_task_logger(__name__)
+
+#
+# class SQLAlchemyTask(celery.Task):
+#     abstract = True
+#
+#     def after_return(self, status, retval, task_id, args, kwags, einfo):
+#         db_session.remove()
 
 
 @celery.task(name="core.tasks.gen_thumbnail", soft_time_limit=300, time_limit=360)
@@ -16,8 +23,9 @@ def gen_thumbnail_task(video_path: str, target_path: str):
     logger.info("Generating thumbnail...")
 
 
-@celery.task(name="core.tasks.download", soft_time_limit=7200, time_limit=10800)
+@celery.task(name="core.tasks.download", soft_time_limit=7200, time_limit=10800)    #, base=SQLAlchemyTask)
 def download_task(data: dict, file_name: str):
+    from app.dl.dl import download_from_json_data
     dur = time.time()
     logger.info("Starting download of " + str(file_name))
     try:

@@ -9,8 +9,6 @@ from flask_cors import CORS
 celery = Celery(__name__)
 
 from .config import config as app_config
-from .dl.dl import media_path
-from .serve.db import db_session, init_db, load_all_videos_from_disk, User, index_all_videos_from_db
 
 
 def create_app():
@@ -30,6 +28,7 @@ def create_app():
 
     @login_manager.user_loader
     def load_user(user_id):
+        from .serve.db import User
         return User.query.get(int(user_id))
 
     log.info("Loading CORS")
@@ -59,6 +58,7 @@ def create_app():
     # log.info("Loading videos from disk")
     if app.config["DEBUG"]:
         with app.app_context():
+            from .serve.db import index_all_videos_from_db
             index_all_videos_from_db()
     # with app.app_context():
     #     load_all_videos_from_disk(media_path)
