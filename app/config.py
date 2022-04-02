@@ -10,13 +10,14 @@ load_dotenv()
 class BaseConfig(object):
     ''' Base config class. '''
 
-    APP_NAME = environ.get('APP_NAME') or 'klippekort'
+    APP_NAME = environ.get('APP_NAME') or 'posterity'
     ORIGINS = ['*']
     CACHE_TYPE = "RedisCache"
     CACHE_DEFAULT_TIMEOUT = 300
     EMAIL_CHARSET = 'UTF-8'
     API_KEY = environ.get('API_KEY')
-    BROKER_URL = environ.get('BROKER_URL')
+    broker_url = environ.get('BROKER_URL')
+    BROKER_URL = broker_url
     SECRET_KEY = environ.get("SECRET_KEY")
     REGISTER_TOKEN = environ.get("REGISTER_TOKEN")
     RESULT_BACKEND = environ.get('RESULT_BACKEND')

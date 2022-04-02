@@ -14,17 +14,17 @@
 {% block content %}
         <div class="uk-container uk-padding-small uk-height-1-1 uk-padding-remove-top">
             <div class="uk-card uk-card-default uk-card-body video-card uk-width-1-1 uk-text-center">
-                <h2>{{ custom_title }}</h2>
-                {% for tag in tags %}
+                <h2>{{ video.title }}</h2>
+                {% for tag in video.tags_by_category %}
                 <span class="uk-label {% if tag.category > 1 %}uk-label-danger{% elif tag.category == 1 %}uk-label-warning{% endif %}">{{ tag.name }}</span>
                 {% endfor %}
-                {% for category in categories %}
+                {% for category in video.categories %}
                 <span class="uk-label uk-label-category">{{ category.name }}</span>
                 {% endfor %}
                 <hr>
                 <div class="uk-width-1-1 uk-height-1-1">
                     <div class="uk-text-center uk-width-1-1 video-content">
-                        {% if status == 1 %}
+                        {% if video.status == 1 %}
                         <video
                         id="video-player"
                         class="video-js vjs-16-9 vjs-big-play-centered"
@@ -34,35 +34,35 @@
                         loop="loop"
                         height="264"
                         poster=""
-                        data-setup='{"poster":"/preview/{{ video_id }}.png"}'
+                        data-setup='{"poster":"/preview/{{ video.video_id }}.png"}'
                         >
                             <source src="{{ stream_path }}" type="video/mp4" />
                         </video>
-                        {% elif status == 0 %}
+                        {% elif video.status == 0 %}
                         Video is still downloading, page will refresh automatically when done.
                         {% endif %}
                     </div>
                 </div>
             </div>
-            {% if status == 1 %}
+            {% if video.status == 1 %}
             <div>
             </div>
             {% endif %}
             <div class="uk-grid uk-width-1-1 uk-margin-remove uk-margin-top">
 
-                {% if status == 0 %}
+                {% if video.status == 0 %}
                 <div class="uk-width-1-1 uk-background-muted uk-text-center uk-padding-small">
                     <h3 class="uk-text-muted uk-margin-remove-bottom">Downloading...</h3>
                 </div>
-                {% elif status == 1 %}
+                {% elif video.status == 1 %}
                 <div class="uk-width-1-1 uk-background-muted uk-text-center uk-padding-small">
                     <a href="{{ dl_path }}"><h3 class="uk-text-primary uk-margin-remove-bottom">Click here to download MP4 file</h3></a>
                 </div>
-                {% elif status == 3 %}
+                {% elif video.status == 3 %}
                 <div class="uk-width-1-1 uk-background-muted uk-text-center uk-padding-small">
                     <h3 class="uk-text-danger">Invalid URL, no video to download.</h3>
                 </div>
-                {% elif status == 4 %}
+                {% elif video.status == 4 %}
                 <div class="uk-width-1-1 uk-background-muted uk-text-center uk-padding-remove">
                     <h3 class="uk-text-danger">Video might be region/age restricted and requires cookies (not implemented).</h3>
                 </div>
@@ -82,10 +82,10 @@
                 <div class="uk-width-1-1 uk-padding-small uk-flex-center">
                     <div class="uk-grid uk-width-1-1 uk-margin-remove">
                         <div class="uk-width-1-1 uk-width-1-2@s uk-text-center uk-padding-small">
-                            <a class="uk-button uk-button-primary" href="/edit_video/{{ video_id }}"><span uk-icon="icon: pencil"></span> Edit info</a>
+                            <a class="uk-button uk-button-primary" href="/edit_video/{{ video.video_id }}"><span uk-icon="icon: pencil"></span> Edit info</a>
                         </div>
                         <div class="uk-width-1-1 uk-width-1-2@s uk-text-center uk-padding-small">
-                            <a class="uk-button uk-button-danger" href="/remove/{{ video_id }}" onclick="return confirm('Are you sure you want to delete this video?');"><span uk-icon="icon: trash"></span> Delete video</a>
+                            <a class="uk-button uk-button-danger" href="/remove/{{ video.video_id }}" onclick="return confirm('Are you sure you want to delete this video?');"><span uk-icon="icon: trash"></span> Delete video</a>
                         </div>
                     </div>
                 </div>
@@ -96,7 +96,7 @@
                             <span uk-icon="icon: quote-right; ratio: 2;"></span>
                         </div>
                         <div class="uk-width-5-6">
-                            <p><i>{{ orig_title }}</i></p>
+                            <p><i>{{ video.orig_title }}</i></p>
                         </div>
                     </div>
                 </div>
@@ -106,7 +106,11 @@
                             <span uk-icon="icon: tv; ratio: 2;"></span>
                         </div>
                         <div class="uk-width-5-6">
-                            <p>{{ video_format }}</p>
+                            <p>
+                                {{ video.dimensions_str }}<br>
+                                {{ video.format_str }}, {{ video.frame_rate_str }}<br>
+                                {{ video.bit_rate_str }}, {{ video.file_size_str }}
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -116,7 +120,7 @@
                             <span uk-icon="icon: location; ratio: 2;"></span>
                         </div>
                         <div class="uk-width-5-6">
-                            <p><a href="{{ orig_url }}" target="_blank" class="uk-icon-link" uk-icon="link">{{ source }}</a></p>
+                            <p><a href="{{ video.url }}" target="_blank" class="uk-icon-link" uk-icon="link">{{ video.source }}</a></p>
                         </div>
                     </div>
                 </div>
@@ -126,18 +130,14 @@
                             <span uk-icon="icon: future; ratio: 2;"></span>
                         </div>
                         <div class="uk-width-5-6">
-                            {% if video %}
                             <p>{{ video.duration_str_verbose }}</p>
-                            {% else %}
-                            <p>{{ duration }} seconds.</p>
-                            {% endif %}
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        {% if status == 1 %}
+        {% if video.status == 1 %}
         <script src="https://vjs.zencdn.net/7.18.1/video.min.js"></script>
         <script>
         var vid_element = document.getElementById("video-player");
@@ -150,10 +150,7 @@
         {% elif status == 0 %}
         <script src="{{ url_for('serve.static', filename='js/klippekort.js') }}"></script>
         <script>
-            var video_id = window.location.pathname.replace("/", "");
-            if (video_id.length > 1) {
-                redirectOnComplete(video_id);
-            }
+            redirectOnComplete('{{ video.video_id }}');
         </script>
         {% endif %}
 {% endblock %}

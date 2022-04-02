@@ -112,10 +112,10 @@ def generate_video_images(
                 line, color=(0, 0, 0), font=font
             )
 
-    preview = img.convert("P", palette=Image.Palette.ADAPTIVE, colors=256)
-    preview_blurred = preview_blurred.convert("P", palette=Image.Palette.ADAPTIVE, colors=256)
-    thumb = thumb.convert("P", palette=Image.Palette.ADAPTIVE, colors=64)
-    thumb_blurred = thumb_blurred.convert("P", palette=Image.Palette.ADAPTIVE, colors=64)
+    preview = img.convert("P", palette=Image.ADAPTIVE, colors=256)
+    preview_blurred = preview_blurred.convert("P", palette=Image.ADAPTIVE, colors=256)
+    thumb = thumb.convert("P", palette=Image.ADAPTIVE, colors=64)
+    thumb_blurred = thumb_blurred.convert("P", palette=Image.ADAPTIVE, colors=64)
 
     try:
         preview.save(preview_path, optimize=True)

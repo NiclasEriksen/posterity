@@ -1,5 +1,6 @@
 import os
 import sys
+import math
 from datetime import datetime
 import shortuuid
 
@@ -15,6 +16,16 @@ def find_between( s, first, last ):
         return s[start:end]
     except ValueError:
         return ""
+
+
+def convert_file_size(size_bytes):
+    if size_bytes == 0:
+        return "0B"
+    size_name = ("B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB")
+    i = int(math.floor(math.log(size_bytes, 1024)))
+    p = math.pow(1024, i)
+    s = round(size_bytes / p, 2)
+    return "%s %s" % (s, size_name[i])
 
 
 def resource_path(relative_path):

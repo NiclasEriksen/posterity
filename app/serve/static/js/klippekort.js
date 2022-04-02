@@ -6,8 +6,12 @@ function handleFormSubmit(event) {
     const formJSON = Object.fromEntries(data.entries());
 
     var submit_btn = document.getElementById("submit-button");
+    var status_field = document.getElementById("video-post-status");
     submit_btn.disabled = true;
     submit_btn.textContent = "Waiting for download task...";
+    if (status_field) {
+        status_field.textContent = "";
+    }
 
     var request = new XMLHttpRequest(); 
     request.open('POST', '/api/v1/core/post_link', true);
@@ -22,6 +26,9 @@ function handleFormSubmit(event) {
             console.log("Error when posting video link...");
             submit_btn.disabled = false;
             submit_btn.textContent = "Save for posterity";
+            if (status_field) {
+                status_field.textContent = this.response;
+            }
             console.log(this.response);
         }
     }

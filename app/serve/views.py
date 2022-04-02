@@ -22,7 +22,7 @@ logger = LocalProxy(lambda: current_app.logger)
 
 from app.dl.dl import media_path, \
     STATUS_COMPLETED, STATUS_COOKIES, STATUS_DOWNLOADING, STATUS_FAILED, STATUS_INVALID, \
-    get_celery_scheduled, get_celery_active, write_metadata
+    get_celery_scheduled, get_celery_active, write_metadata_to_disk
 from app.serve.db import db_session, Video, User, ContentTag, Category,\
     init_db, AUTH_LEVEL_ADMIN, AUTH_LEVEL_MOD, AUTH_LEVEL_USER
 from app import get_environment, app_config
@@ -120,54 +120,22 @@ def front_page_search():
 def serve_video(video_id):
     logger.info(f"Requested video '{video_id}'.")
 
-    metadata = get_metadata_for_video(video_id)
+    video = Video.query.filter_by(video_id=video_id).first()
 
-    dl_video_id = video_id
-
-    if "duplicate" in metadata.keys():
-        if len(metadata["duplicate"]):
-            new_video_id = metadata["duplicate"]
-            new_metadata = get_metadata_for_video(new_video_id)
-            new_metadata["title"] = metadata["title"]
-            new_metadata["content_warning"] = metadata["content_warning"]
-            dl_video_id = new_metadata["video_id"]
-            metadata = new_metadata
-            metadata["video_id"] = video_id
-
-    if not len(metadata.keys()):
-        logger.error("Invalid metadata from json file.")
+    if not video:
+        logger.error("Video was not found.")
         return render_template("not_found.html")
 
-    video = Video.query.filter_by(video_id=video_id).first()
-    if video:
-        tags = video.tags
-        categories = video.categories
-    else:
-        tags = []
-        categories = []
-
-    if metadata["status"] in [STATUS_FAILED, STATUS_INVALID]:
+    if video.status in [STATUS_FAILED, STATUS_INVALID]:
         flash("Video failed to download, this page will self destruct")
         logger.warning("Doing 'burn-after-read' on video")
         _success = delete_video_by_id(video_id)
 
     return render_template(
         "video.html",
-        custom_title=metadata["title"],
-        orig_title=metadata["video_title"],
-        status=metadata["status"] if "status" in metadata else 2,
-        duration=int(metadata["duration"]),
         video=video,
-        source=metadata["source"],
-        content_warning=metadata["content_warning"],
-        tags=tags,
-        categories=categories,
-        dl_path="/download/" + dl_video_id,
-        stream_path=f"/view/{dl_video_id}.mp4",
-        orig_url=metadata["url"],
-        video_format=metadata["format"],
-        upload_time=metadata["upload_time"],
-        video_id=video_id
+        dl_path="/download/" + video_id,
+        stream_path=f"/view/{video_id}.mp4",
     )
 
 
@@ -246,7 +214,7 @@ def edit_video_post(video_id: str):
 
     db_session.add(video)
     db_session.commit()
-    write_metadata(video_id, video.to_json())
+    write_metadata_to_disk(video_id, video.to_json())
 
     available_tags = ContentTag.query.order_by(ContentTag.name).all()
     available_categories = Category.query.order_by(Category.name).all()
@@ -532,11 +500,6 @@ def check_progress(video_id):
     if not len(metadata.keys()):
         return "", 404
 
-    if "duplicate" in metadata.keys():
-        if len(metadata["duplicate"]):
-            video_id = metadata["duplicate"]
-            metadata = get_metadata_for_video(video_id)
-
     s = metadata["status"]
     if s == STATUS_COMPLETED:
         return "", 200
@@ -618,7 +581,6 @@ def list_videos(max_count=10) -> list:
 
 @cache.memoize(timeout=1)
 def get_metadata_for_video(video_id: str) -> dict:
-    session = db_session
     try:
         video = Video.query.filter_by(video_id=video_id).first()
     except OperationalError:
@@ -627,57 +589,4 @@ def get_metadata_for_video(video_id: str) -> dict:
     if video:
         index_video_data(video)
         return video.to_json()
-
-    path = os.path.join(media_path, video_id + ".json")
-    try:
-        with open(path) as f:
-            d = json.load(f)
-
-            if "video_id" not in d:
-                d["video_id"] = video_id
-
-            if not len(d["video_id"]):
-                d["video_id"] = video_id
-
-            if not video:
-                video = Video()
-
-            video.from_json(d)
-
-            if "duplicate" in d:
-                og_id = d["duplicate"]
-                if len(og_id):
-                    og = session.query(Video).filter_by(video_id=og_id).first()
-                    if og:
-                        if video.duplicate_of == og:
-                            pass
-                        elif video not in og.duplicates:
-                            og.duplicates.append(video)
-                            video.duplicate_of = og
-                            session.add(og)
-
-            session.add(video)
-            logger.info(f"Found json file for {video_id}, returning metadata")
-
-            index_video_data(video)
-            d = video.to_json()
-
-            try:
-                session.commit()
-            except OperationalError:
-                session.rollback()
-                logger.warning(f"Database connection seems bad, returning pure json data")
-            except IntegrityError:
-                session.rollback()
-                logger.warning(f"Integrity error on writing to database, most likely duplicate video_id")
-            except Exception as e:
-                logger.error(e)
-
-            return d
-
-    except (FileNotFoundError, json.JSONDecodeError):
-        logger.error(f"Error happened while loading JSON data for {video_id}")
-        pass
-    except OSError:
-        logger.error(f"Error happened while opening files during fetching of metadata for {video_id}")
     return {}

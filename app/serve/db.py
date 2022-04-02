@@ -10,7 +10,7 @@ import time
 from contextlib import contextmanager
 from werkzeug.local import LocalProxy
 from flask import current_app
-from app.dl.helpers import seconds_to_verbose_time, seconds_to_hhmmss
+from app.dl.helpers import seconds_to_verbose_time, seconds_to_hhmmss, convert_file_size
 
 
 log = LocalProxy(lambda: current_app.logger)
@@ -120,6 +120,26 @@ class Video(Base):
 
     def content_tags_readable_priority(self, priority: int) -> str:
         return ", ".join([t.name for t in self.tags_by_category if t.category >= priority])
+
+    @property
+    def format_str(self) -> str:
+        return f"{self.video_format} / {self.audio_format}"
+
+    @property
+    def bit_rate_str(self) -> str:
+        return f"{self.bit_rate / 1000:.1f} kbit/s"
+
+    @property
+    def frame_rate_str(self) -> str:
+        return f"{int(self.frame_rate)} FPS"
+
+    @property
+    def dimensions_str(self) -> str:
+        return f"{self.width}x{self.height}"
+
+    @property
+    def file_size_str(self) -> str:
+        return convert_file_size(self.file_size)
 
     def to_json(self) -> dict:
         return {
