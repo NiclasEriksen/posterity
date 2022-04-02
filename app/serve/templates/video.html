@@ -12,16 +12,8 @@
 <meta property="og:video:release_date" content="{{ upload_time }}">
 {% endblock %}
 {% block content %}
-        <div class="uk-container uk-padding-small uk-height-1-1 uk-padding-remove-top">
-            <div class="uk-card uk-card-default uk-card-body video-card uk-width-1-1 uk-text-center">
-                <h2>{{ video.title }}</h2>
-                {% for tag in video.tags_by_category %}
-                <span class="uk-label {% if tag.category > 1 %}uk-label-danger{% elif tag.category == 1 %}uk-label-warning{% endif %}">{{ tag.name }}</span>
-                {% endfor %}
-                {% for category in video.categories %}
-                <span class="uk-label uk-label-category">{{ category.name }}</span>
-                {% endfor %}
-                <hr>
+        <div class="uk-container uk-padding-remove uk-padding-small@m uk-height-1-1 uk-padding-remove-top">
+            <div class="uk-card uk-card-default uk-card-body video-card uk-width-1-1 uk-text-center uk-padding-remove-top">
                 <div class="uk-width-1-1 uk-height-1-1">
                     <div class="uk-text-center uk-width-1-1 video-content">
                         {% if video.status == 1 %}
@@ -43,20 +35,40 @@
                         {% endif %}
                     </div>
                 </div>
+                <div class="uk-width-1-1 uk-padding-small">
+                    <h2 class="uk-margin-remove-bottom">{{ video.title }}</h2>
+                    {% for tag in video.tags_by_category %}
+                    <span class="uk-label {% if tag.category > 1 %}uk-label-danger{% elif tag.category == 1 %}uk-label-warning{% endif %}">{{ tag.name }}</span>
+                    {% endfor %}
+                    {% for category in video.categories %}
+                    <span class="uk-label uk-label-category">{{ category.name }}</span>
+                    {% endfor %}
+                </div>
             </div>
             {% if video.status == 1 %}
             <div>
             </div>
             {% endif %}
-            <div class="uk-grid uk-width-1-1 uk-margin-remove uk-margin-top">
-
+            <div class="uk-grid uk-width-1-1 uk-margin-remove uk-margin-vertical">
+                {% if current_user.is_authenticated and status != 0 %}
+                <div class="uk-width-1-1 uk-padding-small uk-flex-center">
+                    <div class="uk-grid uk-width-1-1 uk-margin-remove">
+                        <div class="uk-width-1-1 uk-width-1-2@s uk-text-center uk-padding-small">
+                            <a class="uk-button uk-button-primary" href="/edit_video/{{ video.video_id }}"><span uk-icon="icon: pencil"></span> Edit info</a>
+                        </div>
+                        <div class="uk-width-1-1 uk-width-1-2@s uk-text-center uk-padding-small">
+                            <a class="uk-button uk-button-danger" href="/remove/{{ video.video_id }}" onclick="return confirm('Are you sure you want to delete this video?');"><span uk-icon="icon: trash"></span> Delete video</a>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
                 {% if video.status == 0 %}
                 <div class="uk-width-1-1 uk-background-muted uk-text-center uk-padding-small">
                     <h3 class="uk-text-muted uk-margin-remove-bottom">Downloading...</h3>
                 </div>
                 {% elif video.status == 1 %}
-                <div class="uk-width-1-1 uk-background-muted uk-text-center uk-padding-small">
-                    <a href="{{ dl_path }}"><h3 class="uk-text-primary uk-margin-remove-bottom">Click here to download MP4 file</h3></a>
+                <div class="uk-width-1-1 uk-text-center uk-padding-small">
+                    <a href="{{ dl_path }}"><h3 class="uk-text-primary uk-margin-remove-bottom">Click here to download video file</h3></a>
                 </div>
                 {% elif video.status == 3 %}
                 <div class="uk-width-1-1 uk-background-muted uk-text-center uk-padding-small">
@@ -75,19 +87,6 @@
                 {% if duplicate|length > 1 %}
                 <div class="uk-width-1-1 uk-background-muted uk-text-center uk-padding-remove">
                     <h3 class="uk-text-warning">This video is a duplicate of <a href="/{{ duplicate }}">{{ duplicate }}</a>.</h3>
-                </div>
-                {% endif %}
-
-                {% if current_user.is_authenticated and status != 0 %}
-                <div class="uk-width-1-1 uk-padding-small uk-flex-center">
-                    <div class="uk-grid uk-width-1-1 uk-margin-remove">
-                        <div class="uk-width-1-1 uk-width-1-2@s uk-text-center uk-padding-small">
-                            <a class="uk-button uk-button-primary" href="/edit_video/{{ video.video_id }}"><span uk-icon="icon: pencil"></span> Edit info</a>
-                        </div>
-                        <div class="uk-width-1-1 uk-width-1-2@s uk-text-center uk-padding-small">
-                            <a class="uk-button uk-button-danger" href="/remove/{{ video.video_id }}" onclick="return confirm('Are you sure you want to delete this video?');"><span uk-icon="icon: trash"></span> Delete video</a>
-                        </div>
-                    </div>
                 </div>
                 {% endif %}
                 <div class="uk-width-1-1 uk-width-1-2@m">
