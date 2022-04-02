@@ -225,7 +225,8 @@ def download_from_json_data(data: dict, file_name: str) -> bool:
                     os.path.join(preview_path, file_name + "_preview_blurred.png"),
                     start=5 if duration >= 10.0 else 0,
                     blur_amount=0.75,
-                    desaturate=True
+                    desaturate=True,
+                    content_text=metadata["content_warning"]
                 )
         except Exception as e:
             print(e)
