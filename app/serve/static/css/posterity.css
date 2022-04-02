@@ -222,3 +222,57 @@ body, html {
 .thumbnail-rounded:hover {
     border: 2px solid var(--light-grey);
 }
+
+.video-spinner {
+  height: 24px;
+  width: 24px;
+  border-radius: 50%;
+  -webkit-animation: video-spin 3s infinite linear;
+  animation: video-spin 3s infinite linear;
+}
+
+@-webkit-keyframes video-spin {
+  0%, 20%, 100% {
+     -webkit-transform: translate(-27px, 150px);
+     transform: translate(-27px, -27px);
+     background-color: var(--warning);
+  }
+  25%, 45% {
+     -webkit-transform: translate(27px, -27px);
+     transform: translate(27px, -27px);
+     background-color: var(--primary);
+  }
+  50%, 70% {
+     -webkit-transform: translate(27px, 27px);
+     transform: translate(27px, 27px);
+     background-color: var(--danger);
+  }
+  75%, 95% {
+     -webkit-transform: translate(-27px, 27px);
+     transform: translate(-27px, 27px);
+     background-color: var(--success);
+  }
+}
+
+@keyframes video-spin {
+  0%, 20%, 100% {
+     -webkit-transform: translate(-27px, 270px);
+     transform: translate(-27px, -27px);
+     background-color: var(--warning);
+  }
+  25%, 45% {
+     -webkit-transform: translate(27px, -27px);
+     transform: translate(27px, -27px);
+     background-color: var(--primary);
+  }
+  50%, 70% {
+     -webkit-transform: translate(27px, 27px);
+     transform: translate(27px, 27px);
+     background-color: var(--danger);
+  }
+  75%, 95% {
+     -webkit-transform: translate(-27px, 27px);
+     transform: translate(-27px, 27px);
+     background-color: var(--success);
+  }
+}

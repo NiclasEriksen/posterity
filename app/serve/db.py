@@ -148,7 +148,7 @@ class Video(Base):
             "title": self.title,
             "video_title": self.orig_title,
             "content_warning": self.content_tags_string,
-            "tags": [t.id for t in self.tags],
+            "tags": [t.id for t in self.tags_by_category],
             "categories": [c.id for c in self.categories],
             "category": "/".join([c.name for c in self.categories]),
             "status": self.status,

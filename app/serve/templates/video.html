@@ -31,7 +31,14 @@
                             <source src="{{ stream_path }}" type="video/mp4" />
                         </video>
                         {% elif video.status == 0 %}
-                        Video is still downloading, page will refresh automatically when done.
+                        <div class="uk-flex uk-margin uk-text-meta uk-flex-center uk-padding-large uk-height-large">
+                            <div class="uk-position-center uk-padding-small">
+                                <div class="video-spinner"></div>
+                            </div>
+                            <div class="uk-position-top uk-padding-small">
+                                Video is still downloading, page will refresh automatically when done.
+                            </div>
+                        </div>
                         {% endif %}
                     </div>
                 </div>
@@ -45,10 +52,6 @@
                     {% endfor %}
                 </div>
             </div>
-            {% if video.status == 1 %}
-            <div>
-            </div>
-            {% endif %}
             <div class="uk-grid uk-width-1-1 uk-margin-remove uk-margin-vertical">
                 {% if current_user.is_authenticated and status != 0 %}
                 <div class="uk-width-1-1 uk-padding-small uk-flex-center">
