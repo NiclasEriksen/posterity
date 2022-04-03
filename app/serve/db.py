@@ -99,6 +99,19 @@ class Video(Base):
         return self.upload_time.strftime("%b %d, %H:%M").lower()
 
     @property
+    def upload_time_iso8601(self) -> str:
+        if self.upload_time:
+            return self.upload_time.isoformat()
+        return "Unknown date."
+
+    @property
+    def duration_seconds(self) -> int:
+        try:
+            return round(self.duration)
+        except (TypeError, ValueError):
+            return 0
+
+    @property
     def duration_str(self) -> str:
         return seconds_to_hhmmss(self.duration)
 

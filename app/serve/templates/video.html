@@ -3,13 +3,19 @@
 {% block metadata %}
 <meta property="og:site_name" content="Posterity video">
 <meta property="og:title" content="{{ video.title }}" />
-<meta property="og:description" content="Content warning: {{ video.content_tags_readable_priority(1) }}" />
+<meta property="og:description" content="{{ video.orig_title }}" />
 <meta property="og:image" itemprop="image" content="/preview/{{ video.video_id }}.png">
-<meta property="og:type" content="video.movie" />
+<meta property="og:type" content="video" />
 <meta property="og:video" content="{{ stream_path }}" />
-<meta property="og:video:duration" content="{{ video.duration_str }}" />
-<meta property="og:video:tag" content="{{ video.content_tags_readable }}" />
-<meta property="og:video:release_date" content="{{ video.upload_time }}">
+<meta property="og:video:type" content="video/mp4" />
+<meta property="og:video:width" content="{{ video.width }}" />
+<meta property="og:video:height" content="{{ video.height }}" />
+<meta property="og:video:duration" content="{{ video.duration_seconds }}" />
+{% for tag in video.tags_by_category %}
+<meta property="og:video:tag" content="{{ tag.name }}" />{% endfor %}
+{% for tag in video.categories %}
+<meta property="og:video:tag" content="{{ tag.name }}" />{% endfor %}
+<meta property="og:video:release_date" content="{{ video.upload_time_iso8601 }}">
 {% endblock %}
 {% block content %}
         <div class="uk-container uk-padding-remove uk-padding-small@m uk-height-1-1 uk-padding-remove-top">
