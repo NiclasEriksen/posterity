@@ -127,6 +127,13 @@ def serve_video(video_id):
         logger.error("Video was not found.")
         return render_template("not_found.html")
 
+    if "embed" in request.args:
+        return render_template(
+            "embed_video.html",
+            video=video,
+            stream_path=f"/view/{video_id}.mp4"
+        )
+
     if video.status in [STATUS_FAILED, STATUS_INVALID]:
         flash("Video failed to download, this page will self destruct")
         logger.warning("Doing 'burn-after-read' on video")

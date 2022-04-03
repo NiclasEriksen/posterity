@@ -1,0 +1,46 @@
+
+<!DOCTYPE html>
+<html style="background-color: ##2E353D;" lang="no" dir="ltr" data-cast-api-enabled="true">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Posterity video</title>
+    <link rel="canonical" href="/{{ video.video_id }}">
+    <link rel="stylesheet" href="{{ url_for('serve.static', filename='css/posterity.css') }}" />
+    <link href="https://vjs.zencdn.net/7.18.1/video-js.css" rel="stylesheet" />
+</head>
+<body style="background-color: ##2E353D; margin: 0;" dir="ltr">
+    <div id="video-player-embed">
+        {% if video.status == 1 %}
+        <video
+        id="video-player"
+        class="video-js vjs-16-9 vjs-big-play-centered"
+        controls
+        preload="auto"
+        width="{{ video.preview_width }}"
+        loop="loop"
+        height="{{ video.preview_height }}"
+        poster=""
+        data-setup='{"poster":"/preview/{{ video.video_id }}.png"}'
+        >
+            <source src="{{ stream_path }}" type="video/mp4" />
+        </video>
+        <script src="https://vjs.zencdn.net/7.18.1/video.min.js"></script>
+        {% elif video.status == 0 %}
+        <p>
+            <div class="video-spinner"></div>
+        </p>
+        <p>
+            Video is still downloading, page will refresh automatically when done.
+        </p>
+        {% endif %}
+    </div>
+    <noscript>
+        <div class="player-unavailable">
+            <h2>An error occurred</h2>
+            <p>
+                <a href="/{{ video.video_id }}" target="_blank">Try watching it on Posterity</a>, or enable JavaScript in your browser.
+            </p>
+        </div>
+    </noscript>
+</body>
+</html>
