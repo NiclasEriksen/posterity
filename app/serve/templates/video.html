@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% block page_title %}Video: {{ video.title }}{% endblock %}
 {% block metadata %}<!-- OpenGraph metadata for video -->
+        <meta name="description" content="{{ video.orig_title }}!">
         <meta property="og:site_name" content="Posterity video">
         <meta property="og:title" content="{{ video.title }}" />
         <meta property="og:description" content="{{ video.orig_title }}" />
