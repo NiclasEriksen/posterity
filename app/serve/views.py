@@ -165,12 +165,10 @@ def edit_video_page(video_id: str):
 
     return render_template(
         "edit_video.html",
-        custom_title=video.title,
+        video=video,
         verified=video.verified,
-        source=video.source,
         tags=available_tags,
         categories=available_categories,
-        video_id=video_id
     )
 
 
@@ -242,12 +240,10 @@ def edit_video_post(video_id: str):
 
     return render_template(
         "edit_video.html",
-        custom_title=video.title,
+        video=video,
         verified=video.verified,
-        source=video.source,
         tags=available_tags,
         categories=available_categories,
-        video_id=video_id
     )
 
 
