@@ -16,9 +16,51 @@ except ImportError:
 load_dotenv()
 TEXT_MARGIN = 12
 TEXT_PADDING = 8
+STROKE_SMALL = 1
+STROKE_MEDIUM = 2
+STROKE_LARGE = 3
 FONT_SIZE_SMALL = 24
 FONT_SIZE_MEDIUM = 32
 FONT_SIZE_LARGE = 42
+FONT_COLOR = (108, 174, 217)
+GRAPHIC_COLOR = (225, 96, 112)
+EMOTIONAL_COLOR = (196, 196, 32)
+FONT_GS = 128
+GRAPHIC_GS = 0
+EMOTIONAL_GS = 64
+FONT_STROKE_COLOR = (32, 32, 32)
+GRAPHIC_STROKE_COLOR = (32, 32, 32)
+EMOTIONAL_STROKE_COLOR = (32, 32, 32)
+FONT_STROKE_GS = 255
+GRAPHIC_STROKE_GS = 255
+EMOTIONAL_STROKE_GS = 192
+
+"""
+    --primary: #2C97DE;
+    --primary-light: #6caed9;
+    --primary-dark: #1c5e8a;
+    --info: var(--primary);
+    --success: #2DBDA8;
+    --warning-light: #EFC663;
+    --warning: #D9A322;
+    --danger: #E16070;
+    --bg: #232830;
+    --grey: #EEE;
+    --light-grey: #C2C8CF;
+    --dark-grey: #2E353D;
+    --charcoal: #353C45;
+    --white: #FFF;
+    --black: #13181f;
+    --tag-informative: #00819e;
+    --tag-informative: var(--primary);
+    --tag-emotional: #e6ac00;
+    --tag-emotional: var(--warning);
+    --tag-graphic: #cf2900;
+    --tag-graphic: var(--danger);
+    --category: var(--light-grey);
+"""
+
+
 overlay_font_small = ImageFont.truetype(
     os.path.join(
         os.path.dirname(os.path.realpath(__file__)),
@@ -37,6 +79,34 @@ overlay_font_large = ImageFont.truetype(
         "Faustina-SemiBold.ttf"
     ), FONT_SIZE_LARGE
 )
+
+
+def get_color_for_tag(tag: str, gs: bool = False) -> tuple:
+    if tag.lower() in [
+        "death", "graphic", "violence", "gore", "nudity"
+    ]:
+        c = tuple([GRAPHIC_GS]) if gs else GRAPHIC_COLOR
+    elif tag.lower() in [
+        "distress", "animals", "children", "sexual"
+    ]:
+        c = tuple([EMOTIONAL_GS]) if gs else EMOTIONAL_COLOR
+    else:
+        c = tuple([FONT_GS]) if gs else FONT_COLOR
+    return c
+
+
+def get_stroke_for_tag(tag: str, gs: bool = False) -> tuple:
+    if tag.lower() in [
+        "death", "graphic", "violence", "gore", "nudity"
+    ]:
+        c = tuple([GRAPHIC_STROKE_GS]) if gs else GRAPHIC_STROKE_COLOR
+    elif tag.lower() in [
+        "distress", "animals", "children", "sexual"
+    ]:
+        c = tuple([EMOTIONAL_STROKE_GS]) if gs else EMOTIONAL_STROKE_COLOR
+    else:
+        c = tuple([FONT_STROKE_GS]) if gs else FONT_STROKE_COLOR
+    return c
 
 
 def generate_video_images(
@@ -81,8 +151,10 @@ def generate_video_images(
     thumb_blurred = thumb_blurred.filter(
         ImageFilter.GaussianBlur(thumbnail_size[0] / 16 * blur_amount)
     )
+
     if desaturate:
-        preview_blurred = ImageOps.grayscale(preview_blurred)
+        preview_blurred_desat = ImageOps.grayscale(preview_blurred)
+        preview_blurred.paste(preview_blurred_desat)
         thumb_blurred = ImageOps.grayscale(thumb_blurred)
 
     if len(content_text):
@@ -96,12 +168,15 @@ def generate_video_images(
         padding = int(TEXT_PADDING * ratio)
         if ratio > 0.75:
             size = FONT_SIZE_LARGE
+            stroke = STROKE_LARGE
             font = overlay_font_large
         elif ratio > 0.5:
             size = FONT_SIZE_MEDIUM
+            stroke = STROKE_MEDIUM
             font = overlay_font_medium
         else:
             size = FONT_SIZE_SMALL
+            stroke = STROKE_SMALL
             font = overlay_font_small
 
         if "/" in content_text:
@@ -114,11 +189,13 @@ def generate_video_images(
         for i, line in enumerate(lines):
             preview_draw.text(
                 (TEXT_MARGIN, i * (size + padding) + TEXT_MARGIN),
-                line, color=(0, 0, 0), font=font
+                line, font=font,
+                fill=get_color_for_tag(line), stroke_width=stroke, stroke_fill=get_stroke_for_tag(line)
             )
             preview_blurred_draw.text(
                 (TEXT_MARGIN, i * (size + padding) + TEXT_MARGIN),
-                line, color=(0, 0, 0), font=font
+                line, font=font,
+                fill=get_color_for_tag(line), stroke_width=stroke, stroke_fill=get_stroke_for_tag(line)
             )
 
     preview = img.convert("P", palette=palette, colors=256)
