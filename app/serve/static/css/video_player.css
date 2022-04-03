@@ -1,0 +1,133 @@
+.video-content {
+    --primary: #2C97DE;
+    --primary-light: #6caed9;
+    --primary-dark: #1c5e8a;
+    --info: var(--primary);
+    --success: #2DBDA8;
+    --warning-light: #EFC663;
+    --warning: #D9A322;
+    --danger: #E16070;
+    --bg: #232830;
+    --grey: #EEE;
+    --light-grey: #C2C8CF;
+    --dark-grey: #2E353D;
+    --charcoal: #353C45;
+    --white: #FFF;
+    --black: #13181f;
+    --tag-informative: #00819e;
+    --tag-informative: var(--primary);
+    --tag-emotional: #e6ac00;
+    --tag-emotional: var(--warning);
+    --tag-graphic: #cf2900;
+    --tag-graphic: var(--danger);
+    --category: var(--light-grey);
+    --primary-fg: var(--primary);
+    --primary-bg: var(--dark-grey);
+}
+
+
+// The default color of control backgrounds is mostly black but with a little
+// bit of blue so it can still be seen on all-black video frames, which are common.
+// Try changing to #900
+
+// Try changing to true
+
+.video-js {
+  /* The base font size controls the size of everything, not just text.
+     All dimensions use em-based sizes so that the scale along with the font size.
+     Try increasing it to 15px and see what happens. */
+    font-size: 16px!important;
+
+  /* The main font color changes the ICON COLORS as well as the text */
+    color: var(--primary-fg);
+}
+
+/* The "Big Play Button" is the play button that shows before the video plays.
+   To center it set the align values to center and middle. The typical location
+   of the button is the center, but there is trend towards moving it to a corner
+   where it gets out of the way of valuable content in the poster image.*/
+.vjs-default-skin .vjs-big-play-button {
+  /* The font size is what makes the big play button...big.
+     All width/height values use ems, which are a multiple of the font size.
+     If the .video-js font-size is 10px, then 3em equals 30px.*/
+    font-size: 2.5em;
+
+  /* We're using SCSS vars here because the values are used in multiple places.
+     Now that font size is set, the following em values will be a multiple of the
+     new font size. If the font-size is 3em (30px), then setting any of
+     the following values to 3em would equal 30px. 3 * font-size. */
+
+    line-height: 1.5em;
+    height: 1.5em;
+    width: 2em;
+
+  /* 0.06666em = 2px default */
+    border: 0.06666em solid var(--primary-fg);
+  /* 0.3em = 9px default */
+    border-radius: 0.2em;
+
+    /* Align center */
+    left: 50%;
+    top: 50%;
+    margin-left: -1em;
+    margin-top: -0.75em;
+}
+
+/* The default color of control backgrounds is mostly black but with a little
+   bit of blue so it can still be seen on all-black video frames, which are common. */
+.video-js .vjs-control-bar,
+.video-js .vjs-big-play-button,
+.video-js .vjs-menu-button .vjs-menu-content {
+  /* IE8 - has no alpha support */
+  background-color: var(--primary-bg);
+  /* Opacity: 1.0 = 100%, 0.0 = 0% */
+  background-color: rgba(var(--primary-bg), 0.9);
+}
+
+// Make a slightly lighter version of the main background
+// for the slider background.
+/* Slider - used for Volume bar and Progress bar */
+.video-js .vjs-slider {
+  background-color: var(--charcoal);
+  background-color: rgba(var(--charcoal), 0.9);
+}
+
+/* The slider bar color is used for the progress bar and the volume bar
+   (the first two can be removed after a fix that's coming) */
+.video-js .vjs-volume-level,
+.video-js .vjs-play-progress,
+.video-js .vjs-slider-bar {
+  background: var(--primary-fg);
+}
+
+/* The main progress bar also has a bar that shows how much has been loaded. */
+.video-js .vjs-load-progress {
+  /* For IE8 we'll lighten the color */
+  background: var(--light-grey);
+  /* Otherwise we'll rely on stacked opacities */
+  background: rgba(var(--light-grey), 0.8);
+}
+
+/* The load progress bar also has internal divs that represent
+   smaller disconnected loaded time ranges */
+.video-js .vjs-load-progress div {
+  /* For IE8 we'll lighten the color */
+  background: var(--dark-grey);
+  /* Otherwise we'll rely on stacked opacities */
+  background: rgba(var(--dark-grey), 0.9);
+}
+
+.video-js:hover .vjs-big-play-button {
+  background-color: rgba(0,0,0,.95);
+  border-color: var(--primary-light);
+}
+
+.video-content {
+    width: 100%;
+    max-width: 100%;
+    margin: 0px auto;
+}
+.video-content > video{
+    max-width: 100%;
+    height: auto;
+}
