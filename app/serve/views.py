@@ -135,7 +135,7 @@ def serve_video(video_id):
         )
 
     if video.status in [STATUS_FAILED, STATUS_INVALID]:
-        flash("Video failed to download, this page will self destruct")
+        flash("Video failed to download, this page will self destruct", "warning")
         logger.warning("Doing 'burn-after-read' on video")
         _success = delete_video_by_id(video_id)
     elif video.status == STATUS_COMPLETED:
