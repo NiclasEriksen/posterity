@@ -233,46 +233,46 @@ body, html {
 
 @-webkit-keyframes video-spin {
   0%, 20%, 100% {
-     -webkit-transform: translate(-27px, 150px);
-     transform: translate(-27px, -27px);
-     background-color: var(--warning);
+     -webkit-transform: translate(-35px, 150px);
+     transform: translate(-35px, -35px);
+     background-color: var(--black);
   }
   25%, 45% {
-     -webkit-transform: translate(27px, -27px);
-     transform: translate(27px, -27px);
-     background-color: var(--primary);
+     -webkit-transform: translate(35px, -35px);
+     transform: translate(35px, -35px);
+     background-color: var(--grey);
   }
   50%, 70% {
-     -webkit-transform: translate(27px, 27px);
-     transform: translate(27px, 27px);
-     background-color: var(--danger);
+     -webkit-transform: translate(35px, 35px);
+     transform: translate(35px, 35px);
+     background-color: var(--black);
   }
   75%, 95% {
-     -webkit-transform: translate(-27px, 27px);
-     transform: translate(-27px, 27px);
-     background-color: var(--success);
+     -webkit-transform: translate(-35px, 35px);
+     transform: translate(-35px, 35px);
+     background-color: var(--grey);
   }
 }
 
 @keyframes video-spin {
   0%, 20%, 100% {
-     -webkit-transform: translate(-27px, 270px);
-     transform: translate(-27px, -27px);
-     background-color: var(--warning);
+     -webkit-transform: translate(-35px, 270px);
+     transform: translate(-35px, -35px);
+     background-color: var(--grey);
   }
   25%, 45% {
-     -webkit-transform: translate(27px, -27px);
-     transform: translate(27px, -27px);
-     background-color: var(--primary);
+     -webkit-transform: translate(35px, -35px);
+     transform: translate(35px, -35px);
+     background-color: var(--black);
   }
   50%, 70% {
-     -webkit-transform: translate(27px, 27px);
-     transform: translate(27px, 27px);
-     background-color: var(--danger);
+     -webkit-transform: translate(35px, 35px);
+     transform: translate(35px, 35px);
+     background-color: var(--grey);
   }
   75%, 95% {
-     -webkit-transform: translate(-27px, 27px);
-     transform: translate(-27px, 27px);
-     background-color: var(--success);
+     -webkit-transform: translate(-35px, 35px);
+     transform: translate(-35px, 35px);
+     background-color: var(--black);
   }
 }
