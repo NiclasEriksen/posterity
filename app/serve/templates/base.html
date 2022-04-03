@@ -51,7 +51,7 @@
             <div class="uk-width-1-3 uk-padding-remove uk-height-1-1 uk-position-relative">
                 <span class="uk-position-center-right uk-align-right uk-text-small uk-text-muted">
                     {% if current_user.is_authenticated %}
-                    {{ current_user.username }} <a href="/logout" uk-icon="icon: sign-out; ratio:" class="uk-text-muted uk-icon-link uk-icon-button"></a>
+                    {{ current_user.username }} <a href="/logout" uk-icon="icon: sign-out;" class="uk-text-muted uk-icon-link uk-icon-button"></a>
                     {% else %}
                     <a href="/login" uk-icon="icon: sign-in" class="uk-text-muted uk-icon-link uk-icon-button"></a>
                     {% endif %}
