@@ -1,21 +1,22 @@
 {% extends "base.html" %}
-{% block page_title %}Video: {{ custom_title }}{% endblock %}
-{% block metadata %}
-<meta property="og:site_name" content="Posterity video">
-<meta property="og:title" content="{{ video.title }}" />
-<meta property="og:description" content="{{ video.orig_title }}" />
-<meta property="og:image" itemprop="image" content="/preview/{{ video.video_id }}.png">
-<meta property="og:type" content="video" />
-<meta property="og:video" content="{{ stream_path }}" />
-<meta property="og:video:type" content="video/mp4" />
-<meta property="og:video:width" content="{{ video.width }}" />
-<meta property="og:video:height" content="{{ video.height }}" />
-<meta property="og:video:duration" content="{{ video.duration_seconds }}" />
-{% for tag in video.tags_by_category %}
-<meta property="og:video:tag" content="{{ tag.name }}" />{% endfor %}
-{% for tag in video.categories %}
-<meta property="og:video:tag" content="{{ tag.name }}" />{% endfor %}
-<meta property="og:video:release_date" content="{{ video.upload_time_iso8601 }}">
+{% block page_title %}Video: {{ video.title }}{% endblock %}
+{% block metadata %}<!-- OpenGraph metadata for video -->
+        <meta property="og:site_name" content="Posterity video">
+        <meta property="og:title" content="{{ video.title }}" />
+        <meta property="og:description" content="{{ video.orig_title }}" />
+        <meta property="og:image" itemprop="image" content="/preview/{{ video.video_id }}.png">
+        <meta property="og:type" content="video" />
+        <meta property="og:video" content="{{ stream_path }}" />
+        <meta property="og:video:type" content="video/mp4" />
+        <meta property="og:video:width" content="{{ video.width }}" />
+        <meta property="og:video:height" content="{{ video.height }}" />
+        <meta property="og:video:duration" content="{{ video.duration_seconds }}" />
+        <meta property="og:video:release_date" content="{{ video.upload_time_iso8601 }}">
+        <!-- Content tags -->{% for tag in video.tags_by_category %}
+        <meta property="og:video:tag" content="{{ tag.name }}" />{% endfor %}
+        <!-- Category tags -->{% for tag in video.categories %}
+        <meta property="og:video:tag" content="{{ tag.name }}" />{% endfor %}
+        <!-- End of OpenGraph metadata -->
 {% endblock %}
 {% block content %}
         <div class="uk-container uk-padding-remove uk-padding-small@m uk-height-1-1 uk-padding-remove-top">
