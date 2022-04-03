@@ -1,11 +1,13 @@
 import os
 import functools
+import re
+import mimetypes
 from dotenv import load_dotenv
 import json
 from datetime import datetime
 from flask import Blueprint, current_app, request, abort,\
     render_template, send_from_directory, url_for, flash,\
-    redirect, get_flashed_messages
+    redirect, get_flashed_messages, Response
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import login_user, login_required, logout_user, current_user
 from redis.exceptions import ConnectionError
@@ -58,6 +60,12 @@ def remove_session(*_args):
 @serve.before_request
 def before_request_func():
     current_app.logger.name = "posterity.serve"
+
+
+@serve.after_request
+def after_request(response):
+    response.headers.add('Accept-Ranges', 'bytes')
+    return response
 
 
 @serve.route("/", methods=["GET"])
@@ -233,29 +241,6 @@ def edit_video_post(video_id: str):
     flash(f"Video info for \"{video_id}\"has been updated.", "success")
 
     return redirect(url_for("serve.serve_video", video_id=video.video_id))
-    #
-    # available_tags = ContentTag.query.order_by(ContentTag.name).all()
-    # available_categories = Category.query.order_by(Category.name).all()
-    #
-    # for at in available_tags:
-    #     if at in video.tags:
-    #         at.enabled = True
-    #     else:
-    #         at.enabled = False
-    # for ac in available_categories:
-    #     if ac in video.categories:
-    #         ac.enabled = True
-    #     else:
-    #         ac.enabled = False
-    #
-    #
-    # return render_template(
-    #     "edit_video.html",
-    #     video=video,
-    #     verified=video.verified,
-    #     tags=available_tags,
-    #     categories=available_categories,
-    # )
 
 
 @serve.route("/register", methods=["GET"])
@@ -448,7 +433,7 @@ def download_archive():
 def download_video(video_id=""):
     try:
         if os.path.isfile(os.path.join(media_path, video_id + ".mp4")):
-            return send_from_directory(media_path, video_id + ".mp4", as_attachment=True)
+            return send_from_directory(media_path, video_id + ".mp4", as_attachment=True, conditional=True)
     except OSError as e:
         logger.error(e)
         logger.error("Unable to serve video!")
@@ -459,7 +444,7 @@ def download_video(video_id=""):
 def view_video(video_id=""):
     try:
         if os.path.isfile(os.path.join(media_path, video_id + ".mp4")):
-            return send_from_directory(media_path, video_id + ".mp4")
+            return send_from_directory_partial(media_path, video_id + ".mp4")
     except OSError as e:
         logger.error(e)
         logger.error("Unable to serve video!")
@@ -606,3 +591,43 @@ def get_metadata_for_video(video_id: str) -> dict:
         index_video_data(video)
         return video.to_json()
     return {}
+
+
+def send_from_directory_partial(directory, filename):
+    """
+        Simple wrapper around send_file which handles HTTP 206 Partial Content
+        (byte ranges)
+        TODO: handle all send_file args, mirror send_file's error handling
+        (if it has any)
+    """
+    range_header = request.headers.get('Range', None)
+    if not range_header:
+        print("NOTRH")
+        return send_from_directory(directory, filename, conditional=True)
+
+    path = os.path.join(directory, filename)
+    size = os.path.getsize(path)
+    byte1, byte2 = 0, None
+
+    m = re.search('(\d+)-(\d*)', range_header)
+    g = m.groups()
+
+    if g[0]: byte1 = int(g[0])
+    if g[1]: byte2 = int(g[1])
+
+    length = size - byte1
+    if byte2 is not None:
+        length = byte2 - byte1
+
+    data = None
+    with open(path, 'rb') as f:
+        f.seek(byte1)
+        data = f.read(length)
+
+    rv = Response(data,
+                  206,
+                  mimetype=mimetypes.guess_type(path)[0],
+                  direct_passthrough=True)
+    rv.headers.add('Content-Range', 'bytes {0}-{1}/{2}'.format(byte1, byte1 + length - 1, size))
+
+    return rv
