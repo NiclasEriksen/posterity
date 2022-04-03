@@ -78,6 +78,7 @@ def gen_images_task(metadata: dict):
 @celery.task(name="core.tasks.download", soft_time_limit=7200, time_limit=10800)    #, base=SQLAlchemyTask)
 def download_task(data: dict, file_name: str):
     from app.serve.search import index_video_data
+    from app.serve.db import Video, db_session
     from app.dl.dl import (
         download_from_json_data,
         find_duplicate_video_by_url,
@@ -126,7 +127,12 @@ def download_task(data: dict, file_name: str):
     dur = time.time() - dur
     _hours, minutes, seconds = seconds_to_time(dur)
     if success:
-        index_video_data(video)
+        try:
+            video = db_session.query(Video).filter_by(video_id=file_name).first()
+            if video:
+                index_video_data(video)
+        except:
+            pass
         log.info(f"Download complete in {minutes} minutes, {seconds:.0f} seconds: {file_name}")
     else:
         log.error(f"Download failed after {minutes} minutes, {seconds:.0f} seconds: {file_name}")
