@@ -42,12 +42,12 @@
                         {% if video.status == 1 %}
                         <video
                         id="video-player"
-                        class="video-js vjs-16-9 vjs-big-play-centered"
+                        class="video-js vjs-big-play-centered video-player uk-margin-auto"
                         controls
                         preload="auto"
-                        width="640"
+                        height="{{ video.preview_height }}"
+                        width="{{ video.preview_width }}"
                         loop="loop"
-                        height="264"
                         poster=""
                         data-setup='{"poster":"/preview/{{ video.video_id }}.png"}'
                         >
