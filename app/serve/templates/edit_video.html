@@ -48,8 +48,8 @@
                     <div class="uk-margin">
                         <div class="uk-text-meta">Content tags</div>
                         <select class="uk-select" multiple id="tags_select" name="tags_select">
-                            {% for t in tags %}
-                            <option value="{{ t.id }}" class="uk-text-small" {% if t.enabled %}selected{% endif %}>{{ t.name }}</option>
+                            {% for tag in tags %}
+                            <option value="{{ tag.id }}" class="content-tag-option-{{ tag.category }}"{% if tag.enabled %} selected{% endif %}>{{ tag.name }}</option>
                             {% endfor %}
                         </select>
                     </div>
@@ -57,17 +57,17 @@
                         <div class="uk-text-meta">Categories</div>
                         <select class="uk-select" multiple id="categories_select" name="categories_select">
                             {% for c in categories %}
-                            <option value="{{ c.id }}" class="uk-text-small" {% if c.enabled %}selected{% endif %}>{{ c.name }}</option>
+                            <option value="{{ c.id }}" class="category-option" {% if c.enabled %}selected{% endif %}>{{ c.name }}</option>
                             {% endfor %}
                         </select>
                     </div>
 
                     <div class="uk-width-1-1 uk-grid">
                         <div class="uk-width-1-2">
-                            <a class="uk-input uk-button uk-button-muted uk-button-large" href="/{{ video.video_id }}"><span uk-icon="icon: close"></span> Back to video</a>
+                            <a class="uk-button uk-button-danger uk-button-large" href="/{{ video.video_id }}"><span uk-icon="icon: close"></span> Cancel</a>
                         </div>
                         <div class="uk-inline uk-width-1-2">
-                            <button class="uk-input uk-button uk-button-primary uk-button-large" type="submit"><span uk-icon="icon: close"></span> Apply changes</button>
+                            <button class="uk-button uk-button-primary uk-button-large" type="submit"><span uk-icon="icon: close"></span> Apply</button>
                         </div>
                     </div>
                 </fieldset>

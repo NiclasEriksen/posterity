@@ -230,29 +230,32 @@ def edit_video_post(video_id: str):
     except Exception as e:
         logger.error(e)
 
-    available_tags = ContentTag.query.order_by(ContentTag.name).all()
-    available_categories = Category.query.order_by(Category.name).all()
-
-    for at in available_tags:
-        if at in video.tags:
-            at.enabled = True
-        else:
-            at.enabled = False
-    for ac in available_categories:
-        if ac in video.categories:
-            ac.enabled = True
-        else:
-            ac.enabled = False
-
     flash(f"Video info for \"{video_id}\"has been updated.", "success")
 
-    return render_template(
-        "edit_video.html",
-        video=video,
-        verified=video.verified,
-        tags=available_tags,
-        categories=available_categories,
-    )
+    return redirect(url_for("serve.serve_video", video_id=video.video_id))
+    #
+    # available_tags = ContentTag.query.order_by(ContentTag.name).all()
+    # available_categories = Category.query.order_by(Category.name).all()
+    #
+    # for at in available_tags:
+    #     if at in video.tags:
+    #         at.enabled = True
+    #     else:
+    #         at.enabled = False
+    # for ac in available_categories:
+    #     if ac in video.categories:
+    #         ac.enabled = True
+    #     else:
+    #         ac.enabled = False
+    #
+    #
+    # return render_template(
+    #     "edit_video.html",
+    #     video=video,
+    #     verified=video.verified,
+    #     tags=available_tags,
+    #     categories=available_categories,
+    # )
 
 
 @serve.route("/register", methods=["GET"])
