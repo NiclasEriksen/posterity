@@ -22,12 +22,15 @@
         <meta property="og:video:tag" content="{{ tag.name }}" />{% endfor %}
         <!-- End of OpenGraph metadata -->
         <!-- Twitter Meta Tags -->
-        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:card" content="player">
         <meta name="twitter:domain" content="posterity.no">
         <meta name="twitter:url" content="/{{ video.video_id }}">
         <meta name="twitter:title" content="{{ video.title }}">
         <meta name="twitter:description" content="{{ video.orig_title }}">
         <meta name="twitter:image" content="/preview/{{ video.video_id }}.png">
+        <meta name="twitter:player:width" content="{{ video.preview_width }}">
+        <meta name="twitter:player:height" content="{{ video.preview_height }}">
+        <meta name="twitter:player:stream" content="{{ stream_path }}">
         <!-- End of Twitter Meta Tags -->
 {% endblock %}
 {% block content %}
