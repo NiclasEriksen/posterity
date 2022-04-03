@@ -12,7 +12,6 @@ All the code written for this is also public domain, so we encourage anyone to s
 
 This is not a group or an organization, we do not accept donations. Anyone can contribute to the project but if you're really looking to help Ukraine you should donate your time and resources elsewhere.
 
--   ["World in Focus" Discord server](https://discord.gg/2Vkwv3FFjS). This is the community this project was initially made to serve.
 -   [GitHub: Posterity](https://github.com/NiclasEriksen/posterity/). The GitHub repository for the code that this service is running. Submit issues, feature requests or pull requests here.
 -   [GitHub: FeedBot](https://github.com/NiclasEriksen/Feedbot/). The GitHub repository for a Discord bot that posts videos to Posterity.
 -   Add videos through the Discord bot, request a registration token for a contributor account or get in touch for API keys to post videos.
