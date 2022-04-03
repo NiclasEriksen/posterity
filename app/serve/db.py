@@ -163,6 +163,20 @@ class Video(Base):
         return "No size"
 
     @property
+    def preview_width(self) -> int:
+        if self.width and self.height:
+            ratio = self.width / self.height
+            return int(min(640, 360 * ratio))
+        return 0
+
+    @property
+    def preview_height(self) -> int:
+        if self.width and self.height:
+            ratio = self.height / self.width
+            return int(min(360, 640 * ratio))
+        return 0
+
+    @property
     def file_size_str(self) -> str:
         if self.file_size:
             return convert_file_size(self.file_size)
