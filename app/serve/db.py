@@ -177,6 +177,14 @@ class Video(Base):
         return 0
 
     @property
+    def player_width(self) -> int:
+        return int(self.preview_width * 2)
+
+    @property
+    def player_height(self) -> int:
+        return int(self.preview_height * 2)
+
+    @property
     def file_size_str(self) -> str:
         if self.file_size:
             return convert_file_size(self.file_size)
