@@ -17,6 +17,14 @@
         <!-- Category tags -->{% for tag in video.categories %}
         <meta property="og:video:tag" content="{{ tag.name }}" />{% endfor %}
         <!-- End of OpenGraph metadata -->
+        <!-- Twitter Meta Tags -->
+        <meta name="twitter:card" content="player">
+        <meta property="twitter:domain" content="posterity.no">
+        <meta property="twitter:url" content="/{{ video.video_id }}/">
+        <meta name="twitter:title" content="{{ video.title }}">
+        <meta name="twitter:description" content="{{ video.orig_title }}">
+        <meta name="twitter:image" content="/preview/{{ video.video_id }}.png">
+        <!-- End of Twitter Meta Tags -->
 {% endblock %}
 {% block content %}
         <div class="uk-container uk-padding-remove uk-padding-small@m uk-height-1-1 uk-padding-remove-top">
