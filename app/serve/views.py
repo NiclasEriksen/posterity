@@ -209,9 +209,10 @@ def edit_video_post(video_id: str):
             if cat and cat not in video.categories:
                 video.categories.append(cat)
 
-    video.title = title
-    video.verified = verified
-    video.source = source
+    if video.status != STATUS_DOWNLOADING:
+        video.title = title
+        video.verified = verified
+        video.source = source
 
     db_session.add(video)
     db_session.commit()
