@@ -76,7 +76,7 @@ function redirectOnComplete(video_id) {
     var request = new XMLHttpRequest(); 
     request.open('GET', '/check_progress/' + video_id, true);
     request.onload = function() {
-        if (this.status == 200) {
+        if (this.status == 200 || this.status == 415) {
             window.location.reload();
         } else {
             setTimeout(() => { redirectOnComplete(video_id); }, 1000);
