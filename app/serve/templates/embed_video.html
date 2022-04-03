@@ -13,14 +13,14 @@
         {% if video.status == 1 %}
         <video
         id="video-player"
-        class="video-js vjs-16-9 vjs-big-play-centered"
+        class="video-js vjs-big-play-centered"
         controls
-        preload="auto"
+        preload="false"
         width="{{ video.preview_width }}"
         loop="loop"
         height="{{ video.preview_height }}"
         poster=""
-        data-setup='{"poster":"/preview/{{ video.video_id }}.png"}'
+        data-setup='{"poster":"/preview/{{ video.video_id }}.png", "fluid": true}'
         >
             <source src="{{ stream_path }}" type="video/mp4" />
         </video>
