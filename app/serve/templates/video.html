@@ -4,6 +4,7 @@
         <meta name="description" content="{{ video.orig_title }}!">
         <meta property="og:site_name" content="Posterity video">
         <meta property="og:title" content="{{ video.title }}" />
+        <meta property="og:url" content="/{{ video.video_id }}">
         <meta property="og:description" content="{{ video.orig_title }}" />
         <meta property="og:image" itemprop="image" content="/preview/{{ video.video_id }}.png">
         <meta property="og:type" content="video" />
@@ -21,7 +22,7 @@
         <!-- Twitter Meta Tags -->
         <meta name="twitter:card" content="player">
         <meta property="twitter:domain" content="posterity.no">
-        <meta property="twitter:url" content="/{{ video.video_id }}/">
+        <meta property="twitter:url" content="/{{ video.video_id }}">
         <meta name="twitter:title" content="{{ video.title }}">
         <meta name="twitter:description" content="{{ video.orig_title }}">
         <meta name="twitter:image" content="/preview/{{ video.video_id }}.png">
