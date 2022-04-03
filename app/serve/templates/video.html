@@ -34,25 +34,33 @@
         <meta name="twitter:player:stream" content="https://posterity.no{{ stream_path }}">
         <!-- End of Twitter Meta Tags -->
 {% endblock %}
+{% block styles %}
+        <link rel="stylesheet" href="{{ url_for('serve.static', filename='css/video_player.css') }}" />
+{% endblock %}
 {% block content %}
         <div class="uk-container uk-padding-remove uk-padding-small@m uk-height-1-1 uk-padding-remove-top">
             <div class="uk-card uk-card-default uk-card-body video-card uk-width-1-1 uk-text-center uk-padding-remove-top">
                 <div class="uk-width-1-1 uk-height-1-1">
-                    <div class="uk-text-center uk-width-1-1 video-content">
+                    <div class="uk-text-center uk-width-1-1">
                         {% if video.status == 1 %}
-                        <video
-                        id="video-player"
-                        class="video-js vjs-big-play-centered video-player uk-margin-auto"
-                        controls
-                        preload="auto"
-                        height="{{ video.player_height }}"
-                        width="{{ video.player_width }}"
-                        loop="loop"
-                        poster=""
-                        data-setup='{"poster":"/preview/{{ video.video_id }}.png"}'
+                        <div
+                        class="video-content"
+                        style="width: {{ video.player_width }}px;"
                         >
-                            <source src="{{ stream_path }}" type="video/mp4" />
-                        </video>
+                            <video
+                            id="video-player"
+                            class="video-js vjs-default-skin vjs-big-play-centered video-player uk-margin-auto"
+                            controls
+                            preload="auto"
+                            height="auto"
+                            width="100%"
+                            loop="loop"
+                            poster=""
+                            data-setup='{"fluid": true, "poster":"/preview/{{ video.video_id }}.png", "aspectRatio":"{{video.width}}:{{video.height}}", "playbackRates": [0.25, 0.5, 1, 2, 4] }'
+                            >
+                                <source src="{{ stream_path }}" type="video/mp4" />
+                            </video>
+                        </div>
                         {% elif video.status == 0 %}
                         <div class="uk-flex uk-margin uk-text-meta uk-flex-center uk-padding-large uk-height-large">
                             <div class="uk-position-center uk-padding-small">
@@ -170,6 +178,7 @@
         if (vid_element) {
             videojs('video-player', {}, function() {
                 this.volume(0.5);
+                this.playbackRate(1);
             });
         }
         </script>

@@ -202,14 +202,6 @@ body, html {
     color: var(--light-grey);
 }
 
-.video-content {
-    width: 100%;
-    height: auto;
-}
-.video-player {
-    width: 100%;
-    text-align: center;
-}
 .list-thumbnail {
     min-height: 64px;
     min-width: 64px;

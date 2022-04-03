@@ -6,6 +6,7 @@
     <title>Posterity video</title>
     <link rel="canonical" href="/{{ video.video_id }}">
     <link rel="stylesheet" href="{{ url_for('serve.static', filename='css/posterity.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('serve.static', filename='css/video_player.css') }}" />
     <link href="https://vjs.zencdn.net/7.18.1/video-js.css" rel="stylesheet" />
 </head>
 <body style="background-color: ##2E353D; margin: 0;" dir="ltr">
@@ -13,18 +14,26 @@
         {% if video.status == 1 %}
         <video
         id="video-player"
-        class="video-js vjs-big-play-centered"
+        class="video-js vjs-default-skin vjs-big-play-centered"
         controls
         preload="false"
         width="{{ video.width }}"
         loop="loop"
         height="{{ video.height }}"
         poster=""
-        data-setup='{"poster":"/preview/{{ video.video_id }}.png", "fluid": true}'
+        data-setup='{"poster":"/preview/{{ video.video_id }}.png", "fluid": true, "aspectRatio":"{{video.width}}:{{video.height}}", "playbackRates": [0.25, 0.5, 1, 2, 4] }'
         >
             <source src="{{ stream_path }}" type="video/mp4" />
         </video>
         <script src="https://vjs.zencdn.net/7.18.1/video.min.js"></script>
+        <script>
+        var vid_element = document.getElementById("video-player");
+        if (vid_element) {
+            videojs('video-player', {}, function() {
+                this.playbackRate(1);
+            });
+        }
+        </script>
         {% elif video.status == 0 %}
         <p>
             <div class="video-spinner"></div>
