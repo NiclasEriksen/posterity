@@ -74,17 +74,17 @@
                     </div>
                 </div>
                 <div class="uk-width-1-1 uk-padding-small">
-                    <h2 class="uk-margin-remove-bottom">{{ video.title }}</h2>
+                    <h2 class="uk-padding-small">{{ video.title }}</h2>
                     {% for tag in video.tags_by_category %}
-                    <span class="uk-label {% if tag.category > 1 %}uk-label-danger{% elif tag.category == 1 %}uk-label-warning{% endif %}">{{ tag.name }}</span>
+                    <span class="uk-label label-small {% if tag.category > 1 %}uk-label-danger{% elif tag.category == 1 %}uk-label-warning{% endif %}">{{ tag.name }}</span>
                     {% endfor %}
                     {% for category in video.categories %}
-                    <span class="uk-label uk-label-category">{{ category.name }}</span>
+                    <span class="uk-label label-small uk-label-category">{{ category.name }}</span>
                     {% endfor %}
                 </div>
             </div>
             <div class="uk-grid uk-width-1-1 uk-margin-remove uk-margin-vertical">
-                {% if current_user.is_authenticated and status != 0 %}
+                {% if current_user.is_authenticated and video.status != 0 %}
                 <div class="uk-width-1-1 uk-padding-small uk-flex-center">
                     <div class="uk-grid uk-width-1-1 uk-margin-remove">
                         <div class="uk-width-1-1 uk-width-1-2@s uk-text-center uk-padding-small">
