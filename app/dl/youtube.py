@@ -72,7 +72,8 @@ STREAMING_PATTERNS = ["yt.com", "twitch.com"]
 
 DISPOSABLE_QUERIES = [
     "ref", "ref_src", "ref_url", "taid",
-    "utm_campaign", "utm_medium", "utm_source"
+    "utm_campaign", "utm_medium", "utm_source",
+    "__cft__[0]", "__cft__", "__tn__"
 ]
 TIME_QUERIES = [
     "s", "t", "time", "seek"
