@@ -170,6 +170,18 @@ def is_hls(f: str) -> bool:
             except ValueError:
                 return False
         return True
+    if len(f.split("hls_1080p-")) == 2 or len(f.split("hls_720p-")) == 2:
+        if "1080p" in f:
+            try:
+                int(f.split("hls_1080p-")[1])
+            except ValueError:
+                return False
+        elif "720p" in f:
+            try:
+                int(f.split("hls_720p-")[1])
+            except ValueError:
+                return False
+        return True
     return False
 
 

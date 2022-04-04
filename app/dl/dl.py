@@ -110,7 +110,9 @@ def download_from_json_data(metadata: dict, file_name: str):
     duration = d["duration"]
     video_title = d["title"]
 
-    video_url = video_links[video_formats[-1]]["url"]
+    f = find_best_format(video_formats)
+    video_url = video_links[f]["url"]
+    print(video_url)
     if len(audio_formats):
         audio_url = audio_links[audio_formats[-1]]
     else:
@@ -123,7 +125,7 @@ def download_from_json_data(metadata: dict, file_name: str):
     cmd = get_ffmpeg_cmd(video_url, audio_url, sub_url, vid_save_path)
 
     metadata["video_title"] = video_title
-    metadata["format"] = video_formats[-1]
+    metadata["format"] = f
     metadata["duration"] = duration
     metadata["status"] = STATUS_DOWNLOADING
 
@@ -171,25 +173,25 @@ def get_ffmpeg_cmd(
     http_persistent=True
 ) -> list:
 
-    cmd = ["ffmpeg", "-i"]
+    cmd = ["ffmpeg", "-copyts", "-i"]
 
     if len(vid_url):
         cmd.append(vid_url)
         if len(aud_url):
             cmd += ["-i", aud_url]
-        if len(sub_url):
-            cmd += ["-i", sub_url]
+        # if len(sub_url):
+        #     cmd += ["-i", sub_url]
         if len(aud_url):    # Mapping WITH sound
             cmd += ["-map", "0:v", "-map", "1:a"]
-            if len(sub_url):    # Mapping WITH sound and WITH subtitles
-                cmd += ["-map", "2:s", "-c:s", "mov_text"]
+            # if len(sub_url):    # Mapping WITH sound and WITH subtitles
+            #     cmd += ["-map", "2:s", "-c:s", "mov_text"]
             cmd += ["-c:a", "libopus"]
 
         elif local_audio_channel >= 0:
             c = local_audio_channel     # Mapping with built in audio
             cmd += ["-map", "0:v", "-map", "0:a:" + str(c), "-c:a:" + str(c), "copy", "-strict",  "-2", "-c:a:" + str(c), "aac", "-ac", "2"]
-        elif len(sub_url):  # No sound, only subitles
-            cmd += ["-map", "1:s", "-c:s", "mov_text"]
+        # elif len(sub_url):  # No sound, only subitles
+        #     cmd += ["-map", "1:s", "-c:s", "mov_text"]
 
         cmd += ["-vf", "yadif=parity=auto"]
         cmd += ["-c:v", "libx264", "-f", "mp4"]
@@ -271,6 +273,19 @@ def get_celery_active():
             a = i[k]
 
     return a
+
+
+def find_best_format(formats: list):
+    for f in reversed(formats):
+        if "1920x1080" in f:
+            return f
+    for f in reversed(formats):
+        if "1080p" in f:
+            return f
+    for f in reversed(formats):
+        if "720p" in f:
+            return f
+    return formats[-1]
 
 
 def parse_input_data(data: dict) -> dict:
