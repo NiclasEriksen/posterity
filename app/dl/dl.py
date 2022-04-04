@@ -27,6 +27,7 @@ STATUS_COMPLETED = 1
 STATUS_FAILED = 2
 STATUS_INVALID = 3
 STATUS_COOKIES = 4
+STATUS_PENDING = 5
 
 
 if not os.path.isfile(url_file_path):

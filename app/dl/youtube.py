@@ -144,14 +144,13 @@ def find_highest_quality_url(urls: list) -> str:
 
         tally[url] = best
 
-    best_score = 0
-    best_url = ""
-    for url, score in tally.items():
-        if score >= best_score:
-            best_url = url
-            best_score = score
+    best_score = max([s for _k, s in tally.items()])
 
-    return best_url
+    for url in urls:
+        if tally[url] == best_score:
+            return url
+    # If for some reason none was found lol. Late.
+    return urls[0]
 
 
 def check_stream(url: str) -> bool:

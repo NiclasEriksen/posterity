@@ -167,7 +167,7 @@
                                 <a href="{{ video.url }}" target="_blank">{{ video.url[:128] }}</a>
                             </div>
                         </span>
-                        {% if current_user.is_authenticated %}<br><span class="uk-text-meta" uk-icon="icon: user; ratio: 0.9"></span> {{ video.source }}{% endif %}
+                        {% if current_user.is_authenticated %}<br><span class="uk-text-meta" uk-icon="icon: user; ratio: 0.6"></span> {{ video.source }}{% endif %}
                     </td>
                     <td class="uk-text-muted uk-text-small"{% if video.status != 1 %} style="padding: 0!important;"{% endif %}>
                         {% if video.status == 1 %}
