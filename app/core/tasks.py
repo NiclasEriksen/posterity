@@ -78,7 +78,7 @@ def gen_images_task(metadata: dict):
     log.info(f"Images generated in {minutes} minutes, {seconds:.2f} seconds: {video_id}")
 
 
-@celery.task(name="core.tasks.download", soft_time_limit=7200, time_limit=10800)    #, base=SQLAlchemyTask)
+@celery.task(name="core.tasks.download", soft_time_limit=10800, time_limit=11100)    #, base=SQLAlchemyTask)
 def download_task(data: dict, file_name: str):
     from app.serve.search import index_video_data
     from app.dl.dl import (
