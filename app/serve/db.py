@@ -119,6 +119,10 @@ class Video(Base):
             return f"{round(s / 3600)} hours ago"
         elif s >= 3600:
             return "1 hour ago"
+        elif s >= 90:
+            return f"{round(s / 60)} minutes ago"
+        elif s >= 60:
+            return "1 minute ago"
         return f"{seconds_to_verbose_time(s)} ago"
 
     @property
