@@ -127,7 +127,7 @@ def download_task(data: dict, file_name: str):
         log.error(e)
 
     dur = time.time() - dur
-    _hours, minutes, seconds = seconds_to_time(dur)
+    hours, minutes, seconds = seconds_to_time(dur)
     if success:
         try:
             from app.serve.db import Video, session_scope
@@ -141,7 +141,10 @@ def download_task(data: dict, file_name: str):
                     index_video_data(video)
         except Exception as e:
             log.error(e)
-        log.info(f"Download complete in {minutes} minutes, {seconds:.0f} seconds: {file_name}")
+        if hours > 0:
+            log.info(f"Download complete in {hours} hours, {minutes} minutes: {file_name}")
+        else:
+            log.info(f"Download complete in {minutes} minutes, {seconds:.0f} seconds: {file_name}")
     else:
         try:
             from app.serve.db import Video, session_scope
@@ -156,4 +159,8 @@ def download_task(data: dict, file_name: str):
             log.error(e)
             log.error("Unable to set status to failed on DB row...")
 
-        log.error(f"Download failed after {minutes} minutes, {seconds:.0f} seconds: {file_name}")
+        if hours > 0:
+            log.error(f"Download failed after {hours} hours, {minutes} minutes: {file_name}")
+        else:
+            log.error(f"Download failed after {minutes} minutes, {seconds:.0f} seconds: {file_name}")
+
