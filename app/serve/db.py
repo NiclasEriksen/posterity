@@ -18,7 +18,7 @@ log = LocalProxy(lambda: current_app.logger)
 
 DB_URL = os.environ.get("POSTERITY_DB", "")
 
-engine = create_engine(DB_URL)
+engine = create_engine(DB_URL, pool_pre_ping=True)
 db_session = scoped_session(sessionmaker(bind=engine))
 Base = declarative_base()
 Base.query = db_session.query_property()
