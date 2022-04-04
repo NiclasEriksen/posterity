@@ -174,7 +174,11 @@
                         {% endif %}
                     </td>
                     <td class="uk-text-muted uk-text-small">
-                        <span uk-icon="icon: calendar; ratio: 0.6"></span> {{ video.upload_time_verbose }}
+                        <div uk-tooltip="title: {{ video.upload_time_elapsed_verbose }};pos: top-left;">
+                            <div style="overflow: hidden; white-space: nowrap; text-overflow: ellipsis;">
+                                <span uk-icon="icon: calendar; ratio: 0.6"></span> {{ video.upload_time_verbose }}
+                            </div>
+                        </div>
                     </td>
                 </tr>
                 {% endfor %}

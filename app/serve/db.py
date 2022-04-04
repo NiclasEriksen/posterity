@@ -126,6 +126,13 @@ class Video(Base):
         return f"{seconds_to_verbose_time(s)} ago"
 
     @property
+    def upload_time_elapsed_verbose(self) -> str:
+        s = self.upload_time_elapsed
+        if s >= 86400:  # 24 hours
+            return self.upload_time_str
+        return f"{self.upload_time_verbose}, {self.upload_time_str}"
+
+    @property
     def duration_seconds(self) -> int:
         try:
             return round(self.duration)
