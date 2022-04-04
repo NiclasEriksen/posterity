@@ -4,7 +4,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from flask_login import UserMixin
 import os
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 import time
 # import logging
 from contextlib import contextmanager
@@ -103,6 +103,23 @@ class Video(Base):
         if self.upload_time:
             return self.upload_time.isoformat()
         return "Unknown date."
+
+    @property
+    def upload_time_elapsed(self) -> int:
+        if self.upload_time:
+            return round((datetime.now() - self.upload_time).total_seconds())
+        return 0
+
+    @property
+    def upload_time_verbose(self) -> str:
+        s = self.upload_time_elapsed
+        if s >= 86400:  # 24 hours
+            return self.upload_time_str
+        if s >= 5400:
+            return f"{round(s / 3600)} hours ago"
+        elif s >= 3600:
+            return "1 hour ago"
+        return f"{seconds_to_verbose_time(s)} ago"
 
     @property
     def duration_seconds(self) -> int:
