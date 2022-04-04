@@ -25,20 +25,10 @@ def post_link():
     data = parse_input_data(data)
 
     if data and len(data.keys()):
-        fn = unique_filename()
-        data["video_id"] = fn
-
-        try:
-            existing = db_session.query(Video).filter_by(video_id=fn).first()
-        except Exception as e:
-            db_session.rollback()
-            db_session.remove()
-            logger.error(e)
-            existing = None
-
-        if existing:
-            return Response("Video with that ID exists", status=400)
-
+        if "title" not in data:
+            data["title"] = "No title"
+        if not len(data["title"]):
+            return Response("No title provided.", status=400)
         if "url" not in data:
             return Response("No url in posted data.", status=400)
         if not valid_video_url(data["url"]):
@@ -48,6 +38,22 @@ def post_link():
 
         if find_duplicate_video_by_url(data["url"]):
             return Response("Video with that URL exists", status=406)
+
+        fn = unique_filename()
+        data["video_id"] = fn
+
+        existing = True
+        i = 0
+        while existing and i < 10:
+            try:
+                existing = db_session.query(Video).filter_by(video_id=data["video_id"]).first()
+            except Exception as e:
+                db_session.rollback()
+                db_session.remove()
+                logger.error(e)
+                return Response("Unable to ensure that it's no duplicate, sorry...", status=400)
+            data["video_id"] = unique_filename()
+            i += 1
 
         try:
             video = Video()
