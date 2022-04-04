@@ -199,6 +199,7 @@ body, html {
 }
 .video-link-not-ready {
     color: var(--light-grey);
+    text-decoration: line-through;
 }
 
 .video-link:hover {
