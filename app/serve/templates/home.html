@@ -168,7 +168,7 @@
                             {% if current_user.is_authenticated %}<br><span class="uk-text-meta" uk-icon="icon: user; ratio: 0.9"></span> {{ video.source }}{% endif %}
                         </div>
                     </td>
-                    <td class="uk-text-muted uk-text-small {% if video.status != 1%}uk-padding-remove{% endif %}">
+                    <td class="uk-text-muted uk-text-small"{% if video.status != 1 %} style="padding: 0!important;"{% endif %}>
                         {% if video.status == 1 %}
                         <span uk-icon="icon: future; ratio: 0.6"></span><span> {{ video.duration_str }}</span>
                         {% endif %}
