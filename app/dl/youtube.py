@@ -72,8 +72,22 @@ STREAMING_PATTERNS = ["yt.com", "twitch.com"]
 
 DISPOSABLE_QUERIES = [
     "ref", "ref_src", "ref_url", "taid",
-    "utm_campaign", "utm_medium", "utm_source",
-    "__cft__[0]", "__cft__", "__tn__"
+    "fbclid", "gclid", "gclsrc",
+    "utm_campaign", "utm_medium", "utm_source", "utm_content", "utm_term", "utm_id",
+    "_ga", "mc_cid", "mc_eid",
+    "__cft__[0]", "__cft__", "__tn__",
+    "__mk_de_DE", "__mk_en_US", "__mk_en_GB", "__mk_nb_NO",
+    "rnid", "pf_rd_r", "pf_rd_p", "pd_rd_i", "pd_rd_r", "pd_rd_wg",
+    "_bta_tid", "_bta_c", "trk_contact", "trk_msg", "trk_module", "trk_sid",
+    "gdfms", "gdftrk", "gdffi", "_ke",
+    "redirect_log_mongo_id", "redirect_mongo_id", "sb_referer_host",
+    "mkwid", "pcrid", "ef_id", "s_kwcid", "msclkid", "dm_i", "epik",
+    "pk_campaign", "pk_kwd", "pk_keyword", "piwik_campaign", "piwik_kwd", "piwik_keyword",
+    "mtm_campaign", "mtm_keyword", "mtm_source", "mtm_medium", "mtm_content",
+    "mtm_cid", "mtm_group", "mtm_placement",
+    "matomo_campaign", "matomo_keyword", "matomo_source", "matomo_medium", "matomo_content",
+    "matomo_cid", "matomo_group", "matomo_placement", "_branch_match_id",
+    "hsa_cam", "hsa_grp", "hsa_mt", "hsa_src", "hsa_ad", "hsa_acc", "hsa_net", "hsa_kw", "hsa_tgt", "hsa_ver"
 ]
 TIME_QUERIES = [
     "s", "t", "time", "seek"
