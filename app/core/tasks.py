@@ -5,7 +5,6 @@ from datetime import datetime
 
 from app import celery
 from app.dl.helpers import seconds_to_time
-# from app.serve.db import session_scope
 import time
 
 
@@ -82,7 +81,7 @@ def gen_images_task(metadata: dict):
 @celery.task(name="core.tasks.download", soft_time_limit=7200, time_limit=10800)    #, base=SQLAlchemyTask)
 def download_task(data: dict, file_name: str):
     from app.serve.search import index_video_data
-    from app.serve.db import Video, db_session
+    from app.serve.db import Video, session_scope
     from app.dl.dl import (
         download_from_json_data,
         find_duplicate_video_by_url,
@@ -135,6 +134,10 @@ def download_task(data: dict, file_name: str):
             with session_scope() as session:
                 video = session.query(Video).filter_by(video_id=file_name).first()
                 if video:
+                    if video.status != STATUS_COMPLETED:
+                        video.status = STATUS_COMPLETED
+                        session.add(video)
+                        session.commit()
                     index_video_data(video)
         except Exception as e:
             log.error(e)
