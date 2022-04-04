@@ -165,7 +165,7 @@
                             <span class="uk-text-warning" uk-icon="icon: question; ratio: 0.9"></span>
                             {% endif %}
                             <a href="{{ video['url'] }}" target="_blank">{{ video.url[:128] }}</a>
-                            {% if current_user.is_authenticated %}<br>Uploader: <b>{{ video.source }}</b>{% endif %}
+                            {% if current_user.is_authenticated %}<br><span class="uk-text-meta" uk-icon="icon: user; ratio: 0.9"></span> {{ video.source }}{% endif %}
                         </div>
                     </td>
                     <td class="uk-text-muted uk-text-small">
