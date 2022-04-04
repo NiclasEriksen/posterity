@@ -83,11 +83,11 @@ overlay_font_large = ImageFont.truetype(
 
 def get_color_for_tag(tag: str, gs: bool = False) -> tuple:
     if tag.lower() in [
-        "death", "graphic", "violence", "gore", "nudity"
+        "death", "graphic", "violence", "gore", "nudity", "corpses", "blood"
     ]:
         c = tuple([GRAPHIC_GS]) if gs else GRAPHIC_COLOR
     elif tag.lower() in [
-        "distress", "animals", "children", "sexual"
+        "distress", "animals", "children", "sexual", "shock", "emotional"
     ]:
         c = tuple([EMOTIONAL_GS]) if gs else EMOTIONAL_COLOR
     else:
@@ -97,11 +97,11 @@ def get_color_for_tag(tag: str, gs: bool = False) -> tuple:
 
 def get_stroke_for_tag(tag: str, gs: bool = False) -> tuple:
     if tag.lower() in [
-        "death", "graphic", "violence", "gore", "nudity"
+        "death", "graphic", "violence", "gore", "nudity", "corpses", "blood"
     ]:
         c = tuple([GRAPHIC_STROKE_GS]) if gs else GRAPHIC_STROKE_COLOR
     elif tag.lower() in [
-        "distress", "animals", "children", "sexual"
+        "distress", "animals", "children", "sexual", "shock", "emotional"
     ]:
         c = tuple([EMOTIONAL_STROKE_GS]) if gs else EMOTIONAL_STROKE_COLOR
     else:
