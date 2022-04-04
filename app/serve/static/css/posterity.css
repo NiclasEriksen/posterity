@@ -197,6 +197,9 @@ body, html {
 .video-link {
     color: var(--grey);
 }
+.video-link-not-ready {
+    color: var(--light-grey);
+}
 
 .video-link:hover {
     color: var(--light-grey);
