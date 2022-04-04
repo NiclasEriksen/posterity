@@ -93,7 +93,7 @@ TIME_QUERIES = [
     "s", "t", "time", "seek"
 ]
 TIME_LOCATIONS = [
-    "twitter.com", "youtube.com", "t.co", "youtu.be"
+    "twitter.com", "youtube.com", "t.co", "youtu.be", "nrk.no"
 ]
 
 
