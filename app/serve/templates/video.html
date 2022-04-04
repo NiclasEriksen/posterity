@@ -150,7 +150,8 @@
                             <span uk-icon="icon: location; ratio: 2;"></span>
                         </div>
                         <div class="uk-width-5-6">
-                            <p><a href="{{ video.url }}" target="_blank" class="uk-icon-link" uk-icon="link">{{ video.source }}</a></p>
+                            <p><a href="{{ video.url }}" target="_blank" class="uk-icon-link" uk-icon="link">Source link</a></p>
+                            {% if current_user.is_authenticated %}<p class="uk-text-meta uk-text-small">Uploaded by <i>"{{ video.source }}"</i></p>{% endif %}
                         </div>
                     </div>
                 </div>

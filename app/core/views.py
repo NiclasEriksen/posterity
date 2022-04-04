@@ -40,20 +40,18 @@ def post_link():
             return Response("Video with that URL exists", status=406)
 
         fn = unique_filename()
-        data["video_id"] = fn
 
-        existing = True
-        i = 0
-        while existing and i < 10:
-            try:
-                existing = db_session.query(Video).filter_by(video_id=data["video_id"]).first()
-            except Exception as e:
-                db_session.rollback()
-                db_session.remove()
-                logger.error(e)
-                return Response("Unable to ensure that it's no duplicate, sorry...", status=400)
-            data["video_id"] = unique_filename()
-            i += 1
+        try:
+            existing = db_session.query(Video).filter_by(video_id=fn).first()
+            if existing:
+                return Response("Unable to make a unique id, weird...", status=400)
+        except Exception as e:
+            db_session.rollback()
+            db_session.remove()
+            logger.error(e)
+            return Response("Unable to ensure that it's no duplicate, sorry...", status=400)
+
+        data["video_id"] = fn
 
         try:
             video = Video()

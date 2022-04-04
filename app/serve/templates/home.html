@@ -13,6 +13,7 @@
     >
 
         <form action="" id="link-form" class="uk-form uk-padding-small uk-width-1-1 uk-height-1-1">
+            <input type="hidden" id="source_user" name="source_user" value="{{ current_user.username }}">
             <fieldset class="uk-fieldset uk-grid">
 
                 <legend class="uk-legend uk-text-center uk-width-1-1 uk-padding-remove">Post new video for posterity</legend>
@@ -164,6 +165,7 @@
                             <span class="uk-text-warning" uk-icon="icon: question; ratio: 0.9"></span>
                             {% endif %}
                             <a href="{{ video['url'] }}" target="_blank">{{ video.url[:128] }}</a>
+                            {% if current_user.is_authenticated %}<br>Uploader: <b>{{ video.source }}</b>{% endif %}
                         </div>
                     </td>
                     <td class="uk-text-muted uk-text-small">

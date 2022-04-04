@@ -296,16 +296,23 @@ def parse_input_data(data: dict) -> dict:
     try:
         metadata["url"] = data["url"]
         metadata["title"] = data["title"]
-        metadata["content_warning"] = data["content_warning"]
     except KeyError:
         log.error("Corrupted data?!")
         metadata["status"] = STATUS_INVALID
         return metadata
 
     try:
-        metadata["source"] = data["source"]
+        metadata["content_warning"] = data["content_warning"]
     except KeyError:
         pass
+
+    if "source_user" in data and len(data["source_user"]):
+        metadata["source"] = data["source_user"]
+    else:
+        try:
+            metadata["source"] = data["source"]
+        except KeyError:
+            pass
     try:
         metadata["category"] = data["category"]
     except KeyError:
