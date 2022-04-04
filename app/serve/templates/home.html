@@ -169,7 +169,9 @@
                         </div>
                     </td>
                     <td class="uk-text-muted uk-text-small">
+                        {% if video.status == 1 %}
                         <span uk-icon="icon: future; ratio: 0.6"></span><span> {{ video.duration_str }}</span>
+                        {% endif %}
                     </td>
                     <td class="uk-text-muted uk-text-small">
                         <span uk-icon="icon: calendar; ratio: 0.6"></span> {{ video.upload_time_str }}
