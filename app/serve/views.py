@@ -105,7 +105,7 @@ def front_page():
 
     total_pages = total // pp + (1 if total % pp else 0)
 
-    available_tags = ContentTag.query.order_by(ContentTag.name).all()
+    available_tags = ContentTag.query.order_by(ContentTag.category.desc(), ContentTag.name).all()
     available_categories = Category.query.order_by(Category.name).all()
 
     return render_template(
@@ -170,7 +170,7 @@ def edit_video_page(video_id: str):
     if not video:
         return render_template("not_found.html")
 
-    available_tags = ContentTag.query.order_by(ContentTag.name).all()
+    available_tags = ContentTag.query.order_by(ContentTag.category.desc(), ContentTag.name).all()
     available_categories = Category.query.order_by(Category.name).all()
 
     for at in available_tags:
