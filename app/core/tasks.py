@@ -27,15 +27,19 @@ def update_video(video_id: str, status: int, data: dict = {}) -> bool:
         write_metadata(video_id, data)
         return True
 
-    from app.serve.db import Video, session_scope
-    with session_scope() as db_session:
-        video = db_session.query(Video).filter_by(video_id=video_id).first()
-        if not video:
-            return False
-        video.status = status
+    try:
+        from app.serve.db import Video, session_scope
+        with session_scope() as db_session:
+            video = db_session.query(Video).filter_by(video_id=video_id).first()
+            if not video:
+                return False
+            video.status = status
 
-        db_session.add(video)
-        db_session.commit()
+            db_session.add(video)
+            db_session.commit()
+    except Exception as e:
+        log.error(e)
+        return False
     return True
 
 
@@ -128,11 +132,24 @@ def download_task(data: dict, file_name: str):
     _hours, minutes, seconds = seconds_to_time(dur)
     if success:
         try:
-            video = db_session.query(Video).filter_by(video_id=file_name).first()
-            if video:
-                index_video_data(video)
-        except:
-            pass
+            with session_scope() as session:
+                video = session.query(Video).filter_by(video_id=file_name).first()
+                if video:
+                    index_video_data(video)
+        except Exception as e:
+            log.error(e)
         log.info(f"Download complete in {minutes} minutes, {seconds:.0f} seconds: {file_name}")
     else:
+        try:
+            with session_scope() as session:
+                video = session.query(Video).filter_by(video_id=file_name).first()
+                if video:
+                    if video.status == STATUS_DOWNLOADING:
+                        video.status = STATUS_FAILED
+                        session.add(video)
+                        session.commit()
+        except Exception as e:
+            log.error(e)
+            log.error("Unable to set status to failed on DB row...")
+
         log.error(f"Download failed after {minutes} minutes, {seconds:.0f} seconds: {file_name}")

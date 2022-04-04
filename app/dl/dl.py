@@ -34,8 +34,8 @@ if not os.path.isfile(url_file_path):
 
 
 def write_metadata_to_db(video_id: str, md: dict):
-    from app.serve.db import session_scope, Video
     try:
+        from app.serve.db import session_scope, Video
         with session_scope() as db_session:
             existing = db_session.query(Video).filter_by(video_id=video_id).first()
 
