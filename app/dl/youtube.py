@@ -87,7 +87,9 @@ DISPOSABLE_QUERIES = [
     "mtm_cid", "mtm_group", "mtm_placement",
     "matomo_campaign", "matomo_keyword", "matomo_source", "matomo_medium", "matomo_content",
     "matomo_cid", "matomo_group", "matomo_placement", "_branch_match_id",
-    "hsa_cam", "hsa_grp", "hsa_mt", "hsa_src", "hsa_ad", "hsa_acc", "hsa_net", "hsa_kw", "hsa_tgt", "hsa_ver"
+    "hsa_cam", "hsa_grp", "hsa_mt", "hsa_src", "hsa_ad", "hsa_acc", "hsa_net", "hsa_kw", "hsa_tgt", "hsa_ver",
+    "ns_mchannel", "ns_source", "ns_campaign", "ns_linkname", "ns_fee",
+    "pinned_post_locator", "pinned_post_asset_id", "pinned_post_type",
 ]
 TIME_QUERIES = [
     "s", "t", "time", "seek"

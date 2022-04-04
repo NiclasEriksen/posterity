@@ -77,6 +77,11 @@ body, html {
     border-color: var(--primary);
 }
 
+.uk-select option:checked {
+    background: var(--charcoal)!important;
+    color: var(--grey);
+}
+
 .uk-text-muted {
     color: var(--light-grey)!important;
 }

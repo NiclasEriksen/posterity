@@ -187,7 +187,6 @@ def edit_video_page(video_id: str):
     return render_template(
         "edit_video.html",
         video=video,
-        verified=video.verified,
         tags=available_tags,
         categories=available_categories,
     )
@@ -201,8 +200,6 @@ def edit_video_post(video_id: str):
         return render_template("not_found.html")
 
     title = request.form.get("custom_title")
-    verified = True if request.form.get("verified") == "verified_on" else False
-    source = request.form.get("source")
     tl = request.form.getlist("tags_select")
     cl = request.form.getlist("categories_select")
 
@@ -232,8 +229,6 @@ def edit_video_post(video_id: str):
 
     if video.status != STATUS_DOWNLOADING:
         video.title = title
-        video.verified = verified
-        video.source = source
 
     db_session.add(video)
     db_session.commit()

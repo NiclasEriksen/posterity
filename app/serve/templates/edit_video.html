@@ -21,33 +21,9 @@
                         </div>
                     </div>
 
-                    <div class="uk-container uk-grid">
-                        <div class="uk-width-1-2">
-                            <label class="uk-form-label">Source</label>
-                            <div class="uk-inline uk-form-controls uk-margin-small">
-                                <span class="uk-form-icon" uk-icon="icon: location"></span>
-                                <input
-                                class="uk-input uk-width-1-1 uk-form-width-medium"
-                                type="text"
-                                placeholder="Source"
-                                name="source"
-                                value="{{ video.source }}"
-                                {% if video.status == 0 %}disabled{% endif %}
-                                >
-                            </div>
-                        </div>
-                        <div class="uk-width-1-2 uk-margin">
-                            <label class="uk-form-label">Verified</label>
-                            <div class="uk-form-controls uk-form-controls-text uk-margin-small">
-                                <label><input class="uk-radio" type="radio" id="not_verified_radio" value="verified_off" name="verified"{% if not verified %} checked{% endif %}> Not verified yet</label><br>
-                                <label><input class="uk-radio" type="radio" id="verified_radio" value="verified_on" name="verified"{% if verified %} checked{% endif %}> Verified</label>
-                            </div>
-                        </div>
-                    </div>
-
                     <div class="uk-margin">
                         <div class="uk-text-meta">Content tags</div>
-                        <select class="uk-select" multiple id="tags_select" name="tags_select">
+                        <select class="uk-select uk-height-small" multiple id="tags_select" name="tags_select">
                             {% for tag in tags %}
                             <option value="{{ tag.id }}" class="content-tag-option-{{ tag.category }}"{% if tag.enabled %} selected{% endif %}>{{ tag.name }}</option>
                             {% endfor %}
@@ -55,7 +31,7 @@
                     </div>
                     <div class="uk-margin">
                         <div class="uk-text-meta">Categories</div>
-                        <select class="uk-select" multiple id="categories_select" name="categories_select">
+                        <select class="uk-select uk-height-small" multiple id="categories_select" name="categories_select">
                             {% for c in categories %}
                             <option value="{{ c.id }}" class="category-option" {% if c.enabled %}selected{% endif %}>{{ c.name }}</option>
                             {% endfor %}
