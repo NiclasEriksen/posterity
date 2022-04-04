@@ -93,7 +93,7 @@ TIME_QUERIES = [
     "s", "t", "time", "seek"
 ]
 TIME_LOCATIONS = [
-    "twitter", "youtube.com", "t.co", "youtu.be"
+    "twitter.com", "youtube.com", "t.co", "youtu.be"
 ]
 
 
@@ -207,7 +207,7 @@ def minimize_url(url: str) -> str:
         query = parse_qs(u.query, keep_blank_values=True)
         for dq in DISPOSABLE_QUERIES:
             query.pop(dq, None)
-        if u.netloc in TIME_LOCATIONS:
+        if u.netloc.replace("www.", "") in TIME_LOCATIONS:
             for dq in TIME_QUERIES:
                 query.pop(dq, None)
 
