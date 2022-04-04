@@ -120,7 +120,7 @@
                     <h3 class="uk-text-warning">This video is a duplicate of <a href="/{{ duplicate }}">{{ duplicate }}</a>.</h3>
                 </div>
                 {% endif %}
-                <div class="uk-width-1-1 uk-width-1-2@m">
+                <div class="uk-width-1-1 uk-width-1-2@s">
                     <div class="uk-grid uk-padding-small">
                         <div class="uk-width-1-6">
                             <span uk-icon="icon: quote-right; ratio: 2;"></span>
@@ -130,38 +130,43 @@
                         </div>
                     </div>
                 </div>
-                <div class="uk-width-1-1 uk-width-1-2@m">
-                    <div class="uk-grid uk-padding-small">
-                        <div class="uk-width-1-6">
-                            <span uk-icon="icon: tv; ratio: 2;"></span>
-                        </div>
-                        <div class="uk-width-5-6">
-                            <p>
-                                {{ video.dimensions_str }}<br>
-                                {{ video.format_str }}, {{ video.frame_rate_str }}<br>
-                                {{ video.bit_rate_str }}, {{ video.file_size_str }}
-                            </p>
-                        </div>
-                    </div>
-                </div>
-                <div class="uk-width-1-1 uk-width-1-2@m">
+                <div class="uk-width-1-1 uk-width-1-2@s">
                     <div class="uk-grid uk-padding-small">
                         <div class="uk-width-1-6">
                             <span uk-icon="icon: location; ratio: 2;"></span>
                         </div>
                         <div class="uk-width-5-6">
-                            <p><a href="{{ video.url }}" target="_blank" class="uk-icon-link" uk-icon="link">Source link</a></p>
-                            {% if current_user.is_authenticated %}<p class="uk-text-meta uk-text-small">Uploaded by <i>"{{ video.source }}"</i></p>{% endif %}
+                            <p class="uk-text-small">
+                                <a href="{{ video.url }}" target="_blank" class="uk-icon-link" uk-icon="link">Source link</a><br>
+                                <span class="uk-text-meta">Uploaded {% if current_user.is_authenticated %}by <i>"{{ video.source }}"</i> {% endif %}{{ video.upload_time_verbose }}</span>
+                            </p>
                         </div>
                     </div>
                 </div>
-                <div class="uk-width-1-1 uk-width-1-2@m">
+                <div class="uk-width-1-1 uk-width-1-2@s">
                     <div class="uk-grid uk-padding-small">
                         <div class="uk-width-1-6">
                             <span uk-icon="icon: future; ratio: 2;"></span>
                         </div>
                         <div class="uk-width-5-6">
-                            <p>{{ video.duration_str_verbose }}</p>
+                            <p class="uk-text-small">
+                                <span class="uk-text-meta">Duration:</span> {{ video.duration_str_verbose }}<br>
+                                <span class="uk-text-meta">File size:</span> {{ video.file_size_str }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="uk-width-1-1 uk-width-1-2@s">
+                    <div class="uk-grid uk-padding-small">
+                        <div class="uk-width-1-6">
+                            <span uk-icon="icon: tv; ratio: 2;"></span>
+                        </div>
+                        <div class="uk-width-5-6">
+                            <p class="uk-text-small">
+                                <span class="uk-text-meta">Dimensions:</span> {{ video.dimensions_str }}<br>
+                                <span class="uk-text-meta">Codecs:</span> {{ video.format_str }}<br>
+                                <span class="uk-text-meta">FPS/bit rate:</span> {{ video.frame_rate_str }}, {{ video.bit_rate_str }}
+                            </p>
                         </div>
                     </div>
                 </div>
