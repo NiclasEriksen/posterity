@@ -74,7 +74,7 @@ DISPOSABLE_QUERIES = [
     "ref", "ref_src", "ref_url", "taid",
     "fbclid", "gclid", "gclsrc",
     "utm_campaign", "utm_medium", "utm_source", "utm_content", "utm_term", "utm_id",
-    "_ga", "mc_cid", "mc_eid",
+    "_ga", "mc_cid", "mc_eid", "usg", "esrc", "ved",
     "__cft__[0]", "__cft__", "__tn__",
     "__mk_de_DE", "__mk_en_US", "__mk_en_GB", "__mk_nb_NO",
     "rnid", "pf_rd_r", "pf_rd_p", "pd_rd_i", "pd_rd_r", "pd_rd_wg",
