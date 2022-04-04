@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block page_title %}Video: {{ video.title }}{% endblock %}
+{% block page_title %}{% if video.status == 1 %}Downloading: {% else %}Video: {% endif %}{{ video.title }}{% endblock %}
 {% block metadata %}<!-- OpenGraph metadata for video -->
         <meta name="description" content="{{ video.orig_title }}!">
         <meta property="og:site_name" content="Posterity video">
