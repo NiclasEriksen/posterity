@@ -68,6 +68,12 @@ def after_request(response):
     return response
 
 
+@serve.route('/robots.txt')
+@serve.route('/sitemap.xml')
+def static_from_root():
+    return send_from_directory(serve.static_folder, request.path[1:])
+
+
 @serve.route("/", methods=["GET"])
 def front_page():
     page = request.args.get("p", type=int, default=1)
