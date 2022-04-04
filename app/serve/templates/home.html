@@ -150,23 +150,25 @@
                         </div>
                     </td>
                     <td class="uk-text-muted uk-text-small uk-visible@s" style="max-width: 15vw;">
-                        <div style="overflow: hidden; white-space: nowrap; text-overflow: ellipsis;">
-                            {% if video.status == 0 %}
-                            <span class="uk-text-primary" uk-icon="icon: download; ratio: 0.9"></span>
-                            {% elif video.status == 1 %}
-                            <span class="uk-text-success" uk-icon="icon: check; ratio: 0.9"></span>
-                            {% elif video.status == 2 %}
-                            <span class="uk-text-danger" uk-icon="icon: close; ratio: 0.9"></span>
-                            {% elif video.status == 3 %}
-                            <span class="uk-text-danger" uk-icon="icon: ban; ratio: 0.9"></span>
-                            {% elif video.status == 4 %}
-                            <span class="uk-text-danger" uk-icon="icon: file-text; ratio: 0.9"></span>
-                            {% else %}
-                            <span class="uk-text-warning" uk-icon="icon: question; ratio: 0.9"></span>
-                            {% endif %}
-                            <a href="{{ video['url'] }}" target="_blank">{{ video.url[:128] }}</a>
-                            {% if current_user.is_authenticated %}<br><span class="uk-text-meta" uk-icon="icon: user; ratio: 0.9"></span> {{ video.source }}{% endif %}
-                        </div>
+                        <span uk-tooltip="title: {{ video.url }};pos: top-left;">
+                            <div style="overflow: hidden; white-space: nowrap; text-overflow: ellipsis;">
+                                {% if video.status == 0 %}
+                                <span class="uk-text-primary" uk-icon="icon: download; ratio: 0.9"></span>
+                                {% elif video.status == 1 %}
+                                <span class="uk-text-success" uk-icon="icon: check; ratio: 0.9"></span>
+                                {% elif video.status == 2 %}
+                                <span class="uk-text-danger" uk-icon="icon: close; ratio: 0.9"></span>
+                                {% elif video.status == 3 %}
+                                <span class="uk-text-danger" uk-icon="icon: ban; ratio: 0.9"></span>
+                                {% elif video.status == 4 %}
+                                <span class="uk-text-danger" uk-icon="icon: file-text; ratio: 0.9"></span>
+                                {% else %}
+                                <span class="uk-text-warning" uk-icon="icon: question; ratio: 0.9"></span>
+                                {% endif %}
+                                <a href="{{ video.url }}" target="_blank">{{ video.url[:128] }}</a>
+                            </div>
+                        </span>
+                        {% if current_user.is_authenticated %}<br><span class="uk-text-meta" uk-icon="icon: user; ratio: 0.9"></span> {{ video.source }}{% endif %}
                     </td>
                     <td class="uk-text-muted uk-text-small"{% if video.status != 1 %} style="padding: 0!important;"{% endif %}>
                         {% if video.status == 1 %}

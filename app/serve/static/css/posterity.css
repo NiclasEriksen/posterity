@@ -203,6 +203,13 @@ body, html {
     font-weight: 300;
 }
 
+.uk-tooltip {
+    overflow-wrap: normal;
+    max-width: min-content;
+    min-width: 10vw;
+    text-align: center;
+}
+
 .video-link:hover {
     color: var(--light-grey);
 }
