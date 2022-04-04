@@ -198,11 +198,16 @@ body, html {
     color: var(--grey);
 }
 .video-link-not-ready {
-    color: var(--charcoal);
+    color: var(--light-grey);
+    font-style: italic;
+    font-weight: 300;
 }
 
 .video-link:hover {
     color: var(--light-grey);
+}
+.video-link-not-ready:hover {
+    color: var(--charcoal);
 }
 
 .list-thumbnail {
