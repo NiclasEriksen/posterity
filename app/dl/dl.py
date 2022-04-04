@@ -5,7 +5,7 @@ import subprocess
 from datetime import datetime
 from typing import Union
 from .helpers import seconds_to_time, resource_path, unique_filename
-from .youtube import valid_youtube_url, get_content_info, AgeRestrictedError
+from .youtube import valid_video_url, get_content_info, AgeRestrictedError
 from .metadata import generate_video_images, technical_info
 from app import celery
 from werkzeug.local import LocalProxy
@@ -73,7 +73,7 @@ def download_from_json_data(metadata: dict, file_name: str):
     from app.serve.db import Video
     vid_save_path = os.path.join(media_path, file_name + ".mp4")
 
-    if not valid_youtube_url(metadata["url"]):
+    if not valid_video_url(metadata["url"]):
         log.error("Invalid video url...")
         metadata["status"] = STATUS_INVALID
         yield STATUS_INVALID

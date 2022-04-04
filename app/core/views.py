@@ -4,9 +4,9 @@ from werkzeug.local import LocalProxy
 from authentication import require_appkey
 
 from .tasks import download_task
-from app.dl.youtube import valid_youtube_url
+from app.dl.youtube import valid_video_url, minimize_url
 from app.dl.helpers import unique_filename
-from app.dl.dl import parse_input_data, find_duplicate_video_by_url
+from app.dl.dl import parse_input_data, find_duplicate_video_by_url, STATUS_DOWNLOADING
 from app.serve.db import db_session, Video
 
 core = Blueprint('core', __name__)
@@ -40,20 +40,19 @@ def post_link():
             return Response("Video with that ID exists", status=400)
 
         if "url" not in data:
-            abort(400)
-            return "No url in data."
-        if not valid_youtube_url(data["url"]):
-            abort(400)
-            return "No valid url."
+            return Response("No url in posted data.", status=400)
+        if not valid_video_url(data["url"]):
+            return Response("That url doesn't seem valid.", status=400)
+
+        data["url"] = minimize_url(data["url"])
+
         if find_duplicate_video_by_url(data["url"]):
             return Response("Video with that URL exists", status=406)
-            abort(400)
-            return "Duplicate video."
 
         try:
             video = Video()
             video.from_json(data)
-            video.status = 0
+            video.status = STATUS_DOWNLOADING
             db_session.add(video)
             db_session.commit()
         except Exception as e:
@@ -61,21 +60,18 @@ def post_link():
             db_session.remove()
             logger.error(e)
             logger.error("Failure to create video object in database.")
-            abort(400)
-            return "Database error on adding video, weird."
+            return Response("Database error on adding video, weird.", status=400)
 
         try:
             task_id = download_task.delay(data, fn)
         except Exception as e:
-            print(e)
-            abort(400)
-            return "Error during adding of download task."
+            logger.error(e)
+            return Response("Error during adding of download task.", status=400)
 
         logger.info(f"Started new download task with id: {task_id}")
-        return "https://posterity.no/" + fn
+        return Response(f"https://posterity.no/{fn}", status=200)
 
-    abort(400)
-    return "No data posted."
+    return Response("No data posted.", status=400)
 
 
 @core.route('/restricted', methods=['GET'])

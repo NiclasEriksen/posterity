@@ -3,16 +3,11 @@ from youtube_dl.utils import DownloadError
 import logging
 import re
 import requests
-from .helpers import program_path, find_between
 import codecs
-
-
-#https://accounts.google.com/signin/v2/identifier?service=youtube
-#CLIENTID: 1011910616755-rbvlv952parvd549q0olik45c9somivd.apps.googleusercontent.com
-#SECRET  : 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
+from urllib.parse import urlencode, urlparse, urlunparse, parse_qs
+from .helpers import program_path, find_between
 
 log = logging.getLogger("posterity_dl.yt")
-
 
 YT_FORMATS = {
     "YT 1080p": "137",
@@ -74,6 +69,17 @@ DEFAULT_AUDIO = "Opus VBR 70kbps"
 DEFAULT_VIDEO = "MP4 720p"
 DEFAULT_LANG  = "en"
 STREAMING_PATTERNS = ["yt.com", "twitch.com"]
+
+DISPOSABLE_QUERIES = [
+    "ref", "ref_src", "ref_url", "taid",
+    "utm_campaign", "utm_medium", "utm_source"
+]
+TIME_QUERIES = [
+    "s", "t", "time", "seek"
+]
+TIME_LOCATIONS = [
+    "twitter", "youtube.com", "t.co", "youtu.be"
+]
 
 
 class AgeRestrictedError(Exception):
@@ -168,13 +174,34 @@ def height_to_width(h: int) -> int:
     return h
 
 
-def valid_youtube_url(url: str) -> bool:
-    if not len(url.split(".")) > 1:
+def valid_video_url(url: str) -> bool:
+    if not url or not isinstance(url, str):
         return False
+
+    u = urlparse(url)
+
+    if u.scheme not in ["http", "https", "ftp"]:
+        return False
+
     return True
 
 
-def get_source_links(url: str) -> str:
+def minimize_url(url: str) -> str:
+    u = urlparse(url)
+    if len(u.query):
+        query = parse_qs(u.query, keep_blank_values=True)
+        for dq in DISPOSABLE_QUERIES:
+            query.pop(dq, None)
+        if u.netloc in TIME_LOCATIONS:
+            for dq in TIME_QUERIES:
+                query.pop(dq, None)
+
+        u = u._replace(query=urlencode(query, True))
+
+    return urlunparse(u)
+
+
+def get_source_links(url: str) -> list:
     headers = {'Accept-Encoding': 'identity'}
 
     if "://t.me" in url and not "embed=1" in url:
