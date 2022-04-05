@@ -69,6 +69,7 @@ def post_link():
             video.status = STATUS_DOWNLOADING if download_now else STATUS_PENDING
             db_session.add(video)
             db_session.commit()
+            data = video.to_json()
         except Exception as e:
             db_session.rollback()
             db_session.remove()
