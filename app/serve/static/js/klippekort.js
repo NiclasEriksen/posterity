@@ -36,6 +36,14 @@ function handleFormSubmit(event) {
             if (category_field) { category_field.value = "default"; }
             console.log(this.response);
 
+        } else if (this.status < 200) {
+            submit_btn.disabled = false;
+            submit_btn.textContent = "Save for posterity";
+            if (status_field) {
+                status_field.innerHTML = '<span class="uk-text-danger">Unknown error when contacting server.</span>';
+            }
+            console.log(this.status);
+            console.log(this.response);
         } else {
             submit_btn.disabled = false;
             submit_btn.textContent = "Save for posterity";
@@ -45,8 +53,20 @@ function handleFormSubmit(event) {
             console.log(this.response);
         }
     }
-    
-    request.send(JSON.stringify(formJSON));
+    request.onerror = function(err) {
+        console.error(err);
+        submit_btn.disabled = false;
+        submit_btn.textContent = "Save for posterity";
+        if (status_field) {
+            status_field.innerHTML = '<span class="uk-text-danger">Unknown error when contacting server.</span>';
+        }
+        console.log(this.response);
+    }
+    try {
+        request.send(JSON.stringify(formJSON));
+    } catch (err) {
+        console.error(err);
+    }
 
 }
 

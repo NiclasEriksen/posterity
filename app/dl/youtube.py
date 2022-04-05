@@ -1,5 +1,8 @@
-from youtube_dl import YoutubeDL
-from youtube_dl.utils import DownloadError
+#from youtube_dl import YoutubeDL
+from yt_dlp import YoutubeDL
+from yt_dlp.utils import DownloadError
+#from youtube_dl.utils import DownloadError
+from html import unescape
 import logging
 import re
 import requests
@@ -186,6 +189,32 @@ def is_hls(f: str) -> bool:
     return False
 
 
+def is_dash(format: str) -> bool:
+    if not isinstance(format, str) and not len(format):
+        return False
+    if len(format.split("v")) == 2:
+        try:
+            int(len(format.split("v")[0]))
+        except (ValueError, TypeError):
+            pass
+        else:
+            return True
+    return False
+
+
+def is_avc(format: str) -> bool:
+    if not isinstance(format, str) and not len(format):
+        return False
+    if len(format.split("avc1.")) == 2:
+        try:
+            assert len(format.split("avc1.")[1]) == 6
+        except AssertionError:
+            return False
+        else:
+            return True
+    return False
+
+
 def height_to_width(h: int) -> int:
     if h > 720 and h <= 1080:
         return 1920
@@ -238,10 +267,10 @@ def minimize_url(url: str) -> str:
 def get_og_tags(html: str, title_only=False):
     titles = re.findall(r"<meta [^>]*property=[\"']og:title[\"'] [^>]*content=[\"']([^'^\"]+?)[\"'][^>]*>", html)
     if title_only:
-        return titles
+        return [unescape(t) for t in titles]
     descs = re.findall(r"<meta [^>]*property=[\"']og:description[\"'] [^>]*content=[\"']([^'^\"]+?)[\"'][^>]*>", html)
     names = re.findall(r"<meta [^>]*property=[\"']og:site_name[\"'] [^>]*content=[\"']([^'^\"]+?)[\"'][^>]*>", html)
-    return titles + descs + names
+    return [unescape(t) for t in titles] + [unescape(t) for t in descs] + [unescape(t) for t in names]
 
 
 def get_source_links(url: str) -> (str, list):
@@ -257,7 +286,6 @@ def get_source_links(url: str) -> (str, list):
         return "No title (missing)", []
 
     html = r.text
-    elements = re.findall(r'[\'"]?([^\'" >]+)', html)
 
     titles = get_og_tags(html, title_only=True)
     if len(titles) > 0:
@@ -274,6 +302,7 @@ def get_source_links(url: str) -> (str, list):
                 title = "No title (mp4)"
 
     urls = []
+    elements = re.findall(r'[\'"]?([^\'" >]+)', html)
 
     if "://t.me" in url:
         if "grouped_media" in html:
@@ -340,11 +369,14 @@ def get_content_info(url: str) -> dict:
         except DownloadError as e:
             log.error("Error during fetching of video info, doing manual")
             video = None
+        except Exception as e:
+            log.error(e)
+            log.error("Unhandled error during YoutubeDL extraction.")
         else:
             if "entries" in result:
                 try:
                     video = result["entries"][0]
-                except IndexError:
+                except (IndexError, ValueError, AttributeError):
                     video = None
             else:
                 video = result
@@ -401,6 +433,7 @@ def get_content_info(url: str) -> dict:
             for u in [f for f in video["formats"]]:
                 if "url" in u:
                     if check_stream(u["url"]):
+                        log.error("This link was a stream (?): " + u["url"])
                         continue
                 try:
                     x = int(u["width"])
@@ -415,7 +448,7 @@ def get_content_info(url: str) -> dict:
                 if "vcodec" in u.keys():
                     if u["format_id"] in vid_ids.keys():
                         d["video_formats"][vid_ids[u["format_id"]]] = {"url": u["url"], "dimensions": (x, y)}
-                    elif is_hls(u["format_id"]):
+                    elif is_hls(u["format_id"]) or is_dash(u["format_id"]) or is_avc(u["format_id"]):
                         d["video_formats"][u["format"]] = {"url": u["url"], "dimensions": (x, y)}
                     else:
                         try:
@@ -424,10 +457,13 @@ def get_content_info(url: str) -> dict:
                             pass
                         else:
                             d["video_formats"][u["format"]] = {"url": u["url"], "dimensions": (x, y)}
-                elif "ext" in u.keys():
-                    if u["ext"] == "mp4":
+
+                elif "ext" in u.keys() or "video_ext" in u.keys():
+                    if u["video_ext"] in ["mp4", "ogv"] or u["ext"] in ["mp4", "ogv"]:
                         if u["format_id"] in vid_ids.keys():
                             d["video_formats"][vid_ids[u["format_id"]]] = {"url": u["url"], "dimensions": (x, y)}
+                        elif is_hls(u["format_id"]) or is_dash(u["format_id"]) or is_avc(u["format_id"]):
+                            d["video_formats"][u["format"]] = {"url": u["url"], "dimensions": (x, y)}
 
                 if "acodec" in u.keys():
                     if u["format_id"] in aud_ids.keys():
