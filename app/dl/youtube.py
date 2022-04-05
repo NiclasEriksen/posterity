@@ -229,7 +229,7 @@ def minimize_url(url: str) -> str:
     return urlunparse(u)
 
 
-def get_source_links(url: str) -> list:
+def get_source_links(url: str) -> (str, list):
     headers = {'Accept-Encoding': 'identity'}
 
     if "://t.me" in url and not "embed=1" in url:
@@ -239,15 +239,21 @@ def get_source_links(url: str) -> list:
         r = requests.get(url, headers=headers)
     except:
         log.error("Unable to download page?!")
-        return []
+        return "No title (missing)", []
     html = r.text
     elements = re.findall(r'[\'"]?([^\'" >]+)', html)
+    titles = re.findall(r"<title>(.*?)</title>", html)
+    if len(titles) > 0:
+        title = titles[0]
+    else:
+        title = "No title (mp4)"
+
     urls = []
 
     if "://t.me" in url:
         if "grouped_media" in html:
             log.error("Multiple videos, link individual Telegram page!")
-            return []
+            return "Multiple videos on page", []
 
     if "contentURL" in html and ".mp4" in html:
         l = find_between(html, "contentURL\":\"", "\"")
@@ -261,7 +267,7 @@ def get_source_links(url: str) -> list:
         elif "http" in e.lower() and ".mp4" in e.lower():
             urls.append(codecs.decode(e, 'unicode-escape'))
 
-    return urls
+    return title, urls
 
 
 def get_content_info(url: str) -> dict:
@@ -319,7 +325,7 @@ def get_content_info(url: str) -> dict:
 
     if not video:
         log.debug(f"YoutubeDL failed to find a video, let's see what we can do with it.")
-        urls = get_source_links(url)
+        title, urls = get_source_links(url)
         if len(urls):
             log.info("Found urls in source code.")
 
@@ -331,7 +337,7 @@ def get_content_info(url: str) -> dict:
                 "sub_formats": {},
                 "duration": 0.0,
                 "thumbnail": "",
-                "title": "No title (mp4)"
+                "title": title
             }
 
         log.error("Was not able to find a video on the url given.")
@@ -408,7 +414,7 @@ def get_content_info(url: str) -> dict:
 
     if not len(d["video_formats"]):
         log.warning("Last ditch attempt to get video link.")
-        urls = get_source_links(url)
+        title, urls = get_source_links(url)
         if len(urls):
             url = find_highest_quality_url(urls)
 
@@ -418,7 +424,7 @@ def get_content_info(url: str) -> dict:
                 "sub_formats": {},
                 "duration": 0.0,
                 "thumbnail": "",
-                "title": "No title (mp4)"
+                "title": title
             }
         if video:
             if "formats" in video:
