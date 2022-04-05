@@ -333,6 +333,14 @@ class Video(Base):
                 tag = ContentTag.query.filter_by(name=c.lstrip().rstrip().capitalize()).first()
                 if not tag:
                     tag = ContentTag.query.filter_by(name=c.lstrip().rstrip()).first()
+                    if not tag:
+                        try:
+                            int(c)
+                        except (TypeError, ValueError):
+                            pass
+                        else:
+                            tag = ContentTag.query.filter_by(id=int(c)).first()
+
                 if tag and tag not in self.tags:
                     self.tags.append(tag)
 
@@ -359,6 +367,16 @@ class Video(Base):
         else:
             for ct in c:
                 tag = Category.query.filter_by(name=ct.lstrip().rstrip().capitalize()).first()
+                if not tag:
+                    tag = Category.query.filter_by(name=ct.lstrip().rstrip()).first()
+                    if not tag:
+                        try:
+                            int(ct)
+                        except (TypeError, ValueError):
+                            pass
+                        else:
+                            tag = Category.query.filter_by(id=int(ct)).first()
+
                 if tag and tag not in self.categories:
                     self.categories.append(tag)
 

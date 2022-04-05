@@ -38,7 +38,7 @@
                         <select class="uk-input uk-select" id="content_warning" name="content_warning">
                             <option value="default">None</option>
                             {% for tag in tags %}
-                            <option class="content-tag-option-{{ tag.category }}">{{ tag.name }}</option>
+                            <option class="content-tag-option-{{ tag.category }}" value="{{ tag.id }}">{{ tag.name }}</option>
                             {% endfor %}
                         </select>
                     </div>
@@ -50,7 +50,7 @@
                         <select class="uk-input uk-select" id="category" name="category">
                             <option value="default">None</option>
                             {% for tag in categories %}
-                            <option class="category-option">{{ tag.name }}</option>
+                            <option class="category-option" value="{{ tag.id }}">{{ tag.name }}</option>
                             {% endfor %}
                         </select>
                     </div>
