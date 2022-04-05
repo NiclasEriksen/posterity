@@ -235,6 +235,15 @@ def minimize_url(url: str) -> str:
     return urlunparse(u)
 
 
+def get_og_tags(html: str, title_only=False):
+    titles = re.findall(r"<meta [^>]*property=[\"']og:title[\"'] [^>]*content=[\"']([^'^\"]+?)[\"'][^>]*>", html)
+    if title_only:
+        return titles
+    descs = re.findall(r"<meta [^>]*property=[\"']og:description[\"'] [^>]*content=[\"']([^'^\"]+?)[\"'][^>]*>", html)
+    names = re.findall(r"<meta [^>]*property=[\"']og:site_name[\"'] [^>]*content=[\"']([^'^\"]+?)[\"'][^>]*>", html)
+    return titles + descs + names
+
+
 def get_source_links(url: str) -> (str, list):
     headers = {'Accept-Encoding': 'identity'}
 
@@ -246,13 +255,23 @@ def get_source_links(url: str) -> (str, list):
     except:
         log.error("Unable to download page?!")
         return "No title (missing)", []
+
     html = r.text
     elements = re.findall(r'[\'"]?([^\'" >]+)', html)
-    titles = re.findall(r"<title>(.*?)</title>", html)
+
+    titles = get_og_tags(html, title_only=True)
     if len(titles) > 0:
         title = titles[0]
     else:
-        title = "No title (mp4)"
+        titles = re.findall(r"<title>(.*?)</title>", html)
+        if len(titles) > 0:
+            title = titles[0]
+        else:
+            titles = get_og_tags(html, title_only=False)    # Broader search
+            if len(titles) > 0:
+                title = titles[0]
+            else:
+                title = "No title (mp4)"
 
     urls = []
 
