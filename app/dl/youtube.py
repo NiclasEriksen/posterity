@@ -221,7 +221,6 @@ def fix_youtube_shorts(url: str) -> str:
 
 
 def minimize_url(url: str) -> str:
-    url = fix_youtube_shorts(url)
     u = urlparse(url)
     if len(u.query):
         query = parse_qs(u.query, keep_blank_values=True)
@@ -289,6 +288,7 @@ def get_content_info(url: str) -> dict:
             "thumbnail": "",
             "title": "No title (mp4)"
         }
+    url = fix_youtube_shorts(url)
     vid_ids = {YT_FORMATS[k]: k for k in VID_FORMATS}
     aud_ids = {YT_FORMATS[k]: k for k in AUD_FORMATS}
     d = {
