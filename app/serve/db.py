@@ -331,8 +331,11 @@ class Video(Base):
         else:
             for c in cw:
                 tag = ContentTag.query.filter_by(name=c.lstrip().rstrip().capitalize()).first()
+                if not tag:
+                    tag = ContentTag.query.filter_by(name=c.lstrip().rstrip()).first()
                 if tag and tag not in self.tags:
                     self.tags.append(tag)
+
         try:
             categories = d["categories"]
         except KeyError:
