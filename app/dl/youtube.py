@@ -95,6 +95,7 @@ DISPOSABLE_QUERIES = [
     "hsa_cam", "hsa_grp", "hsa_mt", "hsa_src", "hsa_ad", "hsa_acc", "hsa_net", "hsa_kw", "hsa_tgt", "hsa_ver",
     "ns_mchannel", "ns_source", "ns_campaign", "ns_linkname", "ns_fee",
     "pinned_post_locator", "pinned_post_asset_id", "pinned_post_type",
+    "ab_channel"
 ]
 TIME_QUERIES = [
     "s", "t", "time", "seek"
