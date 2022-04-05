@@ -322,7 +322,6 @@ def parse_input_data(data: dict) -> dict:
     except KeyError:
         pass
 
-
     if "source_user" in data and len(data["source_user"]):
         metadata["source"] = data["source_user"]
     else:
@@ -334,8 +333,8 @@ def parse_input_data(data: dict) -> dict:
         metadata["category"] = data["category"]
     except KeyError:
         pass
-    metadata["content_warning"].replace("default", "")
-    metadata["category"].replace("default", "")
+    metadata["content_warning"] = metadata["content_warning"].replace("default", "")
+    metadata["category"] = metadata["category"].replace("default", "")
 
     return metadata
 
