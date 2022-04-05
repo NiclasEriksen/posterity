@@ -68,7 +68,7 @@ VID_FORMATS = ["240p", "360p", "480p", "720p", "1080p",
     "MP4 720p 4:3", "MP4 640p 4:3", "MP4 360p 4:3", "MP4 240p 4:3", "MP4 180p 4:3", "MP4 Mobile",
     "Vimeo 360p0", "Vimeo 360p1", "Vimeo 480p0", "Vimeo 640p0", "Vimeo 720p0",  "Vimeo 1080p0"
 ]
-AUD_FORMATS = ["HE-AAC", "mp4a Twitter", "HLS audio 0", "HLS audio 1", "Opus VBR 50kbps", "Opus VBR 70kbps", "Opus VBR 160kbps", "AAC 48kbps", "AAC 128kbps"]
+AUD_FORMATS = ["HE-AAC", "AAC-LC", "MP3", "HLS audio 0", "HLS audio 1", "Opus VBR 50kbps", "Opus VBR 70kbps", "Opus VBR 160kbps", "AAC 48kbps", "AAC 128kbps"]
 SUB_LANGS   = ["en", "no"]
 DEFAULT_AUDIO = "Opus VBR 70kbps"
 DEFAULT_VIDEO = "MP4 720p"
