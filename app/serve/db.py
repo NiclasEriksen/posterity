@@ -94,6 +94,9 @@ class Video(Base):
     tags = relationship("ContentTag", secondary=tag_association_table)
     categories = relationship("Category", secondary=category_association_table)
 
+    def __init__(self):
+        self.upload_time = datetime.now()
+
     @property
     def upload_time_str(self) -> str:
         return self.upload_time.strftime("%b %d, %H:%M").lower()
