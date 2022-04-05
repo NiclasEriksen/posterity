@@ -40,7 +40,9 @@ YT_FORMATS = {
     "Opus VBR 160kbps": "251",
     "AAC 48kbps": "139",
     "AAC 128kbps": "140",
-    "mp4a Twitter": "mp4a.40.2",
+    "AAC-LC": "mp4a.40.2",
+    "HE-AAC": "mp4a.40.5",
+    "MP3": "mp4a.40.34",
     "HLS audio 0": "hls-0-audio_0",
     "HLS audio 1": "hls-1-audio_0",
     "Vimeo 360p0": "http-360p-0",
@@ -66,7 +68,7 @@ VID_FORMATS = ["240p", "360p", "480p", "720p", "1080p",
     "MP4 720p 4:3", "MP4 640p 4:3", "MP4 360p 4:3", "MP4 240p 4:3", "MP4 180p 4:3", "MP4 Mobile",
     "Vimeo 360p0", "Vimeo 360p1", "Vimeo 480p0", "Vimeo 640p0", "Vimeo 720p0",  "Vimeo 1080p0"
 ]
-AUD_FORMATS = ["mp4a Twitter", "HLS audio 0", "HLS audio 1", "Opus VBR 50kbps", "Opus VBR 70kbps", "Opus VBR 160kbps", "AAC 48kbps", "AAC 128kbps"]
+AUD_FORMATS = ["HE-AAC", "mp4a Twitter", "HLS audio 0", "HLS audio 1", "Opus VBR 50kbps", "Opus VBR 70kbps", "Opus VBR 160kbps", "AAC 48kbps", "AAC 128kbps"]
 SUB_LANGS   = ["en", "no"]
 DEFAULT_AUDIO = "Opus VBR 70kbps"
 DEFAULT_VIDEO = "MP4 720p"
@@ -469,7 +471,10 @@ def get_content_info(url: str) -> dict:
                     if u["format_id"] in aud_ids.keys():
                         d["audio_formats"][aud_ids[u["format_id"]]] = u["url"]
                     elif u["acodec"] != None:
-                        log.error(f'Unhandled audio codec: {u["acodec"]}')
+                        if u["acodec"] in aud_ids.keys():
+                            d["audio_formats"][aud_ids[u["acodec"]]] = u["url"]
+                        else:
+                            log.error(f'Unhandled audio codec: {u["format_id"]}')
                 elif "audio" in u["format"]:
                     if u["format_id"] in aud_ids.keys():
                         d["audio_formats"][aud_ids[u["format_id"]]] = u["url"]
