@@ -1,4 +1,5 @@
 from flask import Blueprint, current_app, request, abort, Response
+from flask_login import current_user
 from werkzeug.local import LocalProxy
 
 from authentication import require_appkey
@@ -6,7 +7,7 @@ from authentication import require_appkey
 from .tasks import download_task
 from app.dl.youtube import valid_video_url, minimize_url
 from app.dl.helpers import unique_filename
-from app.dl.dl import parse_input_data, find_duplicate_video_by_url, STATUS_DOWNLOADING
+from app.dl.dl import parse_input_data, find_duplicate_video_by_url, STATUS_DOWNLOADING, STATUS_PENDING
 from app.serve.db import db_session, Video
 
 core = Blueprint('core', __name__)
@@ -20,8 +21,17 @@ def before_request_func():
 
 @core.route("/post_link", methods=["POST"])
 def post_link():
+    download_now = False
+
     logger.info("Link posted.")
     data = request.get_json()
+    if current_user:
+        if current_user.is_authenticated:
+            if "download_now" in data and isinstance(data["download_now"], bool):
+                download_now = data["download_now"]
+            else:
+                download_now = True
+
     data = parse_input_data(data)
 
     if data and len(data.keys()):
@@ -56,7 +66,7 @@ def post_link():
         try:
             video = Video()
             video.from_json(data)
-            video.status = STATUS_DOWNLOADING
+            video.status = STATUS_DOWNLOADING if download_now else STATUS_PENDING
             db_session.add(video)
             db_session.commit()
         except Exception as e:
@@ -66,14 +76,17 @@ def post_link():
             logger.error("Failure to create video object in database.")
             return Response("Database error on adding video, weird.", status=400)
 
-        try:
-            task_id = download_task.delay(data, fn)
-        except Exception as e:
-            logger.error(e)
-            return Response("Error during adding of download task.", status=400)
+        if download_now:
+            try:
+                task_id = download_task.delay(data, fn)
+            except Exception as e:
+                logger.error(e)
+                return Response("Error during adding of download task. Link has been put in pending queue.", status=400)
 
-        logger.info(f"Started new download task with id: {task_id}")
-        return Response(f"https://posterity.no/{fn}", status=200)
+            logger.info(f"Started new download task with id: {task_id}")
+            return Response(f"https://posterity.no/{fn}", status=201)
+        else:
+            return Response("Video has peen submitted, pending approval.", status=202)
 
     return Response("No data posted.", status=400)
 

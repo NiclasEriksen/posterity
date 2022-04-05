@@ -113,7 +113,7 @@ def download_from_json_data(metadata: dict, file_name: str):
 
     f = find_best_format(video_formats)
     video_url = video_links[f]["url"]
-    print(video_url)
+
     if len(audio_formats):
         audio_url = audio_links[audio_formats[-1]]
     else:

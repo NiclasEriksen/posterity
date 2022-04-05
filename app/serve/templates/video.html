@@ -67,6 +67,12 @@
                                 <div class="video-spinner"></div>
                             </div>
                         </div>
+                        {% elif video.status == 5 %}
+                        <div class="uk-flex uk-margin uk-text-meta uk-flex-center uk-padding-large uk-height-large">
+                            <div class="uk-position-center uk-padding-small">
+                                <div class="video-spinner"></div>
+                            </div>
+                        </div>
                         {% endif %}
                     </div>
                 </div>
@@ -109,17 +115,16 @@
                 <div class="uk-width-1-1 uk-background-muted uk-text-center uk-padding-remove">
                     <h3 class="uk-text-danger">Video might be region/age restricted and requires cookies (not implemented).</h3>
                 </div>
+                {% elif video.status == 5 %}
+                <div class="uk-width-1-1 uk-background-muted uk-text-center uk-padding-remove">
+                    <h3 class="uk-text-warning">Link is pending approval by an editor and has not started downloading yet.</h3>
+                </div>
                 {% else %}
                 <div class="uk-width-1-1 uk-background-muted uk-text-center uk-padding-remove">
                     <h3 class="uk-text-danger">Download failed.</h3>
                 </div>
                 {% endif %}
 
-                {% if duplicate|length > 1 %}
-                <div class="uk-width-1-1 uk-background-muted uk-text-center uk-padding-remove">
-                    <h3 class="uk-text-warning">This video is a duplicate of <a href="/{{ duplicate }}">{{ duplicate }}</a>.</h3>
-                </div>
-                {% endif %}
                 <div class="uk-width-1-1 uk-width-1-2@s">
                     <div class="uk-grid uk-padding-small">
                         <div class="uk-width-1-6">

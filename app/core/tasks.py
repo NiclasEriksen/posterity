@@ -88,7 +88,8 @@ def download_task(data: dict, file_name: str):
         STATUS_COMPLETED,
         STATUS_FAILED,
         STATUS_INVALID,
-        STATUS_COOKIES
+        STATUS_COOKIES,
+        STATUS_PENDING
     )
 
     if "video_id" not in data:

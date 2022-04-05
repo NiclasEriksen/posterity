@@ -13,6 +13,7 @@ from flask_login import login_user, login_required, logout_user, current_user
 from redis.exceptions import ConnectionError
 from sqlalchemy.exc import OperationalError, IntegrityError
 from werkzeug.local import LocalProxy
+from sqlalchemy import or_
 
 serve = Blueprint(
     'serve', __name__,
@@ -101,7 +102,16 @@ def front_page():
         vq = Video.query
         total = vq.count()
 
-        videos = vq.order_by(Video.upload_time.desc()).offset(offset).limit(pp).all()
+        if current_user and current_user.is_authenticated:
+            videos = vq.order_by(
+                Video.upload_time.desc()
+            ).offset(offset).limit(pp).all()
+        else:
+            videos = vq.filter(
+                or_(Video.status == STATUS_DOWNLOADING, Video.status == STATUS_COMPLETED)
+            ).order_by(
+                Video.upload_time.desc()
+            ).offset(offset).limit(pp).all()
 
     total_pages = total // pp + (1 if total % pp else 0)
 
@@ -147,13 +157,6 @@ def serve_video(video_id):
             video=video,
             stream_path=f"/view/{video_id}.mp4"
         )
-
-    if video.status in [STATUS_FAILED, STATUS_INVALID]:
-        flash("Video failed to download, this page will self destruct", "warning")
-        logger.warning("Doing 'burn-after-read' on video")
-        _success = delete_video_by_id(video_id)
-    elif video.status == STATUS_COMPLETED:
-        index_video_data(video)
 
     return render_template(
         "video.html",
@@ -233,6 +236,7 @@ def edit_video_post(video_id: str):
     db_session.add(video)
     db_session.commit()
     write_metadata_to_disk(video_id, video.to_json())
+    index_video_data(video)
 
     try:
         _task_id = gen_images_task.delay(video.to_json())

@@ -7,27 +7,40 @@ function handleFormSubmit(event) {
 
     var submit_btn = document.getElementById("submit-button");
     var status_field = document.getElementById("video-post-status");
+    var title_field = document.getElementById("title");
+    var url_field = document.getElementById("url");
+    var cw_field = document.getElementById("content_warning");
+    var category_field = document.getElementById("category");
     submit_btn.disabled = true;
     submit_btn.textContent = "Waiting for download task...";
     if (status_field) {
         status_field.textContent = "";
     }
 
-    var request = new XMLHttpRequest(); 
+    var request = new XMLHttpRequest();
     request.open('POST', '/api/v1/core/post_link', true);
-    request.setRequestHeader('Content-Type', 'application/json; charset=UTF-8'); 
+    request.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
     request.onload = function() {
-        if (this.status >= 200 && this.status < 400) {
+        if (this.status == 201) {
             var url_segments = this.response.split("/");
             if (url_segments.length > 0) {
                 redirectOnProgress(url_segments[url_segments.length - 1]);
             }
+        } else if (this.status == 202) {
+            submit_btn.disabled = false;
+            submit_btn.textContent = "Save for posterity";
+            if (status_field) { status_field.innerHTML = '<span class="uk-text-success">' + this.response + '</span>'; }
+            if (title_field) { title_field.value = ""; }
+            if (url_field) { url_field.value = ""; }
+            if (cw_field) { cw_field.value = "default"; }
+            if (category_field) { category_field.value = "default"; }
+            console.log(this.response);
+
         } else {
-            console.log("Error when posting video link...");
             submit_btn.disabled = false;
             submit_btn.textContent = "Save for posterity";
             if (status_field) {
-                status_field.textContent = this.response;
+                status_field.innerHTML = '<span class="uk-text-danger">' + this.response + '</span>';
             }
             console.log(this.response);
         }

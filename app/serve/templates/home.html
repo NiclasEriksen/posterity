@@ -6,7 +6,6 @@
 }
 </style>
 <div class="uk-container uk-grid uk-padding-small uk-height-1-1 uk-padding-remove-top uk-margin-remove" style="min-width:100%">
-    {% if current_user.is_authenticated %}
     <div
         class="uk-width-1-1 uk-width-1-4@l uk-dark uk-background-secondary uk-height-1-1 uk-margin uk-padding-remove"
         style="border: 1px dashed #CCC;border-top: 0;"
@@ -37,7 +36,7 @@
                     <div class="uk-inline uk-width-1-1">
                         <span class="uk-form-icon" uk-icon="icon: warning"></span>
                         <select class="uk-input uk-select" id="content_warning" name="content_warning">
-                            <option>None</option>
+                            <option value="default">None</option>
                             {% for tag in tags %}
                             <option class="content-tag-option-{{ tag.category }}">{{ tag.name }}</option>
                             {% endfor %}
@@ -49,7 +48,7 @@
                     <div class="uk-inline uk-width-1-1">
                         <span class="uk-form-icon" uk-icon="icon: tag"></span>
                         <select class="uk-input uk-select" id="category" name="category">
-                            <option>None</option>
+                            <option value="default">None</option>
                             {% for tag in categories %}
                             <option class="category-option">{{ tag.name }}</option>
                             {% endfor %}
@@ -64,18 +63,21 @@
                         <span class="content-tag-option-0">Informative</span> /
                         <span class="uk-text-category">Video type</span>
                     </span><br>
+                    {% if current_user.is_authenticated %}
                     <span class="uk-text-meta"><i>You can add more tags and categories later</i></span>
+                    {% else %}
+                    <span class="uk-text-meta"><i>Link will need to be approved by an editor before it's archived.</i></span>
+                    {% endif %}
                 </p>
 
                 <div class="uk-margin uk-width-1-1">
                     <button class="uk-button uk-button-default" type="submit" id="submit-button">Save for posterity</button>
                 </div>
-                <p id="video-post-status" class="uk-text-small uk-text-danger"></p>
+                <p id="video-post-status" class="uk-text-small uk-text-meta"></p>
             </fieldset>
         </form>
     </div>
-    {% endif %}
-    <div class="uk-width-1-1 {% if current_user.is_authenticated %}uk-width-3-4@l {% endif %}uk-padding-small">
+    <div class="uk-width-1-1 uk-padding-small">
         <div class="uk-grid uk-grid-small uk-text-small uk-padding-small uk-padding-remove-vertical">
             <div class="uk-width-1-1 uk-width-1-2@l uk-text-muted uk-text-center">
                 <div class=" uk-position-relative uk-container uk-height-1-1">
