@@ -88,7 +88,7 @@ def seconds_to_verbose_time(t: float) -> str:
                 return f"{seconds} seconds"
             elif seconds > 0:
                 return "1 second"
-            return "Unknown"
+            return "0 seconds"
 
 
 def seconds_to_hhmmss(t: float) -> str:
