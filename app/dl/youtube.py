@@ -214,7 +214,14 @@ def valid_video_url(url: str) -> bool:
     return True
 
 
+def fix_youtube_shorts(url: str) -> str:
+    if "youtube.com/shorts/" in url:
+        return url.replace("/shorts/", "/embed/")
+    return url
+
+
 def minimize_url(url: str) -> str:
+    url = fix_youtube_shorts(url)
     u = urlparse(url)
     if len(u.query):
         query = parse_qs(u.query, keep_blank_values=True)
