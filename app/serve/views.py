@@ -615,7 +615,7 @@ def get_metadata_for_video(video_id: str) -> dict:
     return {}
 
 
-@cache.memoize(timeout=10)
+@cache.memoize(timeout=30)
 def get_possible_duplicates(video_id: str) -> list:
     try:
         from imgcompare import is_equal
