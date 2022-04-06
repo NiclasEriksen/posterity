@@ -174,7 +174,7 @@ def get_ffmpeg_cmd(
     http_persistent=True
 ) -> list:
 
-    cmd = ["ffmpeg", "-copyts", "-i"]
+    cmd = ["ffmpeg", "-i"]
 
     if len(vid_url):
         cmd.append(vid_url)
