@@ -30,6 +30,8 @@ def start_download(video_id: str):
         return Response("No video found by that id.", status=404)
     if video.status == STATUS_DOWNLOADING:
         return Response("That video is already downloading.", status=400)
+    elif video.status == STATUS_COMPLETED:
+        return Response("That video is already downloaded.", status=400)
 
     try:
         task_id = download_task.delay(video.to_json(), video.video_id)
