@@ -162,9 +162,25 @@ def serve_video(video_id):
         )
 
     if current_user.is_authenticated and video.status == STATUS_COMPLETED:
-        duplicates = get_possible_duplicates(video_id)
+        duplicate_ids = get_possible_duplicates(video_id)
+        duplicates = []
+        for d_id in duplicate_ids:
+            v = db_session.query(Video).filter_by(video_id=d_id).first()
+            if v:
+                duplicates.append(v)
+
+        for vd in video.duplicates:
+            if vd not in duplicates:
+                video.duplicates.remove(vd)
+        for d in duplicates:
+            if d not in video.duplicates:
+                video.duplicates.append(d)
+
+        db_session.add(video)
+        db_session.commit()
     else:
         duplicates = []
+
 
     return render_template(
         "video.html",
@@ -633,11 +649,13 @@ def get_possible_duplicates(video_id: str) -> list:
             if v.duration and video.duration:
                 if abs(1.0 - v.duration / video.duration) <= COMPARE_DURATION_THRESHOLD:
                     duration_candidates.append(v)
+                    continue
 
         aspect_ratio_candidates = []
         for v in duration_candidates:
             if abs(v.aspect_ratio - video.aspect_ratio) <= COMPARE_RATIO_THRESHOLD:
                 aspect_ratio_candidates.append(v)
+                continue
 
         vid_thumb_path = os.path.join(current_app.config["THUMBNAIL_FOLDER"], video_id + "_thumb.jpg")
 
@@ -649,16 +667,18 @@ def get_possible_duplicates(video_id: str) -> list:
                     try:
                         if is_equal(vid_thumb_path, other_thumb_path, tolerance=COMPARE_IMAGE_DATA_THRESHOLD):
                             img_candidates.append(v)
+                            continue
                     except Exception as e:
                         logger.error(e)
                         continue
+
             candidates = img_candidates
         else:
             candidates = aspect_ratio_candidates
-
-        return candidates
+        return [c.video_id for c in candidates]
     except Exception as e:
         logger.error(e)
+        db_session.rollback()
         return []
 
 

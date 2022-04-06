@@ -128,7 +128,7 @@
                     {% endif %}
                     </div>
 
-                    {% if duplicates|length %}
+                    {% if video.duplicates|length %}
                     <div class="uk-width-1-1 uk-margin uk-background-muted uk-padding-small">
                         <h3>Possible duplicates:</h3>
                         <table class="uk-width-1-1 uk-table uk-table-small uk-table-responsive uk-table-justify uk-table-middle">
@@ -139,7 +139,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                {% for d in duplicates %}
+                                {% for d in video.duplicates %}
                                 <tr>
                                     <td class="uk-flex uk-flex-middle" style="min-height: 64px;">
                                         <div class="list-thumbnail uk-position-relative" style="display: table-cell;">

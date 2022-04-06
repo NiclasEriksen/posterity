@@ -88,9 +88,12 @@ class Video(Base):
     source = Column(String)
     location = Column(String)
     verified = Column(Boolean)
-    duplicate_of_id = Column(Integer, ForeignKey("videos.id"))
-    duplicate_of = relationship("Video", remote_side=[id])
-    duplicates = relationship("Video", back_populates="duplicate_of")
+    duplicates = relationship(
+        "Video", lambda: video_duplicates,
+        primaryjoin=lambda: Video.id == video_duplicates.c.video_id,
+        secondaryjoin=lambda: Video.id == video_duplicates.c.duplicate_id,
+        backref="duplicate_of"
+    )
     tags = relationship("ContentTag", secondary=tag_association_table)
     categories = relationship("Category", secondary=category_association_table)
 
@@ -249,7 +252,7 @@ class Video(Base):
             "video_id": self.video_id,
             "verified": self.verified,
             "upload_time": time.mktime(self.upload_time.timetuple()) if self.upload_time else 0,
-            "duplicate": self.duplicate_of.video_id if self.duplicate_of else "",
+            "duplicate": ", ".join(v.video_id for v in self.duplicates),
         }
     
     def from_json(self, d: dict):
@@ -387,6 +390,13 @@ class Video(Base):
                     self.categories.append(tag)
 
 
+video_duplicates = Table(
+    "video_duplicates", Base.metadata,
+    Column("video_id", Integer, ForeignKey(Video.id), primary_key=True),
+    Column("duplicate_id", Integer, ForeignKey(Video.id), primary_key=True)
+)
+
+
 class RegisterToken(Base):
     __tablename__ = "tokens"
     id = Column(Integer, primary_key=True)
@@ -456,7 +466,6 @@ def index_all_videos_from_db():
 
 
 def load_all_videos_from_disk(media_path: str):
-    duplicates = {}
     videos = []
 
     try:
@@ -484,13 +493,13 @@ def load_all_videos_from_disk(media_path: str):
 
                     video = Video()
                     video.from_json(d)
-
-                    if "duplicate" in d.keys():
-                        if len(d["duplicate"]):
-                            if d["duplicate"] in duplicates:
-                                duplicates[d["duplicate"]].append(video_id)
-                            else:
-                                duplicates[d["duplicate"]] = [video_id]
+                    #
+                    # if "duplicate" in d.keys():
+                    #     if len(d["duplicate"]):
+                    #         if d["duplicate"] in duplicates:
+                    #             duplicates[d["duplicate"]].append(video_id)
+                    #         else:
+                    #             duplicates[d["duplicate"]] = [video_id]
 
                     videos.append(video)
                     index_video_data(video)
@@ -501,26 +510,26 @@ def load_all_videos_from_disk(media_path: str):
 
     db_session.add_all(videos)
     db_session.commit()
-
-    # Connect duplicates
-    for original, dupes in duplicates.items():
-        og = db_session.query(Video).filter_by(video_id=original).first()
-        if not og:
-            log.warning(f"Video lists {original} as original, but it doesn't exist!")
-            continue
-        for duplicate in dupes:
-            d = db_session.query(Video).filter_by(video_id=duplicate).first()
-            if not d:
-                log.warning(f"Video {duplicate} listed as duplicate, but it doesn't exist!")
-                continue
-
-            og.duplicates.append(d)
-            d.duplicate_of = og
-            db_session.add(d)
-
-        db_session.add(og)
-
-    db_session.commit()
+    #
+    # # Connect duplicates
+    # for original, dupes in duplicates.items():
+    #     og = db_session.query(Video).filter_by(video_id=original).first()
+    #     if not og:
+    #         log.warning(f"Video lists {original} as original, but it doesn't exist!")
+    #         continue
+    #     for duplicate in dupes:
+    #         d = db_session.query(Video).filter_by(video_id=duplicate).first()
+    #         if not d:
+    #             log.warning(f"Video {duplicate} listed as duplicate, but it doesn't exist!")
+    #             continue
+    #
+    #         og.duplicates.append(d)
+    #         d.duplicate_of = og
+    #         db_session.add(d)
+    #
+    #     db_session.add(og)
+    #
+    # db_session.commit()
 
     log.info(f"Loaded {len(videos)} videos from json files.")
 
