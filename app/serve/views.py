@@ -546,13 +546,6 @@ def check_status():
     }
 
 
-@serve.route("/check_duplicate/<video_id>")
-def check_duplicate(video_id: str):
-    ids = get_possible_duplicates(video_id)
-
-    return "<br>".join(ids)
-
-
 def delete_video_by_id(video_id: str) -> bool:
     success = 0
     v = Video.query.filter_by(video_id=video_id).first()
@@ -621,50 +614,54 @@ def get_metadata_for_video(video_id: str) -> dict:
 
 @cache.memoize(timeout=10)
 def get_possible_duplicates(video_id: str) -> list:
-    from imgcompare import is_equal
-    candidates = []
-    COMPARE_DURATION_TRESHOLD = 25.0
-    COMPARE_RATIO_TRESHOLD = 0.1
-    COMPARE_IMAGE_DATA_TRESHOLD = 5.0
+    try:
+        from imgcompare import is_equal
+        candidates = []
+        COMPARE_DURATION_TRESHOLD = 25.0
+        COMPARE_RATIO_TRESHOLD = 0.1
+        COMPARE_IMAGE_DATA_TRESHOLD = 5.0
 
-    video = db_session.query(Video).filter_by(video_id=video_id).first()
-    if not video:
-        return candidates
+        video = db_session.query(Video).filter_by(video_id=video_id).first()
+        if not video:
+            return candidates
 
-    vid_q = db_session.query(Video).filter(Video.video_id != video_id).filter_by(status=STATUS_COMPLETED).all()
+        vid_q = db_session.query(Video).filter(Video.video_id != video_id).filter_by(status=STATUS_COMPLETED).all()
 
-    duration_candidates = []
+        duration_candidates = []
 
-    for v in vid_q:
-        if abs(v.duration - video.duration) <= COMPARE_DURATION_TRESHOLD:
-            duration_candidates.append(v)
+        for v in vid_q:
+            if abs(v.duration - video.duration) <= COMPARE_DURATION_TRESHOLD:
+                duration_candidates.append(v)
 
-    aspect_ratio_candidates = []
-    for v in duration_candidates:
-        if abs(v.aspect_ratio - video.aspect_ratio) <= COMPARE_RATIO_TRESHOLD:
-            aspect_ratio_candidates.append(v)
+        aspect_ratio_candidates = []
+        for v in duration_candidates:
+            if abs(v.aspect_ratio - video.aspect_ratio) <= COMPARE_RATIO_TRESHOLD:
+                aspect_ratio_candidates.append(v)
 
-    vid_thumb_path = os.path.join(current_app.config["THUMBNAIL_FOLDER"], video_id + "_thumb.jpg")
+        vid_thumb_path = os.path.join(current_app.config["THUMBNAIL_FOLDER"], video_id + "_thumb.jpg")
 
-    if os.path.isfile(vid_thumb_path):
-        img_candidates = []
-        for v in aspect_ratio_candidates:
-            other_thumb_path = os.path.join(current_app.config["THUMBNAIL_FOLDER"], v.video_id + "_thumb.jpg")
-            if os.path.isfile(other_thumb_path):
-                try:
-                    if is_equal(vid_thumb_path, other_thumb_path, tolerance=COMPARE_IMAGE_DATA_TRESHOLD):
-                        img_candidates.append(v)
-                        # img_candidates.append((
-                        #     v, image_diff_percent(vid_thumb_path, other_thumb_path)
-                        # ))
-                except Exception as e:
-                    logger.error(e)
-                    continue
-        candidates = img_candidates
-    else:
-        candidates = aspect_ratio_candidates
+        if os.path.isfile(vid_thumb_path):
+            img_candidates = []
+            for v in aspect_ratio_candidates:
+                other_thumb_path = os.path.join(current_app.config["THUMBNAIL_FOLDER"], v.video_id + "_thumb.jpg")
+                if os.path.isfile(other_thumb_path):
+                    try:
+                        if is_equal(vid_thumb_path, other_thumb_path, tolerance=COMPARE_IMAGE_DATA_TRESHOLD):
+                            img_candidates.append(v)
+                            # img_candidates.append((
+                            #     v, image_diff_percent(vid_thumb_path, other_thumb_path)
+                            # ))
+                    except Exception as e:
+                        logger.error(e)
+                        continue
+            candidates = img_candidates
+        else:
+            candidates = aspect_ratio_candidates
 
-    return [v.video_id for v in candidates]
+        return [v.video_id for v in candidates]
+    except Exception as e:
+        print(e)
+        return []
 
 
 
