@@ -194,6 +194,12 @@ class Video(Base):
         return "No size"
 
     @property
+    def aspect_ratio(self) -> float:
+        if self.width and self.height:
+            return self.width / self.height
+        return 0.0
+
+    @property
     def preview_width(self) -> int:
         if self.width and self.height:
             ratio = self.width / self.height

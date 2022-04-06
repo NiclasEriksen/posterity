@@ -178,6 +178,23 @@
                             </div>
                         </div>
                     </div>
+                    {% if duplicates|length %}
+                    <div class="uk-width-1-1 uk-width-1-2@s">
+                        <div class="uk-grid uk-padding-small">
+                            <div class="uk-width-1-6">
+                                <span uk-icon="icon: copy; ratio: 2;"></span>
+                            </div>
+                            <div class="uk-width-5-6">
+                                <p>Possible duplicates: </p>
+                                <p class="uk-text-small">
+                                    {% for d in duplicates %}
+                                        <a class="uk-text-meta" href="/{{ d }}">{{ d }}</a><br>
+                                    {% endfor %}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
                 </div>
             </div>
             <div class="uk-height-small"></div>
