@@ -161,7 +161,7 @@ def serve_video(video_id):
             stream_path=f"/view/{video_id}.mp4"
         )
 
-    if current_user.is_authenticated:
+    if current_user.is_authenticated and video.status == STATUS_COMPLETED:
         duplicates = get_possible_duplicates(video_id)
     else:
         duplicates = []
