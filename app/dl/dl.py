@@ -196,7 +196,7 @@ def get_ffmpeg_cmd(
         #     cmd += ["-map", "1:s", "-c:s", "mov_text"]
 
         cmd += ["-vf", "yadif=parity=auto"]
-        cmd += ["-vcodec", "libx264", "-crf", str(CRF), "-f", "mp4"]
+        cmd += ["-vcodec", "libx264", "-crf", str(CRF), "-vb", "2500k", "-f", "mp4"]
         # cmd += ["-c:v", "h264", "-f", "mp4"]
 
     # Only audio, export to ogg.
