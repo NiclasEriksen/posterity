@@ -101,7 +101,7 @@
                     <div class="uk-width-1-1 uk-padding-small">
                         <div class="uk-grid uk-width-1-1 uk-margin uk-margin-remove-left">
                             <div class="uk-width-1-2 uk-width-1-3@s uk-text-center uk-padding-small">
-                                <button class="uk-button uk-button-primary" type="button" id="start-download-button" onclick="startDownload('{{ video.video_id }}');" {% if video.status == 1 %}disabled{% endif %}>Download</button>
+                                <button class="uk-button uk-button-primary" type="button" id="start-download-button" onclick="startDownload('{{ video.video_id }}');" {% if video.status == 1 %}disabled{% endif %}>Start download</button>
                             </div>
                             <div class="uk-width-1-2 uk-width-1-3@s uk-text-center uk-padding-small">
                                 <a class="uk-button uk-button-secondary" href="/edit_video/{{ video.video_id }}">Edit</a>
