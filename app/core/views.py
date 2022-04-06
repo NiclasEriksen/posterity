@@ -8,7 +8,7 @@ from .tasks import download_task
 from app.dl.youtube import valid_video_url, minimize_url
 from app.dl.helpers import unique_filename
 from app.dl.dl import parse_input_data, find_duplicate_video_by_url,\
-    STATUS_DOWNLOADING, STATUS_PENDING, STATUS_FAILED
+    STATUS_DOWNLOADING, STATUS_PENDING, STATUS_FAILED, STATUS_COMPLETED
 from app.serve.db import db_session, Video
 
 core = Blueprint('core', __name__)
