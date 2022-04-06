@@ -41,8 +41,8 @@ APPLICATION_ENV = get_environment()
 MAX_RESULT_PER_PAGE = 30
 TORRENT_NAME = "Posterity.Ukraine.archive.torrent"
 COMPARE_DURATION_THRESHOLD = 0.1
-COMPARE_RATIO_THRESHOLD = 0.1
-COMPARE_IMAGE_DATA_THRESHOLD = 10.0
+COMPARE_RATIO_THRESHOLD = 0.075
+COMPARE_IMAGE_DATA_THRESHOLD = 7.5
 
 
 def catch_redis_errors(f):
@@ -615,7 +615,7 @@ def get_metadata_for_video(video_id: str) -> dict:
     return {}
 
 
-@cache.memoize(timeout=30)
+@cache.memoize(timeout=60)
 def get_possible_duplicates(video_id: str) -> list:
     try:
         from imgcompare import is_equal
@@ -660,7 +660,6 @@ def get_possible_duplicates(video_id: str) -> list:
     except Exception as e:
         logger.error(e)
         return []
-
 
 
 def send_from_directory_partial(directory, filename):
