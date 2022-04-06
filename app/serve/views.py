@@ -40,6 +40,9 @@ load_dotenv()
 APPLICATION_ENV = get_environment()
 MAX_RESULT_PER_PAGE = 30
 TORRENT_NAME = "Posterity.Ukraine.archive.torrent"
+COMPARE_DURATION_THRESHOLD = 10.0
+COMPARE_RATIO_THRESHOLD = 0.1
+COMPARE_IMAGE_DATA_THRESHOLD = 5.0
 
 
 def catch_redis_errors(f):
@@ -617,9 +620,6 @@ def get_possible_duplicates(video_id: str) -> list:
     try:
         from imgcompare import is_equal
         candidates = []
-        COMPARE_DURATION_TRESHOLD = 25.0
-        COMPARE_RATIO_TRESHOLD = 0.1
-        COMPARE_IMAGE_DATA_TRESHOLD = 5.0
 
         video = db_session.query(Video).filter_by(video_id=video_id).first()
         if not video:
@@ -630,12 +630,12 @@ def get_possible_duplicates(video_id: str) -> list:
         duration_candidates = []
 
         for v in vid_q:
-            if abs(v.duration - video.duration) <= COMPARE_DURATION_TRESHOLD:
+            if abs(v.duration - video.duration) <= COMPARE_DURATION_THRESHOLD:
                 duration_candidates.append(v)
 
         aspect_ratio_candidates = []
         for v in duration_candidates:
-            if abs(v.aspect_ratio - video.aspect_ratio) <= COMPARE_RATIO_TRESHOLD:
+            if abs(v.aspect_ratio - video.aspect_ratio) <= COMPARE_RATIO_THRESHOLD:
                 aspect_ratio_candidates.append(v)
 
         vid_thumb_path = os.path.join(current_app.config["THUMBNAIL_FOLDER"], video_id + "_thumb.jpg")
@@ -646,11 +646,8 @@ def get_possible_duplicates(video_id: str) -> list:
                 other_thumb_path = os.path.join(current_app.config["THUMBNAIL_FOLDER"], v.video_id + "_thumb.jpg")
                 if os.path.isfile(other_thumb_path):
                     try:
-                        if is_equal(vid_thumb_path, other_thumb_path, tolerance=COMPARE_IMAGE_DATA_TRESHOLD):
+                        if is_equal(vid_thumb_path, other_thumb_path, tolerance=COMPARE_IMAGE_DATA_THRESHOLD):
                             img_candidates.append(v)
-                            # img_candidates.append((
-                            #     v, image_diff_percent(vid_thumb_path, other_thumb_path)
-                            # ))
                     except Exception as e:
                         logger.error(e)
                         continue
@@ -660,7 +657,7 @@ def get_possible_duplicates(video_id: str) -> list:
 
         return [v.video_id for v in candidates]
     except Exception as e:
-        print(e)
+        logger.error(e)
         return []
 
 
