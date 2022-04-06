@@ -95,22 +95,6 @@
             </div>
             <div class="uk-container">
                 <div class="uk-grid uk-grid-small uk-width-1-1 uk-margin-remove-left">
-                    <div class="uk-width-1-1 uk-background-muted uk-text-center uk-padding-small">
-                    {% if video.status == 0 %}
-                        <h3 class="uk-text-muted uk-margin-remove-bottom video-download-status">Downloading...</h3>
-                    {% elif video.status == 1 %}
-                        <a href="{{ dl_path }}"><h3 class="uk-text-primary uk-margin-remove-bottom ">Click here to download video file</h3></a>
-                    {% elif video.status == 3 %}
-                        <h3 class="uk-text-danger">Invalid URL, no video to download.</h3>
-                    {% elif video.status == 4 %}
-                        <h3 class="uk-text-danger">Video might be region/age restricted and requires cookies (not implemented).</h3>
-                    {% elif video.status == 5 %}
-                        <h3 class="uk-text-warning">Link is pending approval by an editor and has not started downloading yet.</h3>
-                    {% else %}
-                        <h3 class="uk-text-danger">Download failed.</h3>
-                    {% endif %}
-                    </div>
-
                     <div class="uk-width-1-1 uk-text-small uk-text-center uk-text-meta" id="video-download-status"></div>
 
                     {% if current_user.is_authenticated and video.status != 0 %}
@@ -128,6 +112,22 @@
                         </div>
                     </div>
                     {% endif %}
+                    <div class="uk-width-1-1 uk-text-center uk-padding-small">
+                    {% if video.status == 0 %}
+                        <h3 class="uk-text-muted uk-margin-remove-bottom video-download-status">Downloading...</h3>
+                    {% elif video.status == 1 %}
+                        <a href="{{ dl_path }}"><h3 class="uk-text-primary uk-margin-remove-bottom ">Click here to download video file</h3></a>
+                    {% elif video.status == 3 %}
+                        <h3 class="uk-text-danger">Invalid URL, no video to download.</h3>
+                    {% elif video.status == 4 %}
+                        <h3 class="uk-text-danger">Video might be region/age restricted and requires cookies (not implemented).</h3>
+                    {% elif video.status == 5 %}
+                        <h3 class="uk-text-warning">Link is pending approval by an editor and has not started downloading yet.</h3>
+                    {% else %}
+                        <h3 class="uk-text-danger">Download failed.</h3>
+                    {% endif %}
+                    </div>
+
                     <div class="uk-width-1-1 uk-width-1-2@s">
                         <div class="uk-grid uk-padding-small">
                             <div class="uk-width-1-6">
