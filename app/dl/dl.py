@@ -279,6 +279,7 @@ def get_celery_active():
 
 
 def find_best_format(formats: list):
+    print(formats)
     for f in reversed(formats):
         if "1920x1080" in f:
             return f
@@ -288,6 +289,7 @@ def find_best_format(formats: list):
     for f in reversed(formats):
         if "720p" in f:
             return f
+    print(formats[-1])
     return formats[-1]
 
 

@@ -13,6 +13,7 @@ from .helpers import program_path, find_between
 log = logging.getLogger("posterity_dl.yt")
 
 YT_FORMATS = {
+    "YT 1080p60": "299",
     "YT 1080p": "137",
     "YT 720p": "136",
     "YT 720p2": "95",
@@ -63,7 +64,7 @@ YT_SIZES = {
 }
 
 VID_FORMATS = ["240p", "360p", "480p", "720p", "1080p",
-    "YT 1080p", "YT 720p", "YT 720p2", "YT 640p", "YT 480p", "YT 360p", "YT 240p",
+    "YT 1080p", "YT 1080p60", "YT 720p", "YT 720p2", "YT 640p", "YT 480p", "YT 360p", "YT 240p",
     "MP4 720p", "MP4 360p", "MP4 240p", "MP4 576p",
     "MP4 720p 4:3", "MP4 640p 4:3", "MP4 360p 4:3", "MP4 240p 4:3", "MP4 180p 4:3", "MP4 Mobile",
     "Vimeo 360p0", "Vimeo 360p1", "Vimeo 480p0", "Vimeo 640p0", "Vimeo 720p0",  "Vimeo 1080p0"
@@ -161,9 +162,14 @@ def find_highest_quality_url(urls: list) -> str:
 
 def check_stream(url: str) -> bool:
     if ".m3u8" in url.lower():
-        for p in STREAMING_PATTERNS:
-            if p in url.lower():
-                return True
+        return is_streaming_site(url)
+    return False
+
+
+def is_streaming_site(url: str) -> bool:
+    for p in STREAMING_PATTERNS:
+        if p in url.lower():
+            return True
     return False
 
 
@@ -451,15 +457,18 @@ def get_content_info(url: str) -> dict:
                 if "vcodec" in u.keys():
                     if u["format_id"] in vid_ids.keys():
                         d["video_formats"][vid_ids[u["format_id"]]] = {"url": u["url"], "dimensions": (x, y)}
-                    elif is_hls(u["format_id"]) or is_dash(u["format_id"]) or is_avc(u["format_id"]):
-                        d["video_formats"][u["format"]] = {"url": u["url"], "dimensions": (x, y)}
-                    else:
-                        try:
-                            int(u["format_id"])
-                        except ValueError:
-                            pass
-                        else:
+                    elif not is_streaming_site(url):
+                        if is_hls(u["format_id"]) or is_dash(u["format_id"]) or is_avc(u["format_id"]):
                             d["video_formats"][u["format"]] = {"url": u["url"], "dimensions": (x, y)}
+                        else:
+                            try:
+                                int(u["format_id"])
+                            except ValueError:
+                                pass
+                            else:
+                                d["video_formats"][u["format"]] = {"url": u["url"], "dimensions": (x, y)}
+                    elif u["vcodec"] != "none":
+                        log.error(f'Unhandled video codec: {u["format_id"]} {u["vcodec"]} {u["format"]}')
 
                 elif "ext" in u.keys() or "video_ext" in u.keys():
                     if u["video_ext"] in ["mp4", "ogv"] or u["ext"] in ["mp4", "ogv"]:
@@ -471,10 +480,10 @@ def get_content_info(url: str) -> dict:
                 if "acodec" in u.keys():
                     if u["format_id"] in aud_ids.keys():
                         d["audio_formats"][aud_ids[u["format_id"]]] = u["url"]
-                    elif u["acodec"] != None:
+                    elif u["acodec"] is not None:
                         if u["acodec"] in aud_ids.keys():
                             d["audio_formats"][aud_ids[u["acodec"]]] = u["url"]
-                        else:
+                        elif u["acodec"] != "none":
                             log.error(f'Unhandled audio codec: {u["format_id"]}')
                 elif "audio" in u["format"]:
                     if u["format_id"] in aud_ids.keys():
