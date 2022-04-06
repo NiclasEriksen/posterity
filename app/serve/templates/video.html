@@ -128,7 +128,7 @@
                     {% endif %}
                     </div>
 
-                    {% if video.duplicates|length %}
+                    {% if current_user.is_authenticated and video.duplicates|length %}
                     <div class="uk-width-1-1 uk-margin uk-background-muted uk-padding-small">
                         <h3>Possible duplicates:</h3>
                         <table class="uk-width-1-1 uk-table uk-table-small uk-table-responsive uk-table-justify uk-table-middle">

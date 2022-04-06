@@ -178,8 +178,6 @@ def serve_video(video_id):
 
         db_session.add(video)
         db_session.commit()
-    else:
-        duplicates = []
 
 
     return render_template(
@@ -187,7 +185,6 @@ def serve_video(video_id):
         video=video,
         dl_path="/download/" + video_id,
         stream_path=f"/view/{video_id}.mp4",
-        duplicates=duplicates
     )
 
 
