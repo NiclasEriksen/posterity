@@ -456,40 +456,40 @@ def view_video(video_id=""):
     return "Video file not found."
 
 
-@serve.route("/preview/<video_id>.png")
+@serve.route("/preview/<video_id>.jpg")
 def get_preview_image(video_id=""):
     video = Video.query.filter_by(video_id=video_id).first()
     try:
         if video:
-            if os.path.isfile(os.path.join(current_app.config["PREVIEW_FOLDER"], video_id + "_preview_blurred.png")):
+            if os.path.isfile(os.path.join(current_app.config["PREVIEW_FOLDER"], video_id + "_preview_blurred.jpg")):
                 for ct in video.tags:
                     if ct.category > 1:
-                        return send_from_directory(current_app.config["PREVIEW_FOLDER"], video_id + "_preview_blurred.png")
-            if os.path.isfile(os.path.join(current_app.config["PREVIEW_FOLDER"], video_id + "_preview.png")):
-                return send_from_directory(current_app.config["PREVIEW_FOLDER"], video_id + "_preview.png")
+                        return send_from_directory(current_app.config["PREVIEW_FOLDER"], video_id + "_preview_blurred.jpg")
+            if os.path.isfile(os.path.join(current_app.config["PREVIEW_FOLDER"], video_id + "_preview.jpg")):
+                return send_from_directory(current_app.config["PREVIEW_FOLDER"], video_id + "_preview.jpg")
     except Exception as e:
         logger.error(e)
         logger.error("Unhandled exception during fetching of preview image.")
 
-    return serve.send_static_file("no_preview.png")
+    return serve.send_static_file("no_preview.jpg")
 
 
-@serve.route("/thumbnail/<video_id>.png")
+@serve.route("/thumbnail/<video_id>.jpg")
 def get_thumbnail_image(video_id=""):
     try:
         video = Video.query.filter_by(video_id=video_id).first()
         if video:
-            if os.path.isfile(os.path.join(current_app.config["THUMBNAIL_FOLDER"], video_id + "_thumb_blurred.png")):
+            if os.path.isfile(os.path.join(current_app.config["THUMBNAIL_FOLDER"], video_id + "_thumb_blurred.jpg")):
                 for ct in video.tags:
                     if ct.category > 1:
-                        return send_from_directory(current_app.config["THUMBNAIL_FOLDER"], video_id + "_thumb_blurred.png")
-            if os.path.isfile(os.path.join(current_app.config["THUMBNAIL_FOLDER"], video_id + "_thumb.png")):
-                return send_from_directory(current_app.config["THUMBNAIL_FOLDER"], video_id + "_thumb.png")
+                        return send_from_directory(current_app.config["THUMBNAIL_FOLDER"], video_id + "_thumb_blurred.jpg")
+            if os.path.isfile(os.path.join(current_app.config["THUMBNAIL_FOLDER"], video_id + "_thumb.jpg")):
+                return send_from_directory(current_app.config["THUMBNAIL_FOLDER"], video_id + "_thumb.jpg")
     except Exception as e:
         logger.error(e)
         logger.error("Unhandled exception during fetching of thumbnail image.")
 
-    return serve.send_static_file("no_thumbnail.png")
+    return serve.send_static_file("no_thumbnail.jpg")
 
 
 @serve.route("/get_torrent")

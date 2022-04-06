@@ -117,7 +117,7 @@ def generate_video_images(
     content_text: str = ""
 ):
 
-    raw_frame = NamedTemporaryFile(suffix=".png")
+    raw_frame = NamedTemporaryFile(suffix=".jpg")
 
     try:
         _d = (
@@ -198,16 +198,17 @@ def generate_video_images(
                 fill=get_color_for_tag(line), stroke_width=stroke, stroke_fill=get_stroke_for_tag(line)
             )
 
-    preview = img.convert("P", palette=palette, colors=256)
-    preview_blurred = preview_blurred.convert("P", palette=palette, colors=256)
-    thumb = thumb.convert("P", palette=palette, colors=64)
-    thumb_blurred = thumb_blurred.convert("P", palette=palette, colors=64)
+    preview = img
+    # preview = img.convert("P", palette=palette, colors=256)
+    # preview_blurred = preview_blurred.convert("P", palette=palette, colors=256)
+    # thumb = thumb.convert("P", palette=palette, colors=64)
+    # thumb_blurred = thumb_blurred.convert("P", palette=palette, colors=64)
 
     try:
-        preview.save(preview_path, optimize=True)
-        preview_blurred.save(blurred_preview_path, optimize=True)
-        thumb.save(thumbnail_path, optimize=True)
-        thumb_blurred.save(blurred_thumb_path, optimize=True)
+        preview.save(preview_path, optimize=True, quality=75)
+        preview_blurred.save(blurred_preview_path, optimize=True, quality=75)
+        thumb.save(thumbnail_path, optimize=True, quality=60)
+        thumb_blurred.save(blurred_thumb_path, optimize=True, quality=60)
     except (PermissionError, IOError, FileExistsError) as e:
         print(e)
 
@@ -329,13 +330,13 @@ def generate_all_images(
 
         generate_video_images(
             video_path,
-            os.path.join(thumbnail_path, video_id + "_thumb.png"),
-            os.path.join(preview_path, video_id + "_preview.png"),
-            os.path.join(thumbnail_path, video_id + "_thumb_blurred.png"),
-            os.path.join(preview_path, video_id + "_preview_blurred.png"),
-            start=5 if info["duration"] > 10.0 else 0,
+            os.path.join(thumbnail_path, video_id + "_thumb.jpg"),
+            os.path.join(preview_path, video_id + "_preview.jpg"),
+            os.path.join(thumbnail_path, video_id + "_thumb_blurred.jpg"),
+            os.path.join(preview_path, video_id + "_preview_blurred.jpg"),
+            start=5 if info["duration"] > 30.0 else 0,
             blur_amount=0.75,
-            desaturate=True,
+            desaturate=False,
             content_text=content_text
         )
 

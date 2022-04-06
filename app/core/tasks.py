@@ -64,13 +64,13 @@ def gen_images_task(metadata: dict):
 
     generate_video_images(
         vid_save_path,
-        os.path.join(thumbnail_path, video_id + "_thumb.png"),
-        os.path.join(preview_path, video_id + "_preview.png"),
-        os.path.join(thumbnail_path, video_id + "_thumb_blurred.png"),
-        os.path.join(preview_path, video_id + "_preview_blurred.png"),
-        start=5 if duration >= 10.0 else 0,
+        os.path.join(thumbnail_path, video_id + "_thumb.jpg"),
+        os.path.join(preview_path, video_id + "_preview.jpg"),
+        os.path.join(thumbnail_path, video_id + "_thumb_blurred.jpg"),
+        os.path.join(preview_path, video_id + "_preview_blurred.jpg"),
+        start=5 if duration >= 30.0 else 0,
         blur_amount=0.75,
-        desaturate=True,
+        desaturate=False,
         content_text=content_warning if content_warning.lower().strip() != "none" else ""
     )
     dur = time.time() - dur
