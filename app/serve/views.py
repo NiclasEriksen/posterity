@@ -615,7 +615,6 @@ def send_from_directory_partial(directory, filename):
     """
     range_header = request.headers.get('Range', None)
     if not range_header:
-        print("NOTRH")
         return send_from_directory(directory, filename, conditional=True)
 
     path = os.path.join(directory, filename)
@@ -635,7 +634,11 @@ def send_from_directory_partial(directory, filename):
     data = None
     with open(path, 'rb') as f:
         f.seek(byte1)
-        data = f.read(length)
+        try:
+            data = f.read(length)
+        except ValueError:
+            logger.error("Error when reading video file, length given is wrong.")
+            data = b""
 
     rv = Response(data,
                   206,

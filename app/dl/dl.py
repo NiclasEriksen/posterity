@@ -28,6 +28,7 @@ STATUS_FAILED = 2
 STATUS_INVALID = 3
 STATUS_COOKIES = 4
 STATUS_PENDING = 5
+CRF = 28
 
 
 if not os.path.isfile(url_file_path):
@@ -186,7 +187,7 @@ def get_ffmpeg_cmd(
             cmd += ["-map", "0:v", "-map", "1:a"]
             # if len(sub_url):    # Mapping WITH sound and WITH subtitles
             #     cmd += ["-map", "2:s", "-c:s", "mov_text"]
-            cmd += ["-c:a", "libopus"]
+            cmd += ["-c:a", "aac"]
 
         elif local_audio_channel >= 0:
             c = local_audio_channel     # Mapping with built in audio
@@ -195,7 +196,7 @@ def get_ffmpeg_cmd(
         #     cmd += ["-map", "1:s", "-c:s", "mov_text"]
 
         cmd += ["-vf", "yadif=parity=auto"]
-        cmd += ["-c:v", "libx264", "-f", "mp4"]
+        cmd += ["-c:v", "libx264", "-crf", str(CRF), "-f", "mp4"]
     
     # Only audio, export to ogg.
     elif len(aud_url):
