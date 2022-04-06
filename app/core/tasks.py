@@ -68,7 +68,7 @@ def gen_images_task(metadata: dict):
         os.path.join(preview_path, video_id + "_preview.jpg"),
         os.path.join(thumbnail_path, video_id + "_thumb_blurred.jpg"),
         os.path.join(preview_path, video_id + "_preview_blurred.jpg"),
-        start=5 if duration >= 30.0 else 0,
+        start=5 if duration >= 10.0 else 0,
         blur_amount=0.75,
         desaturate=False,
         content_text=content_warning if content_warning.lower().strip() != "none" else ""

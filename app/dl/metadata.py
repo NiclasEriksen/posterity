@@ -334,7 +334,7 @@ def generate_all_images(
             os.path.join(preview_path, video_id + "_preview.jpg"),
             os.path.join(thumbnail_path, video_id + "_thumb_blurred.jpg"),
             os.path.join(preview_path, video_id + "_preview_blurred.jpg"),
-            start=5 if info["duration"] > 30.0 else 0,
+            start=5 if info["duration"] > 10.0 else 0,
             blur_amount=0.75,
             desaturate=False,
             content_text=content_text
