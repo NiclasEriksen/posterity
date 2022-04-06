@@ -151,13 +151,13 @@ def download_from_json_data(metadata: dict, file_name: str):
             if len(thumbnail_path) and len(preview_path):
                 generate_video_images(
                     vid_save_path,
-                    os.path.join(thumbnail_path, file_name + "_thumb.png"),
-                    os.path.join(preview_path, file_name + "_preview.png"),
-                    os.path.join(thumbnail_path, file_name + "_thumb_blurred.png"),
-                    os.path.join(preview_path, file_name + "_preview_blurred.png"),
+                    os.path.join(thumbnail_path, file_name + "_thumb.jpg"),
+                    os.path.join(preview_path, file_name + "_preview.jpg"),
+                    os.path.join(thumbnail_path, file_name + "_thumb_blurred.jpg"),
+                    os.path.join(preview_path, file_name + "_preview_blurred.jpg"),
                     start=5 if duration >= 10.0 else 0,
                     blur_amount=0.75,
-                    desaturate=True,
+                    desaturate=False,
                     content_text=metadata["content_warning"] if metadata["content_warning"].lower().strip() != "none" else ""
                 )
         except Exception as e:
