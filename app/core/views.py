@@ -1,5 +1,5 @@
 from flask import Blueprint, current_app, request, abort, Response
-from flask_login import current_user
+from flask_login import current_user, login_required
 from werkzeug.local import LocalProxy
 
 from authentication import require_appkey
@@ -7,7 +7,8 @@ from authentication import require_appkey
 from .tasks import download_task
 from app.dl.youtube import valid_video_url, minimize_url
 from app.dl.helpers import unique_filename
-from app.dl.dl import parse_input_data, find_duplicate_video_by_url, STATUS_DOWNLOADING, STATUS_PENDING
+from app.dl.dl import parse_input_data, find_duplicate_video_by_url,\
+    STATUS_DOWNLOADING, STATUS_PENDING, STATUS_FAILED
 from app.serve.db import db_session, Video
 
 core = Blueprint('core', __name__)
@@ -17,6 +18,35 @@ logger = LocalProxy(lambda: current_app.logger)
 @core.before_request
 def before_request_func():
     current_app.logger.name = 'core'
+
+
+@core.route("/start_download/<video_id>", methods=["POST"])
+def start_download(video_id: str):
+    if not current_user.is_authenticated:
+        logger.error("Trying to start download without being logged in.")
+        return Response("Lacking permissions to initiate download task.", status=401)
+    video = db_session.query(Video).filter_by(video_id=video_id).first()
+    if not video:
+        return Response("No video found by that id.", status=404)
+    if video.status == STATUS_DOWNLOADING:
+        return Response("That video is already downloading.", status=400)
+
+    try:
+        task_id = download_task.delay(video.to_json(), video.video_id)
+    except Exception as e:
+        video.status = STATUS_PENDING
+        db_session.add(video)
+        db_session.commit()
+
+        logger.error(e)
+        return Response("Error during adding of download task. Link has been put back in pending queue.", status=400)
+    else:
+        video.status = STATUS_DOWNLOADING
+        db_session.add(video)
+        db_session.commit()
+
+        logger.info(f"Started new download task with id: {task_id}")
+        return Response(f"/{video_id}", status=201)
 
 
 @core.route("/post_link", methods=["POST"])
@@ -66,10 +96,9 @@ def post_link():
         try:
             video = Video()
             video.from_json(data)
-            video.status = STATUS_DOWNLOADING if download_now else STATUS_PENDING
+            video.status = STATUS_PENDING
             db_session.add(video)
             db_session.commit()
-            data = video.to_json()
         except Exception as e:
             db_session.rollback()
             db_session.remove()
@@ -78,14 +107,7 @@ def post_link():
             return Response("Database error on adding video, weird.", status=400)
 
         if download_now:
-            try:
-                task_id = download_task.delay(data, fn)
-            except Exception as e:
-                logger.error(e)
-                return Response("Error during adding of download task. Link has been put in pending queue.", status=400)
-
-            logger.info(f"Started new download task with id: {task_id}")
-            return Response(f"https://posterity.no/{fn}", status=201)
+            return start_download(fn)
         else:
             return Response("Video has peen submitted, pending approval.", status=202)
 

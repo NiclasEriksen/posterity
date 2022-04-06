@@ -38,6 +38,7 @@
         <link rel="stylesheet" href="{{ url_for('serve.static', filename='css/video_player.css') }}" />
 {% endblock %}
 {% block content %}
+        <script src="{{ url_for('serve.static', filename='js/klippekort.js') }}"></script>
         <div class="uk-container uk-padding-remove uk-padding-small@m uk-height-1-1 uk-padding-remove-top">
             <div class="uk-card uk-card-default uk-card-body video-card uk-width-1-1 uk-text-center uk-padding-remove-top">
                 <div class="uk-width-1-1 uk-height-1-1">
@@ -62,15 +63,21 @@
                             </video>
                         </div>
                         {% elif video.status == 0 %}
-                        <div class="uk-flex uk-margin uk-text-meta uk-flex-center uk-padding-large uk-height-large">
+                        <div class="uk-flex uk-margin uk-text-meta uk-flex-center uk-padding-large uk-height-medium">
                             <div class="uk-position-center uk-padding-small">
                                 <div class="video-spinner"></div>
                             </div>
                         </div>
                         {% elif video.status == 5 %}
-                        <div class="uk-flex uk-margin uk-text-meta uk-flex-center uk-padding-large uk-height-large">
+                        <div class="uk-flex uk-margin uk-text-meta uk-flex-center uk-padding-large uk-height-medium">
                             <div class="uk-position-center uk-padding-small">
-                                <div class="video-spinner"></div>
+                                <span uk-icon="icon: clock; ratio: 3;"></span>
+                            </div>
+                        </div>
+                        {% else %}
+                        <div class="uk-flex uk-margin uk-text-danger uk-flex-center uk-padding-large uk-height-medium">
+                            <div class="uk-position-center uk-padding-small">
+                                <span uk-icon="icon: warning; ratio: 3;"></span>
                             </div>
                         </div>
                         {% endif %}
@@ -86,92 +93,89 @@
                     {% endfor %}
                 </div>
             </div>
-            <div class="uk-grid uk-width-1-1 uk-margin-remove uk-margin-vertical">
-                {% if current_user.is_authenticated and video.status != 0 %}
-                <div class="uk-width-1-1 uk-padding-small uk-flex-center">
-                    <div class="uk-grid uk-width-1-1 uk-margin-remove">
-                        <div class="uk-width-1-1 uk-width-1-2@s uk-text-center uk-padding-small">
-                            <a class="uk-button uk-button-primary" href="/edit_video/{{ video.video_id }}"><span uk-icon="icon: pencil"></span> Edit info</a>
-                        </div>
-                        <div class="uk-width-1-1 uk-width-1-2@s uk-text-center uk-padding-small">
-                            <a class="uk-button uk-button-danger" href="/remove/{{ video.video_id }}" onclick="return confirm('Are you sure you want to delete this video?');"><span uk-icon="icon: trash"></span> Delete video</a>
-                        </div>
+            <div class="uk-container">
+                <div class="uk-grid uk-grid-small uk-width-1-1 uk-margin-remove-left">
+                    <div class="uk-width-1-1 uk-background-muted uk-text-center uk-padding-small">
+                    {% if video.status == 0 %}
+                        <h3 class="uk-text-muted uk-margin-remove-bottom video-download-status">Downloading...</h3>
+                    {% elif video.status == 1 %}
+                        <a href="{{ dl_path }}"><h3 class="uk-text-primary uk-margin-remove-bottom ">Click here to download video file</h3></a>
+                    {% elif video.status == 3 %}
+                        <h3 class="uk-text-danger">Invalid URL, no video to download.</h3>
+                    {% elif video.status == 4 %}
+                        <h3 class="uk-text-danger">Video might be region/age restricted and requires cookies (not implemented).</h3>
+                    {% elif video.status == 5 %}
+                        <h3 class="uk-text-warning">Link is pending approval by an editor and has not started downloading yet.</h3>
+                    {% else %}
+                        <h3 class="uk-text-danger">Download failed.</h3>
+                    {% endif %}
                     </div>
-                </div>
-                {% endif %}
-                {% if video.status == 0 %}
-                <div class="uk-width-1-1 uk-background-muted uk-text-center uk-padding-small">
-                    <h3 class="uk-text-muted uk-margin-remove-bottom">Downloading...</h3>
-                </div>
-                {% elif video.status == 1 %}
-                <div class="uk-width-1-1 uk-text-center uk-padding-small">
-                    <a href="{{ dl_path }}"><h3 class="uk-text-primary uk-margin-remove-bottom">Click here to download video file</h3></a>
-                </div>
-                {% elif video.status == 3 %}
-                <div class="uk-width-1-1 uk-background-muted uk-text-center uk-padding-small">
-                    <h3 class="uk-text-danger">Invalid URL, no video to download.</h3>
-                </div>
-                {% elif video.status == 4 %}
-                <div class="uk-width-1-1 uk-background-muted uk-text-center uk-padding-remove">
-                    <h3 class="uk-text-danger">Video might be region/age restricted and requires cookies (not implemented).</h3>
-                </div>
-                {% elif video.status == 5 %}
-                <div class="uk-width-1-1 uk-background-muted uk-text-center uk-padding-remove">
-                    <h3 class="uk-text-warning">Link is pending approval by an editor and has not started downloading yet.</h3>
-                </div>
-                {% else %}
-                <div class="uk-width-1-1 uk-background-muted uk-text-center uk-padding-remove">
-                    <h3 class="uk-text-danger">Download failed.</h3>
-                </div>
-                {% endif %}
 
-                <div class="uk-width-1-1 uk-width-1-2@s">
-                    <div class="uk-grid uk-padding-small">
-                        <div class="uk-width-1-6">
-                            <span uk-icon="icon: quote-right; ratio: 2;"></span>
-                        </div>
-                        <div class="uk-width-5-6">
-                            <p><i>{{ video.orig_title }}</i></p>
-                        </div>
-                    </div>
-                </div>
-                <div class="uk-width-1-1 uk-width-1-2@s">
-                    <div class="uk-grid uk-padding-small">
-                        <div class="uk-width-1-6">
-                            <span uk-icon="icon: location; ratio: 2;"></span>
-                        </div>
-                        <div class="uk-width-5-6">
-                            <p class="uk-text-small">
-                                <a href="{{ video.url }}" target="_blank" class="uk-icon-link" uk-icon="link">Source link</a><br>
-                                <span class="uk-text-meta">Uploaded {% if current_user.is_authenticated %}by <i>"{{ video.source }}"</i> {% endif %}{{ video.upload_time_verbose }}</span>
-                            </p>
+                    <div class="uk-width-1-1 uk-text-small uk-text-center uk-text-meta" id="video-download-status"></div>
+
+                    {% if current_user.is_authenticated and video.status != 0 %}
+                    <div class="uk-width-1-1 uk-padding-small">
+                        <div class="uk-grid uk-width-1-1 uk-margin uk-margin-remove-left">
+                            <div class="uk-width-1-2 uk-width-1-3@s uk-text-center uk-padding-small">
+                                <button class="uk-button uk-button-primary" type="button" id="start-download-button" onclick="startDownload('{{ video.video_id }}');">Download</button>
+                            </div>
+                            <div class="uk-width-1-2 uk-width-1-3@s uk-text-center uk-padding-small">
+                                <a class="uk-button uk-button-secondary" href="/edit_video/{{ video.video_id }}">Edit</a>
+                            </div>
+                            <div class="uk-width-1-2 uk-width-1-3@s uk-text-center uk-padding-small">
+                                <a class="uk-button uk-button-danger" href="/remove/{{ video.video_id }}" onclick="return confirm('Are you sure you want to delete this video?');">Delete</a>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="uk-width-1-1 uk-width-1-2@s">
-                    <div class="uk-grid uk-padding-small">
-                        <div class="uk-width-1-6">
-                            <span uk-icon="icon: future; ratio: 2;"></span>
-                        </div>
-                        <div class="uk-width-5-6">
-                            <p class="uk-text-small">
-                                <span class="uk-text-meta">Duration:</span> {{ video.duration_str_verbose }}<br>
-                                <span class="uk-text-meta">File size:</span> {{ video.file_size_str }}
-                            </p>
+                    {% endif %}
+                    <div class="uk-width-1-1 uk-width-1-2@s">
+                        <div class="uk-grid uk-padding-small">
+                            <div class="uk-width-1-6">
+                                <span uk-icon="icon: quote-right; ratio: 2;"></span>
+                            </div>
+                            <div class="uk-width-5-6">
+                                <p><i>{{ video.orig_title }}</i></p>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="uk-width-1-1 uk-width-1-2@s">
-                    <div class="uk-grid uk-padding-small">
-                        <div class="uk-width-1-6">
-                            <span uk-icon="icon: tv; ratio: 2;"></span>
+                    <div class="uk-width-1-1 uk-width-1-2@s">
+                        <div class="uk-grid uk-padding-small">
+                            <div class="uk-width-1-6">
+                                <span uk-icon="icon: location; ratio: 2;"></span>
+                            </div>
+                            <div class="uk-width-5-6">
+                                <p class="uk-text-small">
+                                    <a href="{{ video.url }}" target="_blank" class="uk-icon-link" uk-icon="link">Source link</a><br>
+                                    <span class="uk-text-meta">Uploaded {% if current_user.is_authenticated %}by <i>"{{ video.source }}"</i> {% endif %}{{ video.upload_time_verbose }}</span>
+                                </p>
+                            </div>
                         </div>
-                        <div class="uk-width-5-6">
-                            <p class="uk-text-small">
-                                <span class="uk-text-meta">Dimensions:</span> {{ video.dimensions_str }}<br>
-                                <span class="uk-text-meta">Codecs:</span> {{ video.format_str }}<br>
-                                <span class="uk-text-meta">FPS/bit rate:</span> {{ video.frame_rate_str }}, {{ video.bit_rate_str }}
-                            </p>
+                    </div>
+                    <div class="uk-width-1-1 uk-width-1-2@s">
+                        <div class="uk-grid uk-padding-small">
+                            <div class="uk-width-1-6">
+                                <span uk-icon="icon: future; ratio: 2;"></span>
+                            </div>
+                            <div class="uk-width-5-6">
+                                <p class="uk-text-small">
+                                    <span class="uk-text-meta">Duration:</span> {{ video.duration_str_verbose }}<br>
+                                    <span class="uk-text-meta">File size:</span> {{ video.file_size_str }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="uk-width-1-1 uk-width-1-2@s">
+                        <div class="uk-grid uk-padding-small">
+                            <div class="uk-width-1-6">
+                                <span uk-icon="icon: tv; ratio: 2;"></span>
+                            </div>
+                            <div class="uk-width-5-6">
+                                <p class="uk-text-small">
+                                    <span class="uk-text-meta">Dimensions:</span> {{ video.dimensions_str }}<br>
+                                    <span class="uk-text-meta">Codecs:</span> {{ video.format_str }}<br>
+                                    <span class="uk-text-meta">FPS/bit rate:</span> {{ video.frame_rate_str }}, {{ video.bit_rate_str }}
+                                </p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -191,7 +195,6 @@
         }
         </script>
         {% elif video.status == 0 %}
-        <script src="{{ url_for('serve.static', filename='js/klippekort.js') }}"></script>
         <script>
             redirectOnComplete('{{ video.video_id }}');
         </script>
