@@ -74,7 +74,7 @@ SUB_LANGS   = ["en", "no"]
 DEFAULT_AUDIO = "Opus VBR 70kbps"
 DEFAULT_VIDEO = "MP4 720p"
 DEFAULT_LANG  = "en"
-STREAMING_PATTERNS = ["yt.com", "twitch.com", "youtube.com", "youtu.be"]
+STREAMING_PATTERNS = ["yt.com", "twitch.com", "youtube.com", "youtu.be", "reddit.com", "redd.it"]
 
 DISPOSABLE_QUERIES = [
     "ref", "ref_src", "ref_url", "taid",
@@ -99,10 +99,10 @@ DISPOSABLE_QUERIES = [
     "ab_channel"
 ]
 TIME_QUERIES = [
-    "s", "t", "time", "seek"
+    "s", "t", "time", "seek", "context"
 ]
 TIME_LOCATIONS = [
-    "twitter.com", "youtube.com", "t.co", "youtu.be", "nrk.no"
+    "twitter.com", "youtube.com", "t.co", "youtu.be", "nrk.no", "reddit.com", "redd.it"
 ]
 
 
