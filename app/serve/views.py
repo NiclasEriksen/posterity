@@ -656,7 +656,7 @@ def get_possible_duplicates(video_id: str) -> list:
         else:
             candidates = aspect_ratio_candidates
 
-        return [v.video_id for v in candidates]
+        return candidates
     except Exception as e:
         logger.error(e)
         return []

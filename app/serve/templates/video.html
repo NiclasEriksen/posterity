@@ -128,6 +128,44 @@
                     {% endif %}
                     </div>
 
+                    {% if duplicates|length %}
+                    <div class="uk-width-1-1 uk-margin uk-background-muted uk-padding-small">
+                        <h3>Possible duplicates:</h3>
+                        <table class="uk-width-1-1 uk-table uk-table-small uk-table-responsive uk-table-justify uk-table-middle">
+                            <thead>
+                                <tr>
+                                    <th class="uk-table-expand">Video</th>
+                                    <th class="uk-table-shrink">Source</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for d in duplicates %}
+                                <tr>
+                                    <td class="uk-flex uk-flex-middle" style="min-height: 64px;">
+                                        <div class="list-thumbnail uk-position-relative" style="display: table-cell;">
+                                            <a href="/{{ d.video_id }}">
+                                                <img src="/thumbnail/{{ d.video_id }}.jpg" loading="lazy" class="thumbnail-rounded uk-position-absolute uk-position-center">
+                                            </a>
+                                        </div>
+                                        <div style="display: table-cell;">
+                                            <a href="/{{ d.video_id }}" class="uk-text-bold video-link">{{ d.title }}</a>
+                                        </div>
+                                    </td>
+                                    <td class="uk-text-muted uk-text-small" style="max-width: 15vw;">
+                                        <span uk-tooltip="title: {{ d.url }};pos: top-left;">
+                                            <div style="overflow: hidden; white-space: nowrap; text-overflow: ellipsis;">
+                                                <a href="{{ video.url }}" target="_blank">{{ d.url[:128] }}</a>
+                                            </div>
+                                        </span>
+                                        <br>
+                                        <span class="uk-text-meta" uk-icon="icon: user; ratio: 0.6"></span> {{ d.source }}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% endif %}
                     <div class="uk-width-1-1 uk-width-1-2@s">
                         <div class="uk-grid uk-padding-small">
                             <div class="uk-width-1-6">
@@ -178,23 +216,6 @@
                             </div>
                         </div>
                     </div>
-                    {% if duplicates|length %}
-                    <div class="uk-width-1-1 uk-width-1-2@s">
-                        <div class="uk-grid uk-padding-small">
-                            <div class="uk-width-1-6">
-                                <span uk-icon="icon: copy; ratio: 2;"></span>
-                            </div>
-                            <div class="uk-width-5-6">
-                                <p>Possible duplicates: </p>
-                                <p class="uk-text-small">
-                                    {% for d in duplicates %}
-                                        <a class="uk-text-meta" href="/{{ d }}">{{ d }}</a><br>
-                                    {% endfor %}
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                    {% endif %}
                 </div>
             </div>
             <div class="uk-height-small"></div>
