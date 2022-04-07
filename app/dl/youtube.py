@@ -74,7 +74,7 @@ SUB_LANGS   = ["en", "no"]
 DEFAULT_AUDIO = "Opus VBR 70kbps"
 DEFAULT_VIDEO = "MP4 720p"
 DEFAULT_LANG  = "en"
-STREAMING_PATTERNS = ["yt.com", "twitch.com", "youtube.com", "youtu.be", "reddit.com", "redd.it"]
+STREAMING_PATTERNS = ["yt.com", "twitch.com", "youtube.com", "youtu.be"]
 
 DISPOSABLE_QUERIES = [
     "ref", "ref_src", "ref_url", "taid",
