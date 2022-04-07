@@ -11,6 +11,8 @@ from contextlib import contextmanager
 from werkzeug.local import LocalProxy
 from flask import current_app
 from app.dl.helpers import seconds_to_verbose_time, seconds_to_hhmmss, convert_file_size
+from app.dl.dl import STATUS_DOWNLOADING, STATUS_PROCESSING, STATUS_INVALID,\
+    STATUS_FAILED, STATUS_COMPLETED, STATUS_PENDING
 
 
 log = LocalProxy(lambda: current_app.logger)
@@ -100,6 +102,14 @@ class Video(Base):
 
     def __init__(self):
         self.upload_time = datetime.now()
+
+    @property
+    def ready_to_play(self) -> bool:
+        return self.status == STATUS_COMPLETED
+
+    @property
+    def can_be_changed(self) -> bool:
+        return self.status not in [STATUS_DOWNLOADING, STATUS_PROCESSING]
 
     @property
     def upload_time_str(self) -> str:

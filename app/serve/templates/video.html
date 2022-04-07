@@ -62,7 +62,7 @@
                                 <source src="{{ stream_path }}" type="video/mp4" />
                             </video>
                         </div>
-                        {% elif video.status == 0 %}
+                        {% elif video.status == 0  or video.status == 6 %}
                         <div class="uk-flex uk-margin uk-text-meta uk-flex-center uk-padding-large uk-height-medium">
                             <div class="uk-position-center uk-padding-small">
                                 <div class="video-spinner"></div>
@@ -97,7 +97,7 @@
                 <div class="uk-grid uk-grid-small uk-width-1-1 uk-margin-remove-left">
                     <div class="uk-width-1-1 uk-text-small uk-text-center uk-text-meta" id="video-download-status"></div>
 
-                    {% if current_user.is_authenticated and video.status != 0 %}
+                    {% if current_user.is_authenticated and video.can_be_changed %}
                     <div class="uk-width-1-1 uk-padding-small">
                         <div class="uk-grid uk-width-1-1 uk-margin uk-margin-remove-left">
                             <div class="uk-width-1-2 uk-width-1-3@s uk-text-center uk-padding-small">
@@ -114,7 +114,7 @@
                     {% endif %}
                     <div class="uk-width-1-1 uk-text-center uk-padding-small">
                     {% if video.status == 0 %}
-                        <h3 class="uk-text-muted uk-margin-remove-bottom video-download-status">Downloading...</h3>
+                        <h3 class="uk-text-muted uk-margin-remove-bottom">Downloading...</h3>
                     {% elif video.status == 1 %}
                         <a href="{{ dl_path }}"><h3 class="uk-text-primary uk-margin-remove-bottom ">Click here to download video file</h3></a>
                     {% elif video.status == 3 %}
@@ -123,6 +123,8 @@
                         <h3 class="uk-text-danger">Video might be region/age restricted and requires cookies (not implemented).</h3>
                     {% elif video.status == 5 %}
                         <h3 class="uk-text-warning">Link is pending approval by an editor and has not started downloading yet.</h3>
+                    {% elif video.status == 6 %}
+                        <h3 class="uk-text-muted">Video is post-processing.</h3>
                     {% else %}
                         <h3 class="uk-text-danger">Download failed.</h3>
                     {% endif %}
