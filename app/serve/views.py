@@ -92,14 +92,21 @@ def front_page():
         results = sorted(results, key=lambda x: x["_score"], reverse=True)
         # logger.info(results)
 
-        videos = []
         total = len(results)
+        videos = []
+        removed = 0
         for result in results[offset:offset + MAX_RESULT_PER_PAGE]:
             v = Video.query.filter_by(video_id=result["_id"]).first()
             if v:
-                videos.append(v)
+                if v.private:
+                    removed += 1
+                else:
+                    videos.append(v)
             else:
+                removed += 1
                 remove_video_data_by_id(result["_id"])
+
+        total -= removed
 
     else:
         vq = Video.query
@@ -112,7 +119,7 @@ def front_page():
         else:
             videos = vq.filter(
                 or_(Video.status == STATUS_DOWNLOADING, Video.status == STATUS_COMPLETED)
-            ).order_by(
+            ).filter(Video.private == False).order_by(
                 Video.upload_time.desc()
             ).offset(offset).limit(pp).all()
 
