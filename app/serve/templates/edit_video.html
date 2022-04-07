@@ -38,12 +38,19 @@
                         </select>
                     </div>
 
-                    <div class="uk-width-1-1 uk-grid">
-                        <div class="uk-width-1-2">
-                            <a class="uk-button uk-button-danger uk-button-large" href="/{{ video.video_id }}"><span uk-icon="icon: close"></span> Cancel</a>
+                    <div class="uk-width-1-1 uk-grid uk-grid-small">
+                        <div class="uk-width-1-2 uk-padding">
+                            <a class="uk-input uk-button uk-button-danger" href="/remove/{{ video.video_id }}" onclick="return confirm('Are you sure you want to delete this video?');"><span uk-icon="icon: trash"></span> Delete</a>
                         </div>
-                        <div class="uk-inline uk-width-1-2">
-                            <button class="uk-button uk-button-primary uk-button-large" type="submit"><span uk-icon="icon: close"></span> Apply</button>
+                        <div class="uk-width-1-2 uk-padding">
+                            <a class="uk-input uk-button uk-button-warning" href="/check_duplicates/{{ video.video_id }}"><span uk-icon="icon: copy"></span> Duplicate check</a>
+                        </div>
+
+                        <div class="uk-width-1-2 uk-padding">
+                            <a class="uk-input uk-button uk-button-muted" href="/{{ video.video_id }}"><span uk-icon="icon: close"></span> Cancel</a>
+                        </div>
+                        <div class="uk-width-1-2 uk-padding">
+                            <button class="uk-input uk-button uk-button-primary" type="submit"><span uk-icon="icon: close"></span> Apply</button>
                         </div>
                     </div>
                 </fieldset>

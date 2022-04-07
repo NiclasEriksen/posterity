@@ -100,11 +100,22 @@ body, html {
 }
 .uk-button-primary {
     color: var(--white);
-    background-color: var(--primary);
+    background-color: var(--primary)!important;
 }
 .uk-button-danger {
     color: var(--white);
-    background-color: var(--danger);
+    background-color: var(--danger)!important;
+}
+.uk-button-warning {
+    color: var(--dark-grey);
+    background-color: var(--warning)!important;
+}
+.uk-button-danger:hover, .uk-button-warning:hover, .uk-button-primary:hover, .uk-button-secondary:hover {
+    border-color: var(--grey);
+}
+.uk-button-primary:disabled, .uk-button-warning:disabled, .uk-button-danger:disabled {
+    border: 1px dashed var(--light-grey);
+    background: none!important;
 }
 
 .uk-text-success {

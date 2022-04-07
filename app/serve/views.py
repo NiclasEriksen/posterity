@@ -168,25 +168,6 @@ def serve_video(video_id):
             stream_path=f"/view/{video_id}.mp4"
         )
 
-    if current_user.is_authenticated and video.status == STATUS_COMPLETED:
-        duplicate_ids = get_possible_duplicates(video_id)
-        duplicates = []
-        for d_id in duplicate_ids:
-            v = db_session.query(Video).filter_by(video_id=d_id).first()
-            if v:
-                duplicates.append(v)
-
-        for vd in video.duplicates:
-            if vd not in duplicates:
-                video.duplicates.remove(vd)
-        for d in duplicates:
-            if d not in video.duplicates:
-                video.duplicates.append(d)
-
-        db_session.add(video)
-        db_session.commit()
-
-
     return render_template(
         "video.html",
         video=video,
@@ -554,6 +535,38 @@ def check_progress(video_id):
         return "", 415
 
     return abort(500)
+
+
+@serve.route("/check_duplicates/<video_id>", methods=["GET"])
+@login_required
+def check_duplicates_route(video_id: str):
+    video = db_session.query(Video).filter_by(video_id=video_id).first()
+
+    if video and video.status == STATUS_COMPLETED:
+        duplicate_ids = get_possible_duplicates(video_id)
+        duplicates = []
+
+        for d_id in duplicate_ids:
+            v = db_session.query(Video).filter_by(video_id=d_id).first()
+            if v:
+                duplicates.append(v)
+
+        for vd in video.duplicates:
+            if vd not in duplicates:
+                video.duplicates.remove(vd)
+        for d in duplicates:
+            if d not in video.duplicates:
+                video.duplicates.append(d)
+
+        db_session.add(video)
+        db_session.commit()
+
+        if len(duplicates):
+            flash(f"{len(duplicates)} potential duplicates was found.", "warning")
+        else:
+            flash("No potential duplicates was found.", "success")
+
+    return serve_video(video_id)
 
 
 @serve.route("/check_status")
