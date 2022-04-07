@@ -3,9 +3,13 @@
 {% block content %}
 <div class="uk-container uk-height-1-1">
     <div class="uk-text-center uk-position-center uk-height-medium uk-width-1-1" style="width:100%;">
-        <span uk-icon="icon: question; ratio: 4;" class="uk-padding-small uk-margin-remove"></span>
-        <h2 class="uk-position-center">Could not find a video with that ID.</h2>
-        <p class="uk-text-muted uk-text-small uk-position-bottom">(try refreshing the page)</p>
+        <div class="uk-position-center">
+            <span uk-icon="icon: question; ratio: 4;" class="uk-text-warning uk-padding-small uk-margin-remove"></span><br>
+            <h2>Could not find a video with that ID.</h2>
+            <div class="uk-width-1-1 uk-padding-small">
+                <p class="uk-text-muted uk-text-small uk-position-bottom">(try refreshing the page)</p>
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}

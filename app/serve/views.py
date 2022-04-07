@@ -160,6 +160,9 @@ def serve_video(video_id):
     if not video:
         logger.error("Video was not found.")
         return render_template("not_found.html")
+    elif video.private and not current_user.is_authenticated:
+        logger.error("Video not public and user not logged in.")
+        return render_template("private.html")
 
     if "embed" in request.args:
         return render_template(
@@ -213,6 +216,7 @@ def edit_video_post(video_id: str):
         return render_template("not_found.html")
 
     title = request.form.get("custom_title")
+    private = request.form.get("private-checkbox")
     tl = request.form.getlist("tags_select")
     cl = request.form.getlist("categories_select")
 
@@ -242,6 +246,8 @@ def edit_video_post(video_id: str):
 
     if video.status != STATUS_DOWNLOADING:
         video.title = title
+
+    video.private = True if private == "on" else False
 
     db_session.add(video)
     db_session.commit()

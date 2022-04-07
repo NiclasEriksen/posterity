@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block page_title %}Video not public.{% endblock %}
+{% block content %}
+<div class="uk-container uk-height-1-1">
+    <div class="uk-text-center uk-position-center uk-height-medium uk-width-1-1" style="width:100%;">
+        <div class="uk-position-center">
+            <span uk-icon="icon: warning; ratio: 4;" class="uk-text-danger uk-padding-small uk-margin-remove"></span><br>
+            <h2 class="r">That video is marked as private. You need to log in to see it.</h2>
+            <div class="uk-width-1-1 uk-padding-small">
+                <a class="uk-input uk-button uk-button-muted" href="/"><span uk-icon="icon: reply"></span> Back to front page</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

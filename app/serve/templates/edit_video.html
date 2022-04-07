@@ -37,6 +37,9 @@
                             {% endfor %}
                         </select>
                     </div>
+                    <div class="uk-margin">
+                        <label><input class="uk-checkbox" id="private-checkbox" name="private-checkbox" type="checkbox"{% if video.private %} checked{% endif %}> Mark as private</label>
+                    </div>
 
                     <div class="uk-width-1-1 uk-grid uk-grid-small">
                         <div class="uk-width-1-2 uk-padding-small">
