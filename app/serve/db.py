@@ -31,6 +31,28 @@ AUTH_LEVEL_USER = 0
 AUTH_LEVEL_MOD = 1
 AUTH_LEVEL_ADMIN = 2
 
+REASON_DUPLICATE        = 0
+REASON_MISSING_TAGS     = 1
+REASON_WRONG_TAGS       = 2
+REASON_BROKEN           = 3
+REASON_MISLEADING_TITLE = 4
+REASON_BETTER_SOURCE    = 5
+REASON_NO_RELEVANCE     = 6
+REASON_PRIVACY          = 7
+REASON_OTHER            = 8
+REASON_TEXTS = {
+    REASON_DUPLICATE        : "Duplicate video",
+    REASON_MISSING_TAGS     : "Missing content tags",
+    REASON_WRONG_TAGS       : "Wrong content tags",
+    REASON_BROKEN           : "Broken video",
+    REASON_MISLEADING_TITLE : "Misleading title",
+    REASON_BETTER_SOURCE    : "Have a better source link",
+    REASON_NO_RELEVANCE     : "Video is not relevant",
+    REASON_PRIVACY          : "Incrimination/Doxxing/Privacy",
+    REASON_OTHER            : "Other reasons"
+}
+
+
 tag_association_table = Table(
     "tag_association", Base.metadata,
     Column("video_id", ForeignKey("videos.id")),
@@ -466,6 +488,19 @@ class UserReport(Base):
     video_db_id = Column(Integer, ForeignKey("videos.id"))
     video = relationship("Video", back_populates="user_reports")
     text = Column(String)
+    reason = Column(Integer, default=REASON_OTHER)
+
+    def __init__(self, video: Video, reason: int, text: str):
+        self.video = video
+        self.reason = reason
+        self.text = text
+
+    @property
+    def reason_str(self) -> str:
+        try:
+            return REASON_TEXTS[self.reason]
+        except KeyError:
+            return "Unknown reason"
 
 
 class FailedDownload(Base):
