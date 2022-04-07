@@ -57,7 +57,7 @@ body, html {
 .uk-table-small td {
     padding: 6px 8px;
 }
-.uk-table-small tr {
+.uk-table-small tr, .report-list-item {
     border-bottom: 1px dotted var(--dark-grey);
 }
 

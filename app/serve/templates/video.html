@@ -169,9 +169,11 @@
                     {% endif %}
                     {% if current_user.is_authenticated and video.user_reports|length %}
                     <div class="uk-width-1-1 uk-grid">
-                        <h3 class="uk-text-danger">User reports:</h3>
+                        <div class="uk-width-1-1 report-list-item">
+                            <h3 class="uk-text-danger">User reports:</h3>
+                        </div>
                         {% for r in video.user_reports %}
-                        <div class="uk-width-1-1">
+                        <div class="uk-width-1-1 report-list-item uk-padding-small">
                             <h4><span class="uk-text-muted">Report #{{ r.id }}:</span> {{ r.reason_str }}</h4>
                             {% if r.text|length %}
                             <p class="uk-text-small uk-text-meta">
@@ -183,7 +185,6 @@
                                     <span class="uk-link-icon" uk-icon="icon: trash; ratio: 0.8;"></span> Delete this report
                                 </a>
                             </p>
-                            <hr>
                         </div>
                         {% endfor %}
                     </div>
