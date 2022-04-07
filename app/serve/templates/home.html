@@ -101,18 +101,22 @@
                     </div>
                 </form>
             </div>
-            <a
-                class="uk-width-1-2 uk-input uk-button {% if current_page > 1 %}uk-button-secondary{% else %}disabled_a uk-button-muted{% endif %} uk-button-small"
-                href="{% if current_page > 1 %}/?p={{ current_page - 1 }}{% else %}#{% endif %}{% if keyword|length %}&q={{ keyword }}{% endif %}"
-            >
-                <span uk-icon="icon: chevron-double-left"></span> Previous
-            </a>
-            <a
-                class="uk-width-1-2 uk-input uk-button {% if current_page < max_page %}uk-button-secondary{% else %}disabled_a uk-button-muted{% endif %} uk-button-small"
-                href="{% if current_page < max_page %}/?p={{ current_page + 1 }}{% else %}#{% endif %}{% if keyword|length %}&q={{ keyword }}{% endif %}"
-            >
-                Next <span uk-icon="icon: chevron-double-right"></span>
-            </a>
+            <div class="uk-width-1-2">
+                <a
+                    class="uk-input uk-button {% if current_page > 1 %}uk-button-secondary{% else %}disabled_a uk-button-muted{% endif %} uk-button-small"
+                    href="{% if current_page > 1 %}/?p={{ current_page - 1 }}{% else %}#{% endif %}{% if keyword|length %}&q={{ keyword }}{% endif %}"
+                >
+                    <span uk-icon="icon: chevron-double-left"></span> Previous
+                </a>
+            </div>
+            <div class="uk-width-1-2">
+                <a
+                    class="uk-input uk-button {% if current_page < max_page %}uk-button-secondary{% else %}disabled_a uk-button-muted{% endif %} uk-button-small"
+                    href="{% if current_page < max_page %}/?p={{ current_page + 1 }}{% else %}#{% endif %}{% if keyword|length %}&q={{ keyword }}{% endif %}"
+                >
+                    Next <span uk-icon="icon: chevron-double-right"></span>
+                </a>
+            </div>
         </div>
 
         <table class="uk-table uk-table-small uk-table-responsive uk-table-justify uk-table-middle">
@@ -208,19 +212,22 @@
             </tfoot>
         </table>
         <div class="uk-grid uk-grid-small">
-            <div class="uk-width-1-2 uk-visible@l"></div>
-            <a
-                class="uk-width-1-2 uk-width-1-4@l uk-input uk-button {% if current_page > 1 %}uk-button-secondary{% else %}disabled_a uk-button-muted{% endif %} uk-button-small"
-                href="{% if current_page > 1 %}/?p={{ current_page - 1 }}{% else %}#{% endif %}{% if keyword|length %}&q={{ keyword }}{% endif %}"
-            >
-                <span uk-icon="icon: chevron-double-left"></span> Previous
-            </a>
-            <a
-                class="uk-width-1-2 uk-width-1-4@l uk-input uk-button {% if current_page < max_page %}uk-button-secondary{% else %}disabled_a uk-button-muted{% endif %} uk-button-small"
-                href="{% if current_page < max_page %}/?p={{ current_page + 1 }}{% else %}#{% endif %}{% if keyword|length %}&q={{ keyword }}{% endif %}"
-            >
-                Next <span uk-icon="icon: chevron-double-right"></span>
-            </a>
+            <div class="uk-width-1-2">
+                <a
+                    class="uk-input uk-button {% if current_page > 1 %}uk-button-secondary{% else %}disabled_a uk-button-muted{% endif %} uk-button-small"
+                    href="{% if current_page > 1 %}/?p={{ current_page - 1 }}{% else %}#{% endif %}{% if keyword|length %}&q={{ keyword }}{% endif %}"
+                >
+                    <span uk-icon="icon: chevron-double-left"></span> Previous
+                </a>
+            </div>
+            <div class="uk-width-1-2">
+                <a
+                    class="uk-input uk-button {% if current_page < max_page %}uk-button-secondary{% else %}disabled_a uk-button-muted{% endif %} uk-button-small"
+                    href="{% if current_page < max_page %}/?p={{ current_page + 1 }}{% else %}#{% endif %}{% if keyword|length %}&q={{ keyword }}{% endif %}"
+                >
+                    Next <span uk-icon="icon: chevron-double-right"></span>
+                </a>
+            </div>
         </div>
     </div>
 
