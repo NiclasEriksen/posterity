@@ -182,6 +182,8 @@
                             {% else %}
                             <span class="uk-text-warning" uk-icon="icon: question; ratio: 0.9"></span>
                             {% endif %}
+
+                            {% if current_user.is_authenticated %}
                             {% if video.duplicates|length %}
                             <span uk-tooltip="title: Video has {{ video.duplicates|length }} possible duplicates;pos: top-left;">
                                 <span class="uk-text-warning" uk-icon="icon: copy; ratio: 0.9"></span>
@@ -192,6 +194,8 @@
                                 <span class="uk-text-danger" uk-icon="icon: warning; ratio: 0.9"></span>
                             </span>
                             {% endif %}
+                            {% endif %}
+
                             <span uk-tooltip="title: {{ video.url }};pos: top-left;">
                                 <a href="{{ video.url }}" target="_blank">
                                     {% if video.source_site_name|length %}

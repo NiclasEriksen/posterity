@@ -26,8 +26,8 @@ logger = LocalProxy(lambda: current_app.logger)
 from app.dl.dl import media_path, \
     STATUS_COMPLETED, STATUS_COOKIES, STATUS_DOWNLOADING, STATUS_FAILED, STATUS_INVALID, \
     get_celery_scheduled, get_celery_active, write_metadata_to_disk
-from app.serve.db import db_session, Video, User, ContentTag, Category,\
-    init_db, AUTH_LEVEL_ADMIN, AUTH_LEVEL_MOD, AUTH_LEVEL_USER
+from app.serve.db import db_session, Video, User, ContentTag, UserReport, Category,\
+    init_db, AUTH_LEVEL_ADMIN, AUTH_LEVEL_MOD, AUTH_LEVEL_USER, REASON_TEXTS
 from app import get_environment, app_config
 from app.serve.search import search_videos, index_video_data, remove_video_data, remove_video_data_by_id
 from app.extensions import cache
@@ -436,6 +436,45 @@ def remove_video_route(video_id):
     else:
         flash(f"Video \"{video_id}\" has been deleted successfully!", "success")
     return redirect(url_for("serve.front_page"), code=302)
+
+
+@serve.route("/report_video/<video_id>", methods=["GET"])
+def report_video_route(video_id):
+    video = db_session.query(Video).filter_by(video_id=video_id).first()
+    if not video:
+        return render_template("not_found.html")
+    if video.private:
+        return render_template("private.html")
+
+    report_reasons = [{"id": k, "text": v} for k, v in REASON_TEXTS.items()]
+
+    return render_template("report_video.html", video=video, report_reasons=report_reasons)
+
+
+@serve.route("/report_video/<video_id>", methods=["POST"])
+def report_video_post(video_id):
+    video = db_session.query(Video).filter_by(video_id=video_id).first()
+    if not video:
+        return render_template("not_found.html")
+    if video.private:
+        return render_template("private.html")
+
+    text = request.form.get("report_text", "")
+    reason = request.form.get("report_reason")
+
+    try:
+        reason = int(reason)
+        assert reason in REASON_TEXTS.keys()
+    except (TypeError, ValueError, AssertionError):
+        flash("Invalid data in report form, it was not submitted.", "error")
+        return report_video_route(video_id)
+
+    user_report = UserReport(video, reason, text)
+    db_session.add(user_report)
+    db_session.commit()
+
+    flash("Video has been reported to the editors. Thank you!", "success")
+    return serve_video(video_id)
 
 
 @serve.route("/download_archive", methods=["GET"])

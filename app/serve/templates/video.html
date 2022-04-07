@@ -165,6 +165,18 @@
                         </table>
                     </div>
                     {% endif %}
+                    {% if current_user.is_authenticated and video.user_reports|length %}
+                    <div class="uk-width-1-1 uk-grid">
+                        <h3 class="uk-text-danger">User reports:</h3>
+                        {% for r in video.user_reports %}
+                        <div class="uk-width-1-1">
+                            <h4><span class="uk-text-muted">Report #{{ r.id }}:</span> {{ r.reason_str }}</h4>
+                            {% if r.text|length %}<p class="uk-text-small uk-text-meta">{{ r.text }}</p>{% endif %}
+                            <hr>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
                     <div class="uk-width-1-1 uk-width-1-2@s">
                         <div class="uk-grid uk-padding-small">
                             <div class="uk-width-1-6">
@@ -215,6 +227,17 @@
                             </div>
                         </div>
                     </div>
+                    {% if not current_user.is_authenticated %}
+                    <div class="uk-width-1-1 uk-padding-small">
+                        <div class="uk-grid uk-width-1-1 uk-margin uk-margin-remove-left">
+                            <div class="uk-width-1-1 uk-text-center uk-padding-small uk-link-danger">
+                                <a href="/report_video/{{ video.video_id }}">
+                                    Report video <span class="uk-icon-link uk-link-danger" uk-icon="icon: warning; ratio: 1;"></span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
                 </div>
             </div>
             <div class="uk-height-small"></div>

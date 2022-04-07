@@ -152,6 +152,9 @@ body, html {
     color: var(--primary);
 }
 
+.uk-link-danger a, .uk-link-danger {
+    color: var(--danger)!important;
+}
 .uk-label {
     background: var(--primary-dark);
     color: var(--grey);
