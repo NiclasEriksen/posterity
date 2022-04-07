@@ -100,10 +100,12 @@
                     {% if current_user.is_authenticated and video.can_be_changed %}
                     <div class="uk-width-1-1 uk-padding-small">
                         <div class="uk-grid uk-width-1-1 uk-margin uk-margin-remove-left">
+                            {% if not video.ready_to_play %}
                             <div class="uk-width-1-2 uk-text-center uk-padding-small">
                                 <button class="uk-input uk-button uk-button-primary" type="button" id="start-download-button" onclick="startDownload('{{ video.video_id }}');" {% if video.status == 1 %}disabled{% endif %}>Start download</button>
                             </div>
-                            <div class="uk-width-1-2 uk-text-center uk-padding-small">
+                            {% endif %}
+                            <div class="{% if video.ready_to_play %}uk-width-1-1{% else %}uk-width-1-2{% endif %} uk-text-center uk-padding-small">
                                 <a class="uk-input uk-button uk-button-secondary" href="/edit_video/{{ video.video_id }}">Edit video</a>
                             </div>
                         </div>
