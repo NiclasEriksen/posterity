@@ -117,6 +117,12 @@ body, html {
     border: 1px dashed var(--light-grey);
     background: none!important;
 }
+.uk-input.uk-button {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
 
 .uk-text-success {
     color: var(--success)!important;
