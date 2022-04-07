@@ -100,14 +100,17 @@ def download_task(data: dict, file_name: str):
     log.info("Starting download of " + str(file_name))
     success = False
     try:
-        for status in download_from_json_data(data, file_name):
+        for data in download_from_json_data(data, file_name):
+            status = data["status"]
             if status == STATUS_DOWNLOADING:
-                log.info("Starting ffmpeg process...")
-                update_video(file_name, STATUS_DOWNLOADING)
+                log.info("Update from download process...")
+                update_video(file_name, STATUS_DOWNLOADING, data=data)
                 continue
             elif status == STATUS_COMPLETED:
                 log.info("Download function has completed with no errors.")
+                update_video(file_name, status, data=data)
                 success = True
+                break
             elif status in [STATUS_FAILED, STATUS_INVALID, STATUS_COOKIES]:
                 log.info("Download function has failed.")
                 if status == STATUS_FAILED:
@@ -116,12 +119,8 @@ def download_task(data: dict, file_name: str):
                     log.error("No video on that URL or unhandled formats.")
                 elif status == STATUS_COOKIES:
                     log.error("That video needs cookies for geo-locked or age restricted content.")
-            elif isinstance(status, dict):  # We got metadata back, heck yeah
-                update_video(file_name, STATUS_COMPLETED, data=status)
-                success = True
-                break
 
-            update_video(file_name, status)
+            update_video(file_name, status, data=data)
             break   # Break on any yield that's not continued above
 
     except Exception as e:

@@ -41,7 +41,7 @@ APPLICATION_ENV = get_environment()
 MAX_RESULT_PER_PAGE = 30
 TORRENT_NAME = "Posterity.Ukraine.archive.torrent"
 COMPARE_DURATION_THRESHOLD = 0.1
-COMPARE_RATIO_THRESHOLD = 0.0333
+COMPARE_RATIO_THRESHOLD = 0.15
 COMPARE_IMAGE_DATA_THRESHOLD = 10.0
 
 
@@ -632,6 +632,7 @@ def get_metadata_for_video(video_id: str) -> dict:
 def get_possible_duplicates(video_id: str) -> list:
     try:
         from imgcompare import is_equal
+        from PIL import Image
         candidates = []
 
         video = db_session.query(Video).filter_by(video_id=video_id).first()
@@ -662,7 +663,11 @@ def get_possible_duplicates(video_id: str) -> list:
                 other_thumb_path = os.path.join(current_app.config["THUMBNAIL_FOLDER"], v.video_id + "_thumb.jpg")
                 if os.path.isfile(other_thumb_path):
                     try:
-                        if is_equal(vid_thumb_path, other_thumb_path, tolerance=COMPARE_IMAGE_DATA_THRESHOLD):
+                        img1 = Image.open(vid_thumb_path)
+                        img2 = Image.open(other_thumb_path)
+                        img1.resize((32, 32))
+                        img2.resize((32, 32))
+                        if is_equal(img1, img2, tolerance=COMPARE_IMAGE_DATA_THRESHOLD):
                             img_candidates.append(v)
                             continue
                     except Exception as e:

@@ -83,32 +83,31 @@ def download_from_json_data(metadata: dict, file_name: str):
     if not valid_video_url(metadata["url"]):
         log.error("Invalid video url...")
         metadata["status"] = STATUS_INVALID
-        yield STATUS_INVALID
+        yield metadata
 
     elif media_path == "":
         log.error("No path to save video (MEDIA_FOLDER)...")
         metadata["status"] = STATUS_FAILED
-        yield STATUS_FAILED
+        yield metadata
 
     if ".m3u8" in metadata["url"]:
         log.warning(f"Skipping .m3u8: {metadata['url']}")
         metadata["status"] = STATUS_INVALID
-
-        yield STATUS_INVALID
+        yield metadata
 
     try:
         d = get_content_info(metadata["url"])
     except AgeRestrictedError:
         log.error("Need cookies for age restricted videos...")
         metadata["status"] = STATUS_COOKIES
-        yield STATUS_COOKIES
+        yield metadata
 
     video_formats = list(d["video_formats"].keys())
     video_links = d["video_formats"]
     if not len(video_formats):
         log.error("No video stream to download.")
         metadata["status"] = STATUS_INVALID
-        yield STATUS_INVALID
+        yield metadata
 
     audio_formats = list(d["audio_formats"].keys())
     audio_links = d["audio_formats"]
@@ -120,7 +119,7 @@ def download_from_json_data(metadata: dict, file_name: str):
     if duration > MAX_DURATION_SD:
         log.error("Video is too long to download! Duration: " + str(duration))
         metadata["status"] = STATUS_INVALID
-        yield STATUS_INVALID
+        yield metadata
 
     limit = 2160
     if duration > MAX_DURATION_MD:
@@ -152,7 +151,7 @@ def download_from_json_data(metadata: dict, file_name: str):
     metadata["duration"] = duration
     metadata["status"] = STATUS_DOWNLOADING
 
-    yield STATUS_DOWNLOADING
+    yield metadata
     result = subprocess.run(cmd)
 
     if result.returncode != 0:
@@ -165,7 +164,7 @@ def download_from_json_data(metadata: dict, file_name: str):
             pass
 
         metadata["status"] = STATUS_FAILED
-        yield STATUS_FAILED
+        yield metadata
 
     else:
         metadata["status"] = STATUS_COMPLETED
