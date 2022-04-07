@@ -316,8 +316,9 @@ def register_user_post():
 @login_required
 def logout_route():
     logout_user()
+    next_target = request.args.get("next", "/")
     flash("You have been logged out.", "success")
-    return redirect(url_for("serve.front_page"))
+    return redirect(next_target)
 
 
 @serve.route("/login", methods=["GET"])
@@ -325,14 +326,18 @@ def login_page():
     if current_user.is_authenticated:
         flash(f"You are already logged in.", "error")
         return redirect(url_for("serve.front_page"))
+
+    next_target = request.args.get("next", "/")
     get_flashed_messages()
-    return render_template("login.html")
+    return render_template("login.html", next_target=next_target)
 
 
 @serve.route("/login", methods=["POST"])
 def login_post_route():
     username = request.form.get("username")
     password = request.form.get("password")
+
+    next_target = request.args.get("next", "/")
 
     user = User.query.filter_by(username=username).first()
     if not user:
@@ -347,7 +352,7 @@ def login_post_route():
     
     flash(f"You have been logged in!", "success")
     login_user(user, remember=True)
-    return redirect(url_for("serve.front_page"))
+    return redirect(next_target)
 
 
 @serve.route("/settings", methods=["GET", "POST"])
@@ -417,6 +422,12 @@ def add_category_post():
         flash("Category name cannot be empty.", "error")
 
     return redirect(return_url, 302)
+
+
+@serve.route("/dashboard")
+@login_required
+def dashboard_page():
+    return render_template("dashboard.html", user=current_user)
 
 
 @serve.route("/about", methods=["GET"])
@@ -671,7 +682,7 @@ def check_all_duplicates_route():
     else:
         flash("No potential duplicates was found.", "success")
 
-    return redirect(url_for("serve.front_page"))
+    return redirect(url_for("serve.dashboard_page"))
 
 
 @serve.route("/check_status")

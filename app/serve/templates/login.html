@@ -6,7 +6,7 @@
 
             <span uk-icon="icon: user; ratio: 4;" class="uk-padding-small"></span>
 
-            <form class="uk-form" method="POST" action="/login">
+            <form class="uk-form" method="POST" action="/login?next={{ next_target }}">
                 <div class="uk-inline uk-margin-small">
                     <span class="uk-form-icon" uk-icon="icon: user"></span>
                     <input class="uk-input uk-width-1-1 uk-form-width-medium uk-form-large" type="text" placeholder="Username", name="username" autofocus="">

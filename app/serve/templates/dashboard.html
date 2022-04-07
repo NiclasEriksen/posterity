@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block page_title %}Dashboard - Posterity{% endblock %}
+{% block metadata %}
+<meta property="og:site_name" content="Posterity video">
+<meta property="og:image" itemprop="image" content="{{ url_for('serve.static', filename='posterity.png') }}">
+<meta property="og:type" content="website" />
+{% endblock %}
+{% block content %}
+<section class="uk-section uk-section-small uk-section-muted uk-padding-remove-vertical">
+    <div class="uk-container">
+        <h2>Welcome, {{ user.username }}</h2>
+    </div>
+</section>
+<section class="uk-section uk-section-default uk-section-small uk-padding-remove-vertical">
+    <div class="uk-container uk-margin-bottom">
+        <div class="uk-grid uk-grid-small">
+            <div class="uk-width-1-1 uk-width-1-2@m uk-padding-small">
+                <a class="uk-input uk-button uk-button-warning" href="/check_all_duplicates">
+                    <span uk-icon="icon: copy"></span> Full duplicate check
+                </a>
+            </div>
+        </div>
+        <div class="uk-container uk-width-1-1 uk-height-1-1">
+        <h2>Add new tag:</h2>
+        <form class="uk-form" method="POST" id="add_tag_form" action="/add_tag">
+            <fieldset class="uk-fieldset">
+                <div class="uk-margin">
+                    <input type="text" class="uk-input" name="tag_name" id="tag_name" placeholder="Tag name">
+                </div>
+                <div class="uk-margin">
+                    <select class="uk-select" id="tag_category_select" name="tag_category_select">
+                        <option value="0" selected>Informative</option>
+                        <option value="1">Emotional</option>
+                        <option value="2">Graphic</option>
+                    </select>
+                </div>
+                <button class="uk-button uk-button-primary" type="submit">Submit</button>
+                <input type="hidden" id="return_url" name="return_url" value="/dashboard">
+            </fieldset>
+
+        </form>
+        <h2>Add new category:</h2>
+        <form class="uk-form" method="POST" id="add_category_form" action="/add_category">
+            <fieldset class="uk-fieldset">
+                <div class="uk-margin">
+                    <input type="text" class="uk-input" name="category_name" id="category_name" placeholder="Category name">
+                </div>
+                <button class="uk-button uk-button-primary" type="submit">Submit</button>
+                <input type="hidden" id="return_url_category" name="return_url" value="/dashboard">
+            </fieldset>
+        </form>
+</div>
+    </div>
+</section>
+{% endblock %}
