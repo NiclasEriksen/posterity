@@ -40,7 +40,7 @@ load_dotenv()
 APPLICATION_ENV = get_environment()
 MAX_RESULT_PER_PAGE = 30
 TORRENT_NAME = "Posterity.Ukraine.archive.torrent"
-COMPARE_DURATION_THRESHOLD = 0.15
+COMPARE_DURATION_THRESHOLD = 0.1
 COMPARE_RATIO_THRESHOLD = 0.25
 COMPARE_IMAGE_DATA_THRESHOLD = 15.0
 
@@ -665,8 +665,8 @@ def get_possible_duplicates(video_id: str) -> list:
                     try:
                         img1 = Image.open(vid_thumb_path)
                         img2 = Image.open(other_thumb_path)
-                        img1 = img1.resize((32, 32))
-                        img2 = img2.resize((32, 32))
+                        img1 = img1.resize((64, 64))
+                        img2 = img2.resize((64, 64))
                         if is_equal(img1, img2, tolerance=COMPARE_IMAGE_DATA_THRESHOLD):
                             img_candidates.append(v)
                             continue
