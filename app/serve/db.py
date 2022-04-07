@@ -93,6 +93,7 @@ class Video(Base):
     verified = Column(Boolean)
     post_processed = Column(Boolean, default=False)
     private = Column(Boolean, default=False)
+    user_reports = relationship("UserReport", back_populates="video")
     duplicates = relationship(
         "Video", lambda: video_duplicates,
         primaryjoin=lambda: Video.id == video_duplicates.c.video_id,
@@ -457,6 +458,14 @@ class Category(Base):
 
     def __init__(self, name: str):
         self.name = name
+
+
+class UserReport(Base):
+    __tablename__ = "reports"
+    id = Column(Integer, primary_key=True)
+    video_db_id = Column(Integer, ForeignKey("videos.id"))
+    video = relationship("Video", back_populates="user_reports")
+    text = Column(String)
 
 
 class FailedDownload(Base):
