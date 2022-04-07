@@ -258,6 +258,12 @@ def fix_youtube_shorts(url: str) -> str:
     return url
 
 
+def fix_reddit_old(url: str) -> str:
+    if "old.reddit.com" in url:
+        return url.replace("old.", "")
+    return url
+
+
 def minimize_url(url: str) -> str:
     u = urlparse(url)
     if len(u.query):
@@ -346,6 +352,7 @@ def get_content_info(url: str) -> dict:
             "title": "No title (mp4)"
         }
     url = fix_youtube_shorts(url)
+    url = fix_reddit_old(url)
     vid_ids = {YT_FORMATS[k]: k for k in VID_FORMATS}
     aud_ids = {YT_FORMATS[k]: k for k in AUD_FORMATS}
     d = {
