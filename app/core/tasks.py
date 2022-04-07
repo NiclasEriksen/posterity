@@ -78,6 +78,15 @@ def gen_images_task(metadata: dict):
     log.info(f"Images generated in {minutes} minutes, {seconds:.2f} seconds: {video_id}")
 
 
+@celery.task(name="core.tasks.post_process", soft_time_limit=7200, time_limit=7260)
+def post_process_task(data: dict, file_name: str):
+    from app.dl.dl import (
+        STATUS_COMPLETED,
+        STATUS_FAILED,
+        STATUS_PROCESSING
+    )
+
+
 @celery.task(name="core.tasks.download", soft_time_limit=14400, time_limit=14700)    #, base=SQLAlchemyTask)
 def download_task(data: dict, file_name: str):
     from app.serve.search import index_video_data
@@ -89,7 +98,8 @@ def download_task(data: dict, file_name: str):
         STATUS_FAILED,
         STATUS_INVALID,
         STATUS_COOKIES,
-        STATUS_PENDING
+        STATUS_PENDING,
+        STATUS_PROCESSING,
     )
 
     if "video_id" not in data:
