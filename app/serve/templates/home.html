@@ -183,7 +183,12 @@
                             <span class="uk-text-warning" uk-icon="icon: question; ratio: 0.9"></span>
                             {% endif %}
                             <span uk-tooltip="title: {{ video.url }};pos: top-left;">
-                                <a href="{{ video.url }}" target="_blank">{{ video.url[:128] }}</a>
+                                <a href="{{ video.url }}" target="_blank">
+                                    {% if video.source_site_name|length %}
+                                    <span class="uk-icon-link" uk-icon="icon: {{ video.source_site_name }}; ratio: 0.75"></span>
+                                    {% endif %}
+                                    {{ video.url[:128] }}
+                                </a>
                             </span>
                             </div>
                         {% if current_user.is_authenticated %}<br><span class="uk-text-meta" uk-icon="icon: user; ratio: 0.6"></span> {{ video.source }}{% endif %}

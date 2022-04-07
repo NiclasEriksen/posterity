@@ -5,6 +5,7 @@ from tempfile import NamedTemporaryFile
 from PIL import Image, ImageFilter, ImageOps, UnidentifiedImageError, \
     ImageDraw, ImageFont
 from dotenv import load_dotenv
+from urllib.parse import urlparse
 
 try:
     from PIL.Image import Palette
@@ -211,6 +212,34 @@ def generate_video_images(
         thumb_blurred.save(blurred_thumb_path, optimize=True, quality=60)
     except (PermissionError, IOError, FileExistsError) as e:
         print(e)
+
+
+def get_source_site(url: str) -> str:
+    u = urlparse(url)
+    if len(u.netloc):
+        if any(
+            r in u.netloc for r in ["reddit.com", "redd.it", "redditinc.com", "redditmedia.com", "redditstatic.com"]
+        ):
+            return "reddit"
+        if any(r in u.netloc for r in ["twitter.co", "t.co", "periscope.tv", "pscp.tv", "twimg.com", "twttr.com"]):
+            return "twitter"
+        if any(r in u.netloc for r in ["youtube.", "ytimg.com", "youtu.be", "googlevideo.com"]):
+            return "youtube"
+        if any(
+            r in u.netloc for r in [
+                "twitch.com", "live-video.net", "twitch.tv", "ttvnw.net", "jtvnw.net", "twitchcdn.net", "twitchsvc.net"
+            ]
+        ):
+            return "twitch"
+        if any(r in u.netloc for r in ["facebook.com", "fb.com", "fb.gg", "fbcdn.net", "fbwat.ch", "facebook.net"]):
+            return "facebook"
+        if any(r in u.netloc for r in ["discord.com", "discord.gg", "discord.media", "discordapp."]):
+            return "discord"
+        if any(r in u.netloc for r in ["instagram.com", "cdninstagram.com", "ig.me"]):
+            return "instagram"
+        if any(r in u.netloc for r in ["vimeo.com", "vhx.com", "vhx.tv", "vimeocdn.com"]):
+            return "vimeo"
+    return ""
 
 
 def technical_info(video_path: str) -> dict:

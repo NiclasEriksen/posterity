@@ -13,6 +13,7 @@ from flask import current_app
 from app.dl.helpers import seconds_to_verbose_time, seconds_to_hhmmss, convert_file_size
 from app.dl.dl import STATUS_DOWNLOADING, STATUS_PROCESSING, STATUS_INVALID,\
     STATUS_FAILED, STATUS_COMPLETED, STATUS_PENDING
+from app.dl.metadata import get_source_site
 
 
 log = LocalProxy(lambda: current_app.logger)
@@ -111,6 +112,13 @@ class Video(Base):
     @property
     def can_be_changed(self) -> bool:
         return self.status not in [STATUS_DOWNLOADING, STATUS_PROCESSING]
+
+    @property
+    def source_site_name(self) -> str:
+        s = get_source_site(self.url)
+        if len(s):
+            return s
+        return "world"
 
     @property
     def upload_time_str(self) -> str:
