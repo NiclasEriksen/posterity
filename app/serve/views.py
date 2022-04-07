@@ -665,8 +665,8 @@ def get_possible_duplicates(video_id: str) -> list:
                     try:
                         img1 = Image.open(vid_thumb_path)
                         img2 = Image.open(other_thumb_path)
-                        img1.resize((32, 32))
-                        img2.resize((32, 32))
+                        img1 = img1.resize((32, 32))
+                        img2 = img2.resize((32, 32))
                         if is_equal(img1, img2, tolerance=COMPARE_IMAGE_DATA_THRESHOLD):
                             img_candidates.append(v)
                             continue
