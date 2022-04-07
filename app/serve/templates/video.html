@@ -168,26 +168,24 @@
                     </div>
                     {% endif %}
                     {% if current_user.is_authenticated and video.user_reports|length %}
-                    <div class="uk-width-1-1 uk-grid">
-                        <div class="uk-width-1-1 report-list-item">
-                            <h3 class="uk-text-danger">User reports:</h3>
-                        </div>
-                        {% for r in video.user_reports %}
-                        <div class="uk-width-1-1 report-list-item uk-padding-small">
-                            <h4><span class="uk-text-muted">Report #{{ r.id }}:</span> {{ r.reason_str }}</h4>
-                            {% if r.text|length %}
-                            <p class="uk-text-small uk-text-meta">
-                            {{ r.text }}
-                            </p>
-                            {% endif %}
-                            <p class="uk-text-small">
-                                <a href="/clear_report/{{ r.id }}">
-                                    <span class="uk-link-icon" uk-icon="icon: trash; ratio: 0.8;"></span> Delete this report
-                                </a>
-                            </p>
-                        </div>
-                        {% endfor %}
+                    <div class="uk-width-1-1 report-list-item">
+                        <h3 class="uk-text-danger">User reports:</h3>
                     </div>
+                    {% for r in video.user_reports %}
+                    <div class="uk-width-1-1 report-list-item uk-padding-small">
+                        <h4><span class="uk-text-muted">Report #{{ r.id }}:</span> {{ r.reason_str }}</h4>
+                        {% if r.text|length %}
+                        <p class="uk-text-small uk-text-meta">
+                        {{ r.text }}
+                        </p>
+                        {% endif %}
+                        <p class="uk-text-small">
+                            <a href="/clear_report/{{ r.id }}">
+                                <span class="uk-link-icon" uk-icon="icon: trash; ratio: 0.8;"></span> Delete this report
+                            </a>
+                        </p>
+                    </div>
+                    {% endfor %}
                     {% endif %}
                     <div class="uk-width-1-1 uk-width-1-2@s">
                         <div class="uk-grid uk-padding-small">
