@@ -29,6 +29,11 @@ STATUS_INVALID = 3
 STATUS_COOKIES = 4
 STATUS_PENDING = 5
 CRF = 28
+MAX_DURATION_HD: float = 30 * 60.0
+MAX_RESOLUTION_MD: int = 720
+MAX_DURATION_MD: float = 60 * 60.0
+MAX_RESOLUTION_SD: int = 480
+MAX_DURATION_SD: float = 480 * 60.0     # 8 hours maximum.
 
 
 if not os.path.isfile(url_file_path):
@@ -112,7 +117,23 @@ def download_from_json_data(metadata: dict, file_name: str):
     duration = d["duration"]
     video_title = d["title"]
 
-    f = find_best_format(video_formats)
+    if duration > MAX_DURATION_SD:
+        log.error("Video is too long to download! Duration: " + str(duration))
+        metadata["status"] = STATUS_INVALID
+        yield STATUS_INVALID
+
+    limit = 2160
+    if duration > MAX_DURATION_MD:
+        limit = MAX_RESOLUTION_SD
+    elif duration > MAX_DURATION_HD:
+        limit = MAX_RESOLUTION_MD
+
+    f = find_best_format(d["video_formats"], limit=limit)
+
+    print("================")
+    print(f)
+    print("================")
+
     video_url = video_links[f]["url"]
 
     if len(audio_formats):
@@ -217,7 +238,7 @@ def get_ffmpeg_cmd(
     else:
         cmd += ["-http_persistent", "0"]
 
-    cmd += ["-y", save_path]
+    cmd += ["-v", "24", "-y", save_path]
 
     return cmd
 
@@ -278,8 +299,24 @@ def get_celery_active():
     return a
 
 
-def find_best_format(formats: list):
-    print(formats)
+def find_best_format(formats_dict: dict, limit: int=2160):
+    formats_dict = formats_dict.copy()
+    invalid_ids = [f_id for f_id, i in formats_dict.items() if min(i["dimensions"]) > limit]
+    for i in invalid_ids:
+        formats_dict.pop(i, None)
+
+    best = None
+    highest_res = 0
+    for f_id, info in formats_dict.items():
+        if min(info["dimensions"]) >= highest_res:
+            highest_res = min(info["dimensions"])
+            best = f_id
+
+    if best and highest_res > 0:
+        return best
+
+    # If lacking dimensions and stuff
+    formats = list(formats_dict.keys())
     for f in reversed(formats):
         if "1920x1080" in f:
             return f

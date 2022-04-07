@@ -354,7 +354,7 @@ def get_content_info(url: str) -> dict:
         "sub_formats": {},
         "duration": 0.0,
         "thumbnail": "",
-        "title": ""
+        "title": "",
     }
 
     log.info("Fetching data from YouTube link...")
