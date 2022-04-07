@@ -33,29 +33,38 @@
   
     <body class="uk-height-1-1 posterity-dark-mode">
         <div class="uk-container uk-grid uk-padding-small uk-container-small uk-light uk-background-secondary uk-margin-remove uk-width-1-1" style="padding-top: 5px; padding-bottom: 5px; height: 58px;">
-            <div class="uk-width-1-3 uk-width-1-3@s uk-padding-remove">
+            <div class="uk-width-2-3 uk-width-1-5@s uk-padding-remove">
                 <h4><a class="uk-link-heading" href="/">
                     <img src="{{ url_for('serve.static', filename='posterity_banner_small.png') }}" alt="Posterity" height="48" style="max-height: 48px;">
                 </a></h4>
             </div>
-            <div class="uk-width-1-3 uk-padding-remove uk-text-center uk-height-1-1 uk-position-relative">
+            <div class="uk-width-expand uk-padding-remove uk-text-center uk-height-1-1 uk-position-relative uk-visible@s">
                 <div class="uk-position-center uk-text-small uk-text-muted">
-                    <span>
+                    <span class="uk-visible@s">
                         <a href="/about" uk-icon="icon: info">About </a>
                     </span>
-                    <span class="uk-padding-small uk-visible@s"> | </span>
-                    <span class="uk-visible@s">
+                    <span style="padding: 0 0.1rem 0 0.1rem;"> | </span>
+                    <span>
                         <a href="/download_archive" uk-icon="icon: cloud-download">Downloads </a>
                     </span>
+                    {% if current_user.is_authenticated %}
+                    <span style="padding: 0 0.1rem 0 0.1rem;"> | </span>
+                    <span>
+                        <a href="/dashboard" uk-icon="icon: settings">Dashboard </a>
+                    </span>
+                    {% endif %}
                 </div>
             </div>
-            <div class="uk-width-1-3 uk-padding-remove uk-height-1-1 uk-position-relative">
-                <span class="uk-position-center-right uk-align-right uk-text-small uk-text-muted">
+            <div class="uk-width-1-3 uk-width-1-5@s uk-padding-remove uk-height-1-1 uk-position-relative">
+                <span class="uk-position-center-right uk-align-right uk-text-small uk-text-muted uk-visible@s">
                     {% if current_user.is_authenticated %}
-                    <span class="uk-visible@s">{{ current_user.username }} </span><a href="/logout?next={{ request.path }}" uk-icon="icon: sign-out;" class="uk-text-muted uk-icon-link uk-icon-button"></a>
+                    <span class="uk-visible@m">Editor: {{ current_user.username }} </span><a href="/logout?next={{ request.path }}" uk-icon="icon: sign-out;" class="uk-text-muted uk-icon-link uk-icon-button"></a>
                     {% else %}
                     <a href="/login?next={{ request.path }}" uk-icon="icon: sign-in" class="uk-text-muted uk-icon-link uk-icon-button"></a>
                     {% endif %}
+                </span>
+                <span class="uk-position-center-right uk-align-right uk-text-small uk-text-muted uk-hidden@s">
+                    <a class="uk-navbar-toggle uk-navbar-item uk-hidden@s uk-icon uk-navbar-toggle-icon" data-uk-toggle="" data-uk-navbar-toggle-icon="" href="#offcanvas-nav" aria-expanded="false"></a>
                 </span>
             </div>
         </div>
@@ -70,5 +79,53 @@
         {% endwith %}
         {% block content %}
         {% endblock %}
+		<div id="offcanvas-nav" data-uk-offcanvas="flip: true; overlay: false">
+			<div class="uk-offcanvas-bar uk-offcanvas-bar-animation uk-offcanvas-slide">
+				<button class="uk-offcanvas-close uk-close uk-icon" type="button" data-uk-close></button>
+				<ul class="uk-nav uk-nav-default">
+                    <li class="">
+                        <a href="/">
+                            <span class="uk-margin-small-right uk-icon" data-uk-icon="icon: tv"></span>
+                            Videos overview
+                        </a>
+                    </li>
+                    <li class="">
+                        <a href="/about">
+                            <span class="uk-margin-small-right uk-icon" data-uk-icon="icon: info"></span>
+                            About the project
+                        </a>
+                    </li>
+                    <li class="">
+                        <a href="/download_archive">
+                            <span class="uk-margin-small-right uk-icon" data-uk-icon="icon: cloud-download"></span>
+                            Downloads
+                        </a>
+                    </li>
+                    {% if current_user.is_authenticated %}
+                    <li class="">
+                        <a href="/dashboard">
+                            <span class="uk-margin-small-right uk-icon" data-uk-icon="icon: settings"></span>
+                            Editor dashboard
+                        </a>
+                    </li>
+                    <li class="uk-nav-divider"></li>
+                    <li class="">
+                        <a href="/logout?next={{ request.path }}">
+                            <span class="uk-margin-small-right uk-icon" data-uk-icon="icon: sign-out"></span>
+                            Sign out
+                        </a>
+                    </li>
+                    {% else %}
+                    <li class="uk-nav-divider"></li>
+                    <li class="">
+                        <a href="/login?next={{ request.path }}">
+                            <span class="uk-margin-small-right uk-icon" data-uk-icon="icon: sign-in"></span>
+                            Sign in
+                        </a>
+                    </li>
+                    {% endif %}
+				</ul>
+			</div>
+		</div>
     </body>
 </html>
