@@ -91,6 +91,7 @@ class Video(Base):
     location = Column(String)
     verified = Column(Boolean)
     post_processed = Column(Boolean, default=False)
+    private = Column(Boolean, default=False)
     duplicates = relationship(
         "Video", lambda: video_duplicates,
         primaryjoin=lambda: Video.id == video_duplicates.c.video_id,
