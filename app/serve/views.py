@@ -575,6 +575,41 @@ def check_duplicates_route(video_id: str):
     return serve_video(video_id)
 
 
+@serve.route("/check_all_duplicates", methods=["GET"])
+@login_required
+def check_all_duplicates_route():
+    videos = db_session.query(Video).filter_by(status=STATUS_COMPLETED).all()
+    total_duplicates = 0
+    for video in videos:
+        duplicate_ids = get_possible_duplicates(video.video_id)
+        total_duplicates += len(duplicate_ids)
+        duplicates = []
+
+        for d_id in duplicate_ids:
+            v = db_session.query(Video).filter_by(video_id=d_id).first()
+            if v:
+                duplicates.append(v)
+
+        for vd in video.duplicates:
+            if vd not in duplicates:
+                video.duplicates.remove(vd)
+        for d in duplicates:
+            if d not in video.duplicates:
+                video.duplicates.append(d)
+
+        db_session.add(video)
+        db_session.commit()
+
+    total_duplicates = total_duplicates // 2
+
+    if total_duplicates > 0:
+        flash(f"{total_duplicates} potential duplicates was found.", "warning")
+    else:
+        flash("No potential duplicates was found.", "success")
+
+    return redirect(url_for("serve.front_page"))
+
+
 @serve.route("/check_status")
 @cache.cached(timeout=10)
 def check_status():
