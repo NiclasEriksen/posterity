@@ -26,6 +26,7 @@ logger = LocalProxy(lambda: current_app.logger)
 from app.dl.dl import media_path, \
     STATUS_COMPLETED, STATUS_COOKIES, STATUS_DOWNLOADING, STATUS_FAILED, STATUS_INVALID, \
     get_celery_scheduled, get_celery_active, write_metadata_to_disk
+from app.dl.helpers import seconds_to_verbose_time
 from app.serve.db import db_session, Video, User, ContentTag, UserReport, Category,\
     init_db, AUTH_LEVEL_ADMIN, AUTH_LEVEL_MOD, AUTH_LEVEL_USER, REASON_TEXTS
 from app import get_environment, app_config
@@ -420,7 +421,7 @@ def add_category_post():
 
 @serve.route("/about", methods=["GET"])
 def about_us_page():
-    return render_template("about.html")
+    return render_template("about.html", total_time=seconds_to_verbose_time(get_total_duration()))
 
 
 @serve.route("/remove/<video_id>")
@@ -737,6 +738,18 @@ def list_videos(max_count=10) -> list:
         videos.append(d)
 
     return videos
+
+
+@cache.cached(timeout=300)
+def get_total_duration() -> float:
+    total = 0.0
+    try:
+        for v in db_session.query(Video).all():
+            total += v.duration
+    except Exception as e:
+        logger.error(e)
+
+    return total
 
 
 @cache.memoize(timeout=1)
