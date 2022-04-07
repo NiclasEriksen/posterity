@@ -477,6 +477,30 @@ def report_video_post(video_id):
     return serve_video(video_id)
 
 
+@serve.route("/clear_report/<report_id>", methods=["GET"])
+@login_required
+def clear_report_route(report_id):
+    try:
+        report_id = int(report_id)
+    except (ValueError, TypeError):
+        return render_template("not_found.html", type="report")
+    report = db_session.query(UserReport).filter_by(id=report_id).first()
+    if not report:
+        return render_template("not_found.html", type="report")
+
+    video = report.video
+    if video:
+        video_id = video.video_id
+    else:
+        video_id = ""
+
+    db_session.delete(report)
+    db_session.commit()
+    flash("User report has been deleted.", "success")
+
+    return serve_video(video_id)
+
+
 @serve.route("/download_archive", methods=["GET"])
 def download_archive():
     torrent_path = os.path.join(media_path, TORRENT_NAME)

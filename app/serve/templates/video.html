@@ -173,7 +173,16 @@
                         {% for r in video.user_reports %}
                         <div class="uk-width-1-1">
                             <h4><span class="uk-text-muted">Report #{{ r.id }}:</span> {{ r.reason_str }}</h4>
-                            {% if r.text|length %}<p class="uk-text-small uk-text-meta">{{ r.text }}</p>{% endif %}
+                            {% if r.text|length %}
+                            <p class="uk-text-small uk-text-meta">
+                            {{ r.text }}
+                            </p>
+                            {% endif %}
+                            <p class="uk-text-small">
+                                <a href="/clear_report/{{ r.id }}">
+                                    <span class="uk-link-icon" uk-icon="icon: trash; ratio: 0.8;"></span> Delete this report
+                                </a>
+                            </p>
                             <hr>
                         </div>
                         {% endfor %}
