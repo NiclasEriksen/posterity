@@ -649,7 +649,8 @@ def check_progress(video_id):
         if video.post_processed:
             flash("Post processing seems to have completed successfully", "success")
             return "", 201
-        flash("Video has downloaded successfully", "success")
+        # if s == STATUS_COMPLETED:
+        #     flash("Video has downloaded successfully", "success")
         return "", 200
     if s == STATUS_DOWNLOADING or s == STATUS_PROCESSING:
         return "", 206

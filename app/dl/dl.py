@@ -38,7 +38,7 @@ MAX_DURATION_MD: float = 60 * 60.0
 MAX_RESOLUTION_SD: int = 480
 MAX_DURATION_SD: float = 480 * 60.0     # 8 hours maximum.
 MAX_BIT_RATE_PER_PIXEL = 1.013
-MAX_AUD_BIT_RATE = 70
+MAX_AUD_BIT_RATE = 128
 MAX_FPS = 60
 SPLIT_FPS_THRESHOLD = 40.0
 
@@ -266,7 +266,7 @@ def download_from_json_data(metadata: dict, file_name: str):
 
 def get_post_process_ffmpeg_cmd(
         input_path: str, output_path: str, queue_size=512,
-        fps=25, vid_bit_rate=2000, aud_bit_rate=70,
+        fps=25, vid_bit_rate=2000, aud_bit_rate=128,
     ) -> list:
 
     pass_base = [
