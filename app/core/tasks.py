@@ -158,7 +158,7 @@ def post_process_task(data: dict, video_id: str):
         if hours > 0:
             log.error(f"Post-process failed after {hours} hours, {minutes} minutes: {video_id}")
         else:
-            log.error(f"Post-process failed after {minutes} minutes, {seconds:.0f} seconds: {video}")
+            log.error(f"Post-process failed after {minutes} minutes, {seconds:.0f} seconds: {video_id}")
 
 
 @celery.task(name="core.tasks.download", soft_time_limit=14400, time_limit=14700)    #, base=SQLAlchemyTask)
