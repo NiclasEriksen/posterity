@@ -99,7 +99,7 @@ DISPOSABLE_QUERIES = [
     "ab_channel"
 ]
 TIME_QUERIES = [
-    "s", "t", "time", "seek", "context"
+    "s", "t", "time", "seek", "context", "feature"
 ]
 TIME_LOCATIONS = [
     "twitter.com", "youtube.com", "t.co", "youtu.be", "nrk.no", "reddit.com", "redd.it"
