@@ -46,6 +46,10 @@ def start_processing(video_id: str):
         logger.error(e)
         return Response("Error during adding of processing task.", status=400)
     else:
+        video.status = STATUS_PROCESSING
+        video.post_processed = False
+        db_session.add(video)
+        db_session.commit()
         logger.info(f"Started new processing task with id: {task_id}")
         return Response(f"/{video_id}", status=201)
 
