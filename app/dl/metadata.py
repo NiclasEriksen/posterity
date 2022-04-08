@@ -247,8 +247,10 @@ def technical_info(video_path: str) -> dict:
         "file_size": 0,
         "duration": 0.0,
         "dimensions": (0, 0),
-        "bit_rate": 0,
-        "fps": 0,
+        "bit_rate": 0.0,
+        "vid_bit_rate": 0.0,
+        "aud_bit_rate": 0.0,
+        "fps": 0.0,
         "audio": False,
         "audio_codec": "",
         "video_codec": "",
@@ -314,10 +316,16 @@ def technical_info(video_path: str) -> dict:
                     try:
                         if "/" in fps:
                             total, divisor = fps.split("/")
-                            info["fps"] = int(int(total) / int(divisor))
+                            info["fps"] = float(total) / float(divisor)
                         else:
-                            info["fps"] = int(fps)
+                            info["fps"] = float(fps)
                     except (ValueError, TypeError, AttributeError):
+                        pass
+
+                if "bit_rate" in stream:
+                    try:
+                        info["vid_bit_rate"] = int(stream["bit_rate"])
+                    except (ValueError, TypeError):
                         pass
 
             elif stream["codec_type"] == "audio":
@@ -327,6 +335,11 @@ def technical_info(video_path: str) -> dict:
                     info["audio_codec"] = stream["codec_tag_string"]
                 elif "codec_long_name" in stream:
                     info["audio_codec"] = stream["codec_long_name"]
+                if "bit_rate" in stream:
+                    try:
+                        info["aud_bit_rate"] = int(stream["bit_rate"])
+                    except (ValueError, TypeError):
+                        pass
                 info["audio"] = True
             elif stream["codec_type"] == "subtitle":
                 pass

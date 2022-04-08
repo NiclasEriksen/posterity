@@ -25,10 +25,11 @@ logger = LocalProxy(lambda: current_app.logger)
 
 from app.dl.dl import media_path, \
     STATUS_COMPLETED, STATUS_COOKIES, STATUS_DOWNLOADING, STATUS_FAILED, STATUS_INVALID, \
+    STATUS_PROCESSING, STATUS_PENDING, \
     get_celery_scheduled, get_celery_active, write_metadata_to_disk
 from app.dl.helpers import seconds_to_verbose_time
 from app.serve.db import db_session, Video, User, ContentTag, UserReport, Category,\
-    init_db, AUTH_LEVEL_ADMIN, AUTH_LEVEL_MOD, AUTH_LEVEL_USER, REASON_TEXTS
+    init_db, AUTH_LEVEL_ADMIN, AUTH_LEVEL_EDITOR, AUTH_LEVEL_USER, REASON_TEXTS
 from app import get_environment, app_config
 from app.serve.search import search_videos, index_video_data, remove_video_data, remove_video_data_by_id
 from app.extensions import cache
@@ -113,13 +114,30 @@ def front_page():
         vq = Video.query
         total = vq.count()
 
-        if current_user and current_user.is_authenticated:
+        if current_user.check_auth(AUTH_LEVEL_ADMIN):
             videos = vq.order_by(
                 Video.upload_time.desc()
             ).offset(offset).limit(pp).all()
-        else:
+        elif current_user.check_auth(AUTH_LEVEL_EDITOR):
             videos = vq.filter(
-                or_(Video.status == STATUS_DOWNLOADING, Video.status == STATUS_COMPLETED)
+                or_(Video.private == False, Video.source == current_user.username)
+            ).order_by(
+                Video.upload_time.desc()
+            ).offset(offset).limit(pp).all()
+        elif current_user.is_authenticated:
+            videos = vq.filter(
+                or_(
+                    Video.status == STATUS_DOWNLOADING,
+                    Video.status == STATUS_COMPLETED,
+                    Video.status == STATUS_PENDING,
+                    Video.status == STATUS_PROCESSING
+            )
+            ).filter(Video.private == False).order_by(
+                Video.upload_time.desc()
+            ).offset(offset).limit(pp).all()
+        else:
+            videos = vq.filter_by(
+                status=STATUS_COMPLETED
             ).filter(Video.private == False).order_by(
                 Video.upload_time.desc()
             ).offset(offset).limit(pp).all()
@@ -161,9 +179,14 @@ def serve_video(video_id):
     if not video:
         logger.error("Video was not found.")
         return render_template("not_found.html")
-    elif video.private and not current_user.is_authenticated:
-        logger.error("Video not public and user not logged in.")
-        return render_template("private.html")
+    elif video.private:
+        if current_user.check_auth(AUTH_LEVEL_ADMIN):
+            pass
+        elif current_user.is_authenticated and current_user.username == video.source:
+            pass
+        else:
+            logger.error("Video is set to private.")
+            return render_template("private.html")
 
     if "embed" in request.args:
         return render_template(
@@ -527,6 +550,18 @@ def download_archive():
 
 @serve.route("/download/<video_id>")
 def download_video(video_id=""):
+    video = db_session.query(Video).filter_by(video_id=video_id).first()
+    if not video:
+        return "Video not found."
+
+    if video.private:
+        if current_user.check_auth(AUTH_LEVEL_ADMIN):
+            pass
+        elif current_user.is_authenticated and current_user.username == video.source:
+            pass
+        else:
+            return "Missing permissions to download video."
+
     try:
         if os.path.isfile(os.path.join(media_path, video_id + ".mp4")):
             return send_from_directory(media_path, video_id + ".mp4", as_attachment=True, conditional=True)
@@ -538,9 +573,13 @@ def download_video(video_id=""):
 
 @serve.route("/view/<video_id>.mp4")
 def view_video(video_id=""):
+    original = request.args.get("orig", type=int, default=0)
     try:
-        if os.path.isfile(os.path.join(media_path, video_id + ".mp4")):
-            return send_from_directory_partial(media_path, video_id + ".mp4")
+        proc_path = os.path.join(media_path, os.path.join("processed", f"{video_id}.mp4"))
+        if not original and os.path.isfile(proc_path):
+            return send_from_directory_partial(os.path.join(media_path, "processed"), f"{video_id}.mp4")
+        if os.path.isfile(os.path.join(media_path, f"{video_id}.mp4")):
+            return send_from_directory_partial(media_path, f"{video_id}.mp4")
     except OSError as e:
         logger.error(e)
         logger.error("Unable to serve video!")
@@ -606,15 +645,20 @@ def check_progress(video_id):
         return "", 404
 
     s = video.status
-    if s == STATUS_COMPLETED:
+    if s == STATUS_COMPLETED or s == STATUS_PENDING:
+        if video.post_processed:
+            flash("Post processing seems to have completed successfully", "success")
+            return "", 201
+        flash("Video has downloaded successfully", "success")
         return "", 200
-    if s == STATUS_DOWNLOADING:
+    if s == STATUS_DOWNLOADING or s == STATUS_PROCESSING:
         return "", 206
     if s == STATUS_FAILED:
         return "", 200
     if s == STATUS_INVALID or s == STATUS_COOKIES:
         return "", 415
 
+    flash("This error shouldn't happen, it means we haven't accounted for a status", "error")
     return abort(500)
 
 
@@ -653,6 +697,10 @@ def check_duplicates_route(video_id: str):
 @serve.route("/check_all_duplicates", methods=["GET"])
 @login_required
 def check_all_duplicates_route():
+    if not current_user.check_auth(AUTH_LEVEL_ADMIN):
+        flash("You're lacking permissions to do that.", "error")
+        return redirect(url_for("serve.dashboard_page"))
+
     videos = db_session.query(Video).filter_by(status=STATUS_COMPLETED).all()
     total_duplicates = 0
     for video in videos:

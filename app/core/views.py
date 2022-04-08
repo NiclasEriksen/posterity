@@ -4,11 +4,11 @@ from werkzeug.local import LocalProxy
 
 from authentication import require_appkey
 
-from .tasks import download_task
+from .tasks import download_task, post_process_task
 from app.dl.youtube import valid_video_url, minimize_url
 from app.dl.helpers import unique_filename
 from app.dl.dl import parse_input_data, find_duplicate_video_by_url,\
-    STATUS_DOWNLOADING, STATUS_PENDING, STATUS_FAILED, STATUS_COMPLETED
+    STATUS_DOWNLOADING, STATUS_PENDING, STATUS_FAILED, STATUS_COMPLETED, STATUS_PROCESSING
 from app.serve.db import db_session, Video
 
 core = Blueprint('core', __name__)
@@ -18,6 +18,36 @@ logger = LocalProxy(lambda: current_app.logger)
 @core.before_request
 def before_request_func():
     current_app.logger.name = 'core'
+
+
+@core.route("/start_processing/<video_id>", methods=["POST"])
+def start_processing(video_id: str):
+    if not current_user.check_auth(1):
+        logger.error("Trying to start post-processing without the right permissions.")
+        return Response("Lacking permissions to initiate processing task.", status=401)
+
+    video = db_session.query(Video).filter_by(video_id=video_id).first()
+    if not video:
+        return Response("No video found by that id.", status=404)
+    if video.status == STATUS_DOWNLOADING:
+        return Response("That video is currently downloading.", status=400)
+    elif video.status == STATUS_PROCESSING:
+        return Response("That video is already processing.", status=400)
+    elif video.status == [STATUS_FAILED, STATUS_PENDING]:
+        return Response("Video is not ready to be processed right now.", status=400)
+
+    try:
+        task_id = post_process_task.delay(video.to_json(), video.video_id)
+    except Exception as e:
+        video.status = STATUS_COMPLETED
+        video.post_processed = False
+        db_session.add(video)
+        db_session.commit()
+        logger.error(e)
+        return Response("Error during adding of processing task.", status=400)
+    else:
+        logger.info(f"Started new processing task with id: {task_id}")
+        return Response(f"/{video_id}", status=201)
 
 
 @core.route("/start_download/<video_id>", methods=["POST"])
@@ -57,12 +87,11 @@ def post_link():
 
     logger.info("Link posted.")
     data = request.get_json()
-    if current_user:
-        if current_user.is_authenticated:
-            if "download_now" in data and isinstance(data["download_now"], bool):
-                download_now = data["download_now"]
-            else:
-                download_now = True
+    if current_user.is_authenticated:
+        if "download_now" in data and isinstance(data["download_now"], bool):
+            download_now = data["download_now"]
+        else:
+            download_now = True
 
     data = parse_input_data(data)
 

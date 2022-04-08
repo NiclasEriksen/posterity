@@ -79,12 +79,86 @@ def gen_images_task(metadata: dict):
 
 
 @celery.task(name="core.tasks.post_process", soft_time_limit=7200, time_limit=7260)
-def post_process_task(data: dict, file_name: str):
+def post_process_task(data: dict, video_id: str):
     from app.dl.dl import (
+        process_from_json_data,
         STATUS_COMPLETED,
         STATUS_FAILED,
-        STATUS_PROCESSING
+        STATUS_PROCESSING,
+        media_path
     )
+    if "video_id" not in data:
+        log.error("Bad metadata to process from, aborting task.")
+        update_video(video_id, STATUS_COMPLETED)    # Completed == original file
+        return
+
+    input_path = os.path.join(media_path, f"{video_id}.mp4")
+    output_path = os.path.join(media_path, f"processed/{video_id}.mp4")
+    if not os.path.isfile(input_path):
+        log.error("Input file not found, aborting task.")
+        update_video(video_id, STATUS_COMPLETED)    # Completed == original file
+        return
+
+    dur = time.time()
+    log.info("Starting processing of " + str(video_id))
+
+    success = False
+    try:
+        for data in process_from_json_data(data, input_path, output_path):
+            status = data["status"]
+            if status == STATUS_PROCESSING:
+                log.info(f"Update from post-processing task: {video_id}")
+                update_video(video_id, status, data=data)
+                continue
+            elif status == STATUS_COMPLETED:
+                log.info(f"Post-process task has completed with no errors: {video_id}")
+                update_video(video_id, status, data=data)
+                success = True
+                break
+            elif status in [STATUS_FAILED]:
+                log.info(f"Post-processing for {video_id} has failed.")
+                update_video(video_id, status, data=data)
+                break
+    except Exception as e:
+        log.error(e)
+
+    dur = time.time() - dur
+    hours, minutes, seconds = seconds_to_time(dur)
+    if success:
+        try:
+            from app.serve.db import Video, session_scope
+            with session_scope() as session:
+                video = session.query(Video).filter_by(video_id=video_id).first()
+                if video:
+                    video.status = STATUS_COMPLETED
+                    video.post_processed = True
+                    session.add(video)
+                    session.commit()
+        except Exception as e:
+            log.error(e)
+            log.error("Unable to set status to completed on DB row...")
+        if hours > 0:
+            log.info(f"Post-process complete in {hours} hours, {minutes} minutes: {video_id}")
+        else:
+            log.info(f"Post-process complete in {minutes} minutes, {seconds:.0f} seconds: {video_id}")
+    else:
+        try:
+            from app.serve.db import Video, session_scope
+            with session_scope() as session:
+                video = session.query(Video).filter_by(video_id=video_id).first()
+                if video:
+                    video.status = STATUS_COMPLETED
+                    video.post_processed = False
+                    session.add(video)
+                    session.commit()
+        except Exception as e:
+            log.error(e)
+            log.error("Unable to set status to completed on DB row...")
+
+        if hours > 0:
+            log.error(f"Post-process failed after {hours} hours, {minutes} minutes: {video_id}")
+        else:
+            log.error(f"Post-process failed after {minutes} minutes, {seconds:.0f} seconds: {video}")
 
 
 @celery.task(name="core.tasks.download", soft_time_limit=14400, time_limit=14700)    #, base=SQLAlchemyTask)

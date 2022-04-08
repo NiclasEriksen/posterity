@@ -47,7 +47,7 @@
                     <span>
                         <a href="/download_archive" uk-icon="icon: cloud-download">Downloads </a>
                     </span>
-                    {% if current_user.is_authenticated %}
+                    {% if current_user.check_auth(1) %}
                     <span style="padding: 0 0.1rem 0 0.1rem;"> | </span>
                     <span>
                         <a href="/dashboard" uk-icon="icon: settings">Dashboard </a>
@@ -101,13 +101,15 @@
                             Downloads
                         </a>
                     </li>
-                    {% if current_user.is_authenticated %}
+                    {% if current_user.check_auth(1) %}
                     <li class="">
                         <a href="/dashboard">
                             <span class="uk-margin-small-right uk-icon" data-uk-icon="icon: settings"></span>
                             Editor dashboard
                         </a>
                     </li>
+                    {% endif %}
+                    {% if current_user.is_authenticated %}
                     <li class="uk-nav-divider"></li>
                     <li class="">
                         <a href="/logout?next={{ request.path }}">

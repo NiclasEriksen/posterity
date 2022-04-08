@@ -123,6 +123,59 @@ function startDownload(video_id) {
 
 }
 
+function startProcessing(video_id) {
+    var dl_btn = document.getElementById("start-processing-button");
+    var status_field = document.getElementById("video-download-status");
+    var dl_old_text = "";
+    if (dl_btn) {
+        dl_btn.disabled = true;
+        dl_old_text = dl_btn.textContent
+        dl_btn.textContent = "Starting task...";
+    }
+    if (status_field) {
+        status_field.textContent = "";
+    }
+
+    var request = new XMLHttpRequest();
+    request.open('POST', '/api/v1/core/start_processing/' + video_id, true);
+    request.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
+    request.onload = function() {
+        if (this.status == 201) {
+            window.location.href = '/' + video_id;
+        } else if (this.status >= 400) {
+            dl_btn.disabled = false;
+            dl_btn.textContent = dl_old_text;
+            if (status_field) {
+                status_field.innerHTML = '<span class="uk-text-danger">' + this.response + '</span>';
+            }
+            console.log(this.response);
+        } else {
+            dl_btn.disabled = false;
+            dl_btn.textContent = dl_old_text;
+            if (status_field) {
+                status_field.innerHTML = '<span class="uk-text-warning">Unknown server error :(</span>';
+            }
+            console.log(this.status);
+            console.log(this.response);
+        }
+    }
+    request.onerror = function(err) {
+        console.error(err);
+        dl_btn.disabled = false;
+        dl_btn.textContent = dl_old_text;
+        if (status_field) {
+            status_field.innerHTML = '<span class="uk-text-danger">Unknown error when contacting server.</span>';
+        }
+        console.log(this.response);
+    }
+    try {
+        request.send("");
+    } catch (err) {
+        console.error(err);
+    }
+
+}
+
 
 // if not len(metadata.keys()):
 // return abort(404)
@@ -162,7 +215,7 @@ function redirectOnComplete(video_id) {
     var request = new XMLHttpRequest(); 
     request.open('GET', '/check_progress/' + video_id, true);
     request.onload = function() {
-        if (this.status == 200 || this.status == 415) {
+        if (this.status == 200 || this.status == 201 || this.status == 415) {
             window.location.reload();
         } else {
             setTimeout(() => { redirectOnComplete(video_id); }, 1000);

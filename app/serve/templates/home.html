@@ -149,7 +149,7 @@
                                 <span class="uk-label label-small uk-label-category">{{ category.name }}</span>
                                 {% endfor %}
                             {% endif %}
-                            {% if video.can_be_changed and current_user.is_authenticated %}
+                            {% if video.can_be_changed and (current_user.check_auth(1) or (current_user.is_authenticated and video.source == current_user.username)) %}
                             <a href="/edit_video/{{ video.video_id }}" class="uk-icon-link" uk-icon="icon: pencil; ratio: 0.85"></a>
                             {% endif %}
                         </div>
@@ -187,7 +187,7 @@
                             <span class="uk-text-warning" uk-icon="icon: question; ratio: 0.9"></span>
                             {% endif %}
 
-                            {% if current_user.is_authenticated %}
+                            {% if current_user.check_auth(1) %}
                             {% if video.duplicates|length %}
                             <span uk-tooltip="title: Video has {{ video.duplicates|length }} possible duplicates;pos: top-left;">
                                 <span class="uk-text-warning" uk-icon="icon: copy; ratio: 0.9"></span>

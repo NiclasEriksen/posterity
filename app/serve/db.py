@@ -28,7 +28,7 @@ Base.query = db_session.query_property()
 
 # log = logging.getLogger("posterity.download")
 AUTH_LEVEL_USER = 0
-AUTH_LEVEL_MOD = 1
+AUTH_LEVEL_EDITOR = 1
 AUTH_LEVEL_ADMIN = 2
 
 REASON_DUPLICATE        = 0
@@ -104,11 +104,16 @@ class Video(Base):
     upload_time = Column(DateTime)
     video_format = Column(String)
     audio_format = Column(String)
+    processed_video_format = Column(String)
+    processed_audio_format = Column(String)
     width = Column(Integer, default=0)
     height = Column(Integer, default=0)
     bit_rate = Column(Integer, default=0)
+    processed_bit_rate = Column(Integer, default=0)
     frame_rate = Column(Float, default=0.0)
+    processed_frame_rate = Column(Float, default=0.0)
     file_size = Column(Float, default=0.0)
+    processed_file_size = Column(Float, default=0.0)
     duration = Column(Float)
     source = Column(String)
     location = Column(String)
@@ -226,9 +231,25 @@ class Video(Base):
         return f"{kbps:.1f} kbit/s"
 
     @property
+    def processed_bit_rate_str(self) -> str:
+        try:
+            kbps = self.processed_bit_rate / 1000
+        except (TypeError, ValueError):
+            kbps = 0.0
+        return f"{kbps:.1f} kbit/s"
+
+    @property
     def frame_rate_str(self) -> str:
         try:
             fr = int(self.frame_rate)
+        except (TypeError, ValueError):
+            fr = 0
+        return f"{fr} FPS"
+
+    @property
+    def processed_frame_rate_str(self) -> str:
+        try:
+            fr = int(self.processed_frame_rate)
         except (TypeError, ValueError):
             fr = 0
         return f"{fr} FPS"
@@ -273,6 +294,12 @@ class Video(Base):
             return convert_file_size(self.file_size)
         return "?B"
 
+    @property
+    def processed_file_size_str(self) -> str:
+        if self.processed_file_size:
+            return convert_file_size(self.processed_file_size)
+        return "?B"
+
     def to_json(self) -> dict:
         return {
             "url": self.url,
@@ -285,11 +312,15 @@ class Video(Base):
             "category": "/".join([c.name for c in self.categories]),
             "status": self.status,
             "format": f"{self.video_format} / {self.audio_format}",
+            "processed_format": f"{self.processed_video_format} / {self.processed_audio_format}",
             "width": self.width if self.width else 0,
             "height": self.height if self.height else 0,
             "bit_rate": self.bit_rate if self.bit_rate else 0,
             "frame_rate": self.frame_rate if self.frame_rate else 0.0,
             "file_size": self.file_size if self.file_size else 0,
+            "processed_bit_rate": self.processed_bit_rate if self.processed_bit_rate else 0,
+            "processed_frame_rate": self.processed_frame_rate if self.processed_frame_rate else 0.0,
+            "processed_file_size": self.processed_file_size if self.processed_file_size else 0,
             "duration": self.duration,
             "location": self.location,
             "video_id": self.video_id,
@@ -324,6 +355,14 @@ class Video(Base):
             self.video_format = "Unknown"
             self.audio_format = "Unknown"
         try:
+            formats = d["processed_format"].split(" / ")
+            self.processed_video_format = formats[0]
+            if len(formats) > 1:
+                self.processed_audio_format = formats[1]
+        except (KeyError, IndexError, AttributeError):
+            self.processed_video_format = "Unknown"
+            self.processed_audio_format = "Unknown"
+        try:
             self.location = d["location"]
         except KeyError:
             self.location = "Unknown"
@@ -351,6 +390,18 @@ class Video(Base):
             self.file_size = d["file_size"]
         except KeyError:
             self.file_size = 0
+        try:
+            self.processed_file_size = d["processed_file_size"]
+        except KeyError:
+            self.processed_file_size = 0
+        try:
+            self.processed_frame_rate = d["processed_frame_rate"]
+        except KeyError:
+            self.processed_frame_rate = 0.0
+        try:
+            self.processed_bit_rate = d["processed_bit_rate"]
+        except KeyError:
+            self.processed_bit_rate = 0.0
         try:
             self.upload_time = datetime.utcfromtimestamp(d["upload_time"])
         except KeyError:

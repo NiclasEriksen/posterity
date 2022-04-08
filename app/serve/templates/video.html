@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block page_title %}{% if video.status == 0 %}Downloading: {% else %}Video: {% endif %}{{ video.title }}{% endblock %}
+{% block page_title %}{% if video.status == 0 %}Downloading: {% elif video.status == 6 %}Processing: {% else %}Video: {% endif %}{{ video.title }}{% endblock %}
 {% block metadata %}<!-- OpenGraph metadata for video -->
         <meta name="description" content="{{ video.orig_title }}!">
         <meta property="og:site_name" content="Posterity video">
@@ -97,15 +97,19 @@
                 <div class="uk-grid uk-grid-small uk-width-1-1 uk-margin-remove-left">
                     <div class="uk-width-1-1 uk-text-small uk-text-center uk-text-meta" id="video-download-status"></div>
 
-                    {% if current_user.is_authenticated and video.can_be_changed %}
+                    {% if current_user.check_auth(1) and video.can_be_changed %}
                     <div class="uk-width-1-1 uk-padding-small">
                         <div class="uk-grid uk-width-1-1 uk-margin uk-margin-remove-left">
-                            {% if not video.ready_to_play %}
-                            <div class="uk-width-1-2 uk-text-center uk-padding-small">
+                            {% if video.ready_to_play %}
+                            <div class="uk-width-1-1 uk-width-1-2@s uk-text-center uk-padding-small">
+                                <button class="uk-input uk-button uk-button-primary" type="button" id="start-processing-button" onclick="startProcessing('{{ video.video_id }}');" {% if video.status != 1 or video.post_processed %}disabled{% endif %}>Post-process</button>
+                            </div>
+                            {% else %}
+                            <div class="uk-width-1-1 uk-width-1-2@s uk-text-center uk-padding-small">
                                 <button class="uk-input uk-button uk-button-primary" type="button" id="start-download-button" onclick="startDownload('{{ video.video_id }}');" {% if video.status == 1 %}disabled{% endif %}>Start download</button>
                             </div>
                             {% endif %}
-                            <div class="{% if video.ready_to_play %}uk-width-1-1{% else %}uk-width-1-2{% endif %} uk-text-center uk-padding-small">
+                            <div class="uk-width-1-1 uk-width-1-2@s uk-text-center uk-padding-small">
                                 <a class="uk-input uk-button uk-button-secondary" href="/edit_video/{{ video.video_id }}">Edit video</a>
                             </div>
                         </div>
@@ -115,7 +119,7 @@
                     {% if video.status == 0 %}
                         <h3 class="uk-text-muted uk-margin-remove-bottom">Downloading...</h3>
                     {% elif video.status == 1 %}
-                        <a href="{{ dl_path }}"><h3 class="uk-text-primary uk-margin-remove-bottom ">Click here to download video file</h3></a>
+                        <a href="{{ dl_path }}"><h3 class="uk-text-primary uk-margin-remove-bottom ">Click here to download video in original quality</h3></a>
                     {% elif video.status == 3 %}
                         <h3 class="uk-text-danger">Invalid URL, no video to download.</h3>
                     {% elif video.status == 4 %}
@@ -123,13 +127,13 @@
                     {% elif video.status == 5 %}
                         <h3 class="uk-text-warning">Link is pending approval by an editor and has not started downloading yet.</h3>
                     {% elif video.status == 6 %}
-                        <h3 class="uk-text-muted">Video is post-processing.</h3>
+                        <h3 class="uk-text-muted">Video is post-processing...</h3>
                     {% else %}
                         <h3 class="uk-text-danger">Download failed.</h3>
                     {% endif %}
                     </div>
 
-                    {% if current_user.is_authenticated and video.duplicates|length %}
+                    {% if current_user.check_auth(1) and video.duplicates|length %}
                     <div class="uk-width-1-1 uk-margin uk-background-muted uk-padding-small">
                         <h3>Possible duplicates:</h3>
                         <table class="uk-width-1-1 uk-table uk-table-small uk-table-responsive uk-table-justify uk-table-middle">
@@ -167,7 +171,7 @@
                         </table>
                     </div>
                     {% endif %}
-                    {% if current_user.is_authenticated and video.user_reports|length %}
+                    {% if current_user.check_auth(1) and video.user_reports|length %}
                     <div class="uk-width-1-1 report-list-item">
                         <h3 class="uk-text-danger">User reports:</h3>
                     </div>
@@ -218,7 +222,11 @@
                             <div class="uk-width-5-6">
                                 <p class="uk-text-small">
                                     <span class="uk-text-meta">Duration:</span> {{ video.duration_str_verbose }}<br>
+                                    {% if video.post_processed %}
+                                    <span class="uk-text-meta">File size:</span> {{ video.processed_file_size_str }} <i class="uk-text-meta">({{ video.file_size_str }})</i>
+                                    {% else %}
                                     <span class="uk-text-meta">File size:</span> {{ video.file_size_str }}
+                                    {% endif %}
                                 </p>
                             </div>
                         </div>
@@ -232,12 +240,18 @@
                                 <p class="uk-text-small">
                                     <span class="uk-text-meta">Dimensions:</span> {{ video.dimensions_str }}<br>
                                     <span class="uk-text-meta">Codecs:</span> {{ video.format_str }}<br>
-                                    <span class="uk-text-meta">FPS/bit rate:</span> {{ video.frame_rate_str }}, {{ video.bit_rate_str }}
+                                    {% if video.post_processed %}
+                                    <span class="uk-text-meta">FPS:</span> {{ video.processed_frame_rate_str }} <i>(<span class="uk-text-meta">{{ video.frame_rate_str }}</span>)</i><br>
+                                    <span class="uk-text-meta">Bit rate:</span> {{ video.processed_bit_rate_str }} <i>(<span class="uk-text-meta">{{ video.bit_rate_str }}</span>)</i><br>
+                                    {% else %}
+                                    <span class="uk-text-meta">FPS:</span> {{ video.frame_rate_str }}<br>
+                                    <span class="uk-text-meta">Bit rate:</span> {{ video.bit_rate_str }}
+                                    {% endif %}
                                 </p>
                             </div>
                         </div>
                     </div>
-                    {% if not current_user.is_authenticated %}
+                    {% if not current_user.is_authenticated or not current_user.check_auth(1) %}
                     <div class="uk-width-1-1 uk-padding-small">
                         <div class="uk-grid uk-width-1-1 uk-margin uk-margin-remove-left">
                             <div class="uk-width-1-1 uk-text-center uk-padding-small uk-link-danger">
@@ -264,7 +278,7 @@
             });
         }
         </script>
-        {% elif video.status == 0 %}
+        {% elif video.status == 0 or video.status == 6 %}
         <script>
             redirectOnComplete('{{ video.video_id }}');
         </script>

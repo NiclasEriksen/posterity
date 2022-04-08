@@ -22,6 +22,8 @@ media_path = os.environ.get("MEDIA_FOLDER", "")
 thumbnail_path = os.environ.get("THUMBNAIL_FOLDER", "")
 preview_path = os.environ.get("PREVIEW_FOLDER", "")
 url_file_path = os.path.join(media_path, "urls.store")
+tmp_path = os.path.join(media_path, "tmp")
+
 STATUS_DOWNLOADING = 0
 STATUS_COMPLETED = 1
 STATUS_FAILED = 2
@@ -35,6 +37,10 @@ MAX_RESOLUTION_MD: int = 720
 MAX_DURATION_MD: float = 60 * 60.0
 MAX_RESOLUTION_SD: int = 480
 MAX_DURATION_SD: float = 480 * 60.0     # 8 hours maximum.
+MAX_BIT_RATE_PER_PIXEL = 1.013
+MAX_AUD_BIT_RATE = 70
+MAX_FPS = 60
+SPLIT_FPS_THRESHOLD = 40.0
 
 
 if not os.path.isfile(url_file_path):
@@ -75,6 +81,73 @@ def write_metadata_to_disk(video_id: str, md: dict):
 def write_metadata(video_id: str, md: dict):
     write_metadata_to_disk(video_id, md)
     write_metadata_to_db(video_id, md)
+
+
+def process_from_json_data(metadata: dict, input_file: str, output_file: str) -> dict:
+    metadata["status"] = STATUS_PROCESSING
+    yield metadata
+
+    info = technical_info(input_file)
+
+    vid_bit_rate = info["vid_bit_rate"]
+    aud_bit_rate = info["vid_bit_rate"]
+    fps = info["fps"]
+
+    try:
+        pixels = (info["dimensions"][0] * info["dimensions"][1])
+    except (KeyError, IndexError):
+        pixels = 921600     # 720p
+
+    max_bit_rate = pixels * MAX_BIT_RATE_PER_PIXEL
+
+    vid_bit_rate = min(vid_bit_rate, max_bit_rate) // 1000
+    aud_bit_rate = min(aud_bit_rate // 1000, MAX_AUD_BIT_RATE)
+
+    if fps >= SPLIT_FPS_THRESHOLD and fps <= MAX_FPS:
+        fps *= 0.5
+    elif fps > MAX_FPS:
+        fps = MAX_FPS
+
+    cmd = get_post_process_ffmpeg_cmd(
+        input_file, output_file,
+        fps=fps, vid_bit_rate=vid_bit_rate,
+        aud_bit_rate=aud_bit_rate
+    )
+
+    metadata["processed_bit_rate"] = (vid_bit_rate + aud_bit_rate) * 1000
+    metadata["process"] = (vid_bit_rate + aud_bit_rate) * 1000
+    metadata["processed_frame_rate"] = (vid_bit_rate + aud_bit_rate) * 1000
+
+    if "&&" in cmd:
+        pass_1 = cmd[:cmd.index("&&")]
+        pass_2 = cmd[cmd.index("&&")+1:]
+    else:
+        pass_1 = cmd
+        pass_2 = []
+
+    cur_dir = os.getcwd()
+    os.chdir(tmp_path)
+
+    for i, p in enumerate([pass_1, pass_2]):
+        log.info(f"{metadata['video_id']} | Running pass {i}...")
+        result = subprocess.run(p)
+        if result.returncode != 0:
+            log.error(result)
+            log.error("Well this all went to shit. Removing video.")
+            try:
+                os.remove(output_file)
+            except (FileNotFoundError, OSError):
+                pass
+            metadata["status"] = STATUS_FAILED
+            break
+    else:
+        metadata["status"] = STATUS_COMPLETED
+        metadata = add_technical_info_to_metadata(metadata, input_file, post_process=False)
+        metadata = add_technical_info_to_metadata(metadata, output_file, post_process=True)
+
+    os.chdir(cur_dir)
+
+    yield metadata
 
 
 def download_from_json_data(metadata: dict, file_name: str):
@@ -191,12 +264,33 @@ def download_from_json_data(metadata: dict, file_name: str):
     yield metadata
 
 
+def get_post_process_ffmpeg_cmd(
+        input_path: str, output_path: str, queue_size=512,
+        fps=25, vid_bit_rate=2000, aud_bit_rate=70,
+    ) -> list:
+
+    pass_base = [
+        "ffmpeg", "-thread_queue_size", f"{queue_size}", "-y",
+        "-vsync", "vfr",
+        "-i", input_path,
+        "-vf", "yadif=parity=auto",
+        "-c:v", "libx264", "-pix_fmt", "yuv420p", "-vprofile", "main", "-vlevel", "4", "-preset", "veryslow",
+        "-b:v", f"{vid_bit_rate}k", "-filter:v", f"fps={fps}", "-crf", str(CRF),
+        "-c:a", "aac", "-strict", "experimental", "-b:a", f"{aud_bit_rate}k",
+        "-pass" #-v 24
+    ]
+
+    pass_1 = pass_base + ["1", "-f", "mp4", "/dev/null"]
+    pass_2 = pass_base + ["2", output_path]
+    return pass_1 + ["&&"] + pass_2
+
+
 def get_ffmpeg_cmd(
     vid_url, aud_url, sub_url, save_path, local_audio_channel=-1, normalize=True,
-    http_persistent=True
+    http_persistent=True, queue_size=512
 ) -> list:
 
-    cmd = ["ffmpeg", "-i"]
+    cmd = ["ffmpeg", "-i", "-thread_queue_size", f"{queue_size}"]
 
     if len(vid_url):
         cmd.append(vid_url)
@@ -380,19 +474,24 @@ def parse_input_data(data: dict) -> dict:
     return metadata
 
 
-def add_technical_info_to_metadata(metadata: dict, video_path: str) -> dict:
+def add_technical_info_to_metadata(metadata: dict, video_path: str, post_process=False) -> dict:
     info = technical_info(video_path)
     try:
-        metadata["file_size"] = info["file_size"]
-        metadata["bit_rate"] = info["bit_rate"]
-        metadata["frame_rate"] = info["fps"]
-        metadata["duration"] = info["duration"]
-        metadata["width"] = info["dimensions"][0]
-        metadata["height"] = info["dimensions"][1]
-        metadata["file_size"] = info["file_size"]
-        metadata["format"] = f'{info["video_codec"]} / {info["audio_codec"]}'
+        if post_process:
+            metadata["processed_file_size"] = info["file_size"]
+            metadata["processed_bit_rate"] = info["bit_rate"]
+            metadata["processed_frame_rate"] = info["fps"]
+            metadata["processed_format"] = f'{info["video_codec"]} / {info["audio_codec"]}'
+        else:
+            metadata["file_size"] = info["file_size"]
+            metadata["bit_rate"] = info["bit_rate"]
+            metadata["frame_rate"] = info["fps"]
+            metadata["duration"] = info["duration"]
+            metadata["width"] = info["dimensions"][0]
+            metadata["height"] = info["dimensions"][1]
+            metadata["format"] = f'{info["video_codec"]} / {info["audio_codec"]}'
     except KeyError:
-        pass
+        log.error(e)
 
     return metadata
 

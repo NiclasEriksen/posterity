@@ -25,6 +25,8 @@ def create_app():
     login_manager = LoginManager()
     login_manager.login_view = "serve.login_page"
     login_manager.init_app(app)
+    login_manager.anonymous_user.check_auth = lambda _u, _i: False
+    login_manager.anonymous_user.username = "Anonymous"
 
     @login_manager.user_loader
     def load_user(user_id):
