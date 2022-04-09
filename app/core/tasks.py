@@ -71,10 +71,10 @@ def check_duplicate_video(v1, v2) -> bool:
                 return is_equal(img1, img2, tolerance=COMPARE_IMAGE_DATA_THRESHOLD)
 
             except Exception as e:
-                logger.error(e)
+                log.error(e)
 
     except Exception as e:
-        logger.error(e)
+        log.error(e)
 
     return False
 
