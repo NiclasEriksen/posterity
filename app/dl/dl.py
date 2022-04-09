@@ -95,10 +95,15 @@ def process_from_json_data(metadata: dict, input_file: str, output_file: str) ->
     aud_bit_rate = info["vid_bit_rate"]
     fps = info["fps"]
 
+    if fps >= SPLIT_FPS_THRESHOLD and fps <= MAX_FPS:
+        fps *= 0.5
+    elif fps > MAX_FPS:
+        fps = MAX_FPS
+
     try:
         pixels = (info["dimensions"][0] * info["dimensions"][1])
     except (KeyError, IndexError):
-        pixels = 921600     # 720p
+        pixels = 921600 * (fps / 30.0)     # 720p
 
     max_bit_rate = pixels * MAX_BIT_RATE_PER_PIXEL
     min_bit_rate = pixels * MIN_BIT_RATE_PER_PIXEL
@@ -110,10 +115,6 @@ def process_from_json_data(metadata: dict, input_file: str, output_file: str) ->
     vid_bit_rate = min(vid_bit_rate, max_bit_rate) // 1000
     aud_bit_rate = min(aud_bit_rate // 1000, MAX_AUD_BIT_RATE)
 
-    if fps >= SPLIT_FPS_THRESHOLD and fps <= MAX_FPS:
-        fps *= 0.5
-    elif fps > MAX_FPS:
-        fps = MAX_FPS
 
     # print(vid_bit_rate)
     # print(aud_bit_rate)
