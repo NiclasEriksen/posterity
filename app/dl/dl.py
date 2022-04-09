@@ -316,7 +316,7 @@ def get_post_process_ffmpeg_cmd(
 
 def get_ffmpeg_cmd(
     vid_url, aud_url, _sub_url, save_path, local_audio_channel=-1, normalize=True,
-    http_persistent=True, queue_size=512, crf=26
+    http_persistent=True, queue_size=512, crf=25
 ) -> list:
 
     cmd = ["ffmpeg", "-thread_queue_size", f"{queue_size}", "-i"]
