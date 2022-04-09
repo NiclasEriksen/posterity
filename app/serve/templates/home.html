@@ -154,57 +154,21 @@
                             {% endif %}
                         </div>
                     </td>
-                    <td class="uk-text-muted uk-text-small uk-visible@s" style="max-width: 15vw;">
-                        <div style="overflow: hidden; white-space: nowrap; text-overflow: ellipsis;">
+                    <td class="uk-text-muted uk-text-small uk-visible@s" style="max-width: 25vw;">                        <div>
                             {% if video.private %}
                             <span uk-tooltip="title: Video is private;pos: top-left;">
                                 <span class="uk-text-danger" uk-icon="icon: ban; ratio: 0.9"></span>
                             </span>
                             {% endif %}
-                            {% if video.status == 0 %}
-                            <span uk-tooltip="title: Video is downloading;pos: top-left;">
-                                <span class="uk-text-primary" uk-icon="icon: download; ratio: 0.9"></span>
-                            </span>
-                            {% elif video.status == 1 %}
-                            <span class="uk-text-success" uk-icon="icon: check; ratio: 0.9"></span>
-                            {% elif video.status == 2 %}
-                            <span uk-tooltip="title: Video failed to download;pos: top-left;">
-                                <span class="uk-text-danger" uk-icon="icon: close; ratio: 0.9"></span>
-                            </span>
-                            {% elif video.status == 3 %}
-                            <span class="uk-text-danger" uk-icon="icon: ban; ratio: 0.9"></span>
-                            {% elif video.status == 4 %}
-                            <span class="uk-text-danger" uk-icon="icon: file-text; ratio: 0.9"></span>
-                            {% elif video.status == 5 %}
-                            <span uk-tooltip="title: Video is pending approval;pos: top-left;">
-                                <span class="uk-text-warning" uk-icon="icon: clock; ratio: 0.9"></span>
-                            </span>
-                            {% elif video.status == 6 %}
-                            <span uk-tooltip="title: Video is processing;pos: top-left;">
-                                <span class="uk-text-primary" uk-icon="icon: refresh; ratio: 0.9"></span>
-                            </span>
-                            {% else %}
-                            <span class="uk-text-warning" uk-icon="icon: question; ratio: 0.9"></span>
-                            {% endif %}
 
-                            {% if current_user.check_auth(1) %}
-                            {% if video.duplicates|length %}
-                            <span uk-tooltip="title: Video has {{ video.duplicates|length }} possible duplicates;pos: top-left;">
-                                <span class="uk-text-warning" uk-icon="icon: copy; ratio: 0.9"></span>
+                            <span class="uk-visible@m">
+                                {% include "video_status_icons.html" %}
                             </span>
-                            {% endif %}
-                            {% if video.user_reports|length %}
-                            <span uk-tooltip="title: Video has {{ video.user_reports|length }} reports pending;pos: top-left;">
-                                <span class="uk-text-danger" uk-icon="icon: warning; ratio: 0.9"></span>
-                            </span>
-                            {% endif %}
-                            {% if video.recommend_post_process %}
-                            <span uk-tooltip="title: Recommended for post-processing;pos: top-left;">
-                                <span class="uk-text-muted" uk-icon="icon: move; ratio: 0.9"></span>
-                            </span>
-                            {% endif %}
-                            {% endif %}
 
+                        </div>
+                        <hr class="uk-visible@m" style="margin-top: 2px; margin-bottom: 2px;">
+                        <div style="overflow: hidden; white-space: nowrap; text-overflow: ellipsis;">
+                            {% if current_user.is_authenticated %}<span class="uk-text-meta" uk-icon="icon: user; ratio: 0.6"></span> {{ video.source }}{% endif %}
                             <span uk-tooltip="title: {{ video.url }};pos: top-left;">
                                 <a href="{{ video.url }}" target="_blank">
                                     {% if video.source_site_name|length %}
@@ -213,11 +177,12 @@
                                     {{ video.url[:128] }}
                                 </a>
                             </span>
-                            </div>
-                        {% if current_user.is_authenticated %}<br><span class="uk-text-meta" uk-icon="icon: user; ratio: 0.6"></span> {{ video.source }}{% endif %}
+                        </div>
+
                     </td>
                     <td class="uk-text-muted uk-text-small"{% if video.status != 1 %} style="padding: 0!important;"{% endif %}>
                         <span uk-icon="icon: future; ratio: 0.6"></span><span> {{ video.duration_str }}</span>
+                        <span class="uk-hidden@m"><span style="padding: 0 0.1rem 0 0.1rem;"> | </span>{% include "video_status_icons.html" %}</span>
                     </td>
                     <td class="uk-text-muted uk-text-small">
                         <div uk-tooltip="title: {{ video.upload_time_elapsed_verbose }};pos: top-left;">
