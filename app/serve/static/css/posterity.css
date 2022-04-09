@@ -272,8 +272,45 @@ body, html {
   height: 24px;
   width: 24px;
   border-radius: 50%;
-  -webkit-animation: video-spin 5s infinite ease-in;
-  animation: video-spin 5s infinite ease-in;
+  -webkit-animation: video-spin 4s infinite ease-in;
+  animation: video-spin 4s infinite ease-in;
+}
+.video-spinner-shadow {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    box-shadow: 0 0px 16px 0 rgba(255, 255, 255, 0.75);
+    animation: video-spin-shadow 16s infinite ease-in-out;
+    -webkit-animation: video-spin-shadow 16s infinite ease-in-out;
+}
+
+@-webkit-keyframes video-spin-shadow {
+    0%, 20%, 100% {
+        opacity: 0;
+    }
+    25%, 45% {
+        opacity: 1;
+    }
+    50%, 70% {
+        opacity: 0;
+    }
+    75%, 95% {
+        opacity: 1;
+    }
+}
+@keyframes video-spin-shadow {
+    0%, 20%, 100% {
+        opacity: 0;
+    }
+    25%, 45% {
+        opacity: 1;
+    }
+    50%, 70% {
+        opacity: 0;
+    }
+    75%, 95% {
+        opacity: 1;
+    }
 }
 
 @-webkit-keyframes video-spin {
@@ -320,4 +357,82 @@ body, html {
      transform: translate(-35px, 35px);
      background-color: var(--black);
   }
+}
+
+.shadow-spinner
+{
+    position: relative;
+    width: 200px;
+    height: 200px;
+}
+.shadow-spinner::before
+{
+    content: "";
+    position: absolute;
+    top: 85px;
+    left: 15%;
+    width: 70%;
+    height: 70%;
+    background: var(--warning);
+    box-shadow: -60px -55px 0 var(--primary);
+    border-radius: 50%;
+    animation: shadow-spinner-animate 5s ease-in-out infinite;
+}
+.shadow-spinner::after
+{
+    content: "";
+    position: absolute;
+    bottom: 85px;
+    left: 15%;
+    width: 70%;
+    height: 70%;
+    background: var(--danger);
+    box-shadow: 60px 55px 0 var(--success);
+    border-radius: 50%;
+    animation: shadow-spinner-animate 5s ease-in-out infinite;
+}
+@keyframes shadow-spinner-animate
+{
+    0%
+    {
+        filter: blur(40px) hue-rotate(0deg);
+    }
+    50%
+    {
+        filter: blur(30px) hue-rotate(180deg);
+    }
+    100%
+    {
+        filter: blur(40px) hue-rotate(360deg);
+    }
+}
+.shadow-spinner span {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--charcoal);
+    border-radius: 50%;
+    z-index: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-transform: uppercase;
+    letter-spacing: 4px;
+    font-weight: 500;
+    font-size: 17px;
+    color: var(--grey);
+}
+.shadow-spinner span::before
+{
+    content: "";
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    right: 8px;
+    bottom: 8px;
+    background: transparent;
+    border-radius: 50%;
+    box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.25);
 }

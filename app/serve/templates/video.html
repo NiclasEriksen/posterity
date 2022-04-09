@@ -64,8 +64,13 @@
                         </div>
                         {% elif video.status == 0  or video.status == 6 %}
                         <div class="uk-flex uk-margin uk-text-meta uk-flex-center uk-padding-large uk-height-medium">
-                            <div class="uk-position-center uk-padding-small">
-                                <div class="video-spinner"></div>
+                            <div class="uk-position-center-top uk-padding-small">
+                                {% if video.status == 0 %}
+                                    {% set spinner_text = "Downloading" %}
+                                {% else %}
+                                    {% set spinner_text = "Processing" %}
+                                {% endif %}
+                                {% include "shadow_spinner.html" %}
                             </div>
                         </div>
                         {% elif video.status == 5 %}
