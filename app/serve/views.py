@@ -286,10 +286,11 @@ def edit_video_post(video_id: str):
     write_metadata_to_disk(video_id, video.to_json())
     index_video_data(video)
 
-    try:
-        _task_id = gen_images_task.delay(video.to_json())
-    except Exception as e:
-        logger.error(e)
+    if video.ready_to_play:
+        try:
+            _task_id = gen_images_task.delay(video.to_json())
+        except Exception as e:
+            logger.error(e)
 
     flash(f"Video info for \"{video_id}\"has been updated.", "success")
 
