@@ -102,7 +102,15 @@
                         <div class="uk-grid uk-width-1-1 uk-margin uk-margin-remove-left">
                             {% if video.ready_to_play %}
                             <div class="uk-width-1-1 uk-width-1-2@s uk-text-center uk-padding-small">
-                                <button class="uk-input uk-button uk-button-primary" type="button" id="start-processing-button" onclick="startProcessing('{{ video.video_id }}');" {% if video.status != 1 or video.post_processed %}disabled{% endif %}>Post-process</button>
+                                <button
+                                    class="uk-input uk-button {% if video.recommend_post_process %}uk-button-primary{% else %}uk-button-secondary{% endif %}"
+                                    type="button"
+                                    id="start-processing-button"
+                                    onclick="startProcessing('{{ video.video_id }}');"
+                                    {% if video.status != 1 or video.post_processed %}disabled{% endif %}
+                                >
+                                        Post-process
+                                </button>
                             </div>
                             {% else %}
                             <div class="uk-width-1-1 uk-width-1-2@s uk-text-center uk-padding-small">

@@ -107,11 +107,8 @@ def process_from_json_data(metadata: dict, input_file: str, output_file: str) ->
 
     crf = int(CRF + (CRF_LOW - CRF) * br)
 
-    print(max_bit_rate)
-    print(f"CRF: {crf}, BR: {br}")
     vid_bit_rate = min(vid_bit_rate, max_bit_rate) // 1000
     aud_bit_rate = min(aud_bit_rate // 1000, MAX_AUD_BIT_RATE)
-
 
     if fps >= SPLIT_FPS_THRESHOLD and fps <= MAX_FPS:
         fps *= 0.5

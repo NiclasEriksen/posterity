@@ -113,7 +113,7 @@ body, html {
 .uk-button-danger:hover, .uk-button-warning:hover, .uk-button-primary:hover, .uk-button-secondary:hover {
     border-color: var(--grey);
 }
-.uk-button-primary:disabled, .uk-button-warning:disabled, .uk-button-danger:disabled {
+.uk-button-primary:disabled, .uk-button-warning:disabled, .uk-button-danger:disabled, .uk-button-secondary:disabled {
     border: 1px dashed var(--light-grey);
     background: none!important;
 }

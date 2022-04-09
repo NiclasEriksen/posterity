@@ -12,7 +12,7 @@ from werkzeug.local import LocalProxy
 from flask import current_app
 from app.dl.helpers import seconds_to_verbose_time, seconds_to_hhmmss, convert_file_size
 from app.dl.dl import STATUS_DOWNLOADING, STATUS_PROCESSING, STATUS_INVALID,\
-    STATUS_FAILED, STATUS_COMPLETED, STATUS_PENDING
+    STATUS_FAILED, STATUS_COMPLETED, STATUS_PENDING, MAX_BIT_RATE_PER_PIXEL, MIN_BIT_RATE_PER_PIXEL
 from app.dl.metadata import get_source_site
 
 
@@ -140,6 +140,21 @@ class Video(Base):
     @property
     def can_be_changed(self) -> bool:
         return self.status not in [STATUS_DOWNLOADING, STATUS_PROCESSING]
+
+    @property
+    def recommend_post_process(self) -> bool:
+        if self.post_processed or not self.ready_to_play or not self.bit_rate:
+            return False
+
+        pixels = self.width * self.height * (self.frame_rate / 30.0)
+        min_bit_rate = pixels * MIN_BIT_RATE_PER_PIXEL
+        max_bit_rate = pixels * MAX_BIT_RATE_PER_PIXEL
+        r = max_bit_rate - min_bit_rate
+        br = max(0.0, self.bit_rate - min_bit_rate) / r
+
+        if br > 0.5:
+            return True
+        return False
 
     @property
     def source_site_name(self) -> str:
