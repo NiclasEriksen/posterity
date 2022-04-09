@@ -37,9 +37,11 @@
                             {% endfor %}
                         </select>
                     </div>
+                    {% if current_user.check_auth(1) and video.user_can_edit(current_user) %}
                     <div class="uk-margin">
                         <label><input class="uk-checkbox" id="private-checkbox" name="private-checkbox" type="checkbox"{% if video.private %} checked{% endif %}> Mark as private</label>
                     </div>
+                    {% endif %}
 
                     <div class="uk-width-1-1 uk-grid uk-grid-small">
                         {% if video.can_be_changed %}

@@ -699,6 +699,8 @@ def check_duplicates_route(video_id: str):
             flash(f"{len(duplicates)} potential duplicates was found.", "warning")
         else:
             flash("No potential duplicates was found.", "success")
+    else:
+        flash("Video not ready to check for duplicates.", "error")
 
     return serve_video(video_id)
 
