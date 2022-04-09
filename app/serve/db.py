@@ -138,7 +138,7 @@ class Video(Base):
     def user_can_edit(self, user: User) -> bool:
         if user.check_auth(AUTH_LEVEL_EDITOR):
             return True
-        elif user.username == self.source:
+        elif user.is_authenticated and user.username == self.source:
             return True
         return False
 
