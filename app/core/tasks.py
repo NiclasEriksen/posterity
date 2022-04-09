@@ -107,7 +107,7 @@ def check_all_duplicates_task():
 
             session.add(v1)
             session.add(v2)
-            session.commit()
+        session.commit()
 
     log.info(f"Check is done, found {total_duplicates} duplicates.")
     return total_duplicates
