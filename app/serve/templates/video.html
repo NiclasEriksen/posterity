@@ -64,7 +64,7 @@
                         </div>
                         {% elif video.status == 0  or video.status == 6 %}
                         <div class="uk-flex uk-margin uk-text-meta uk-flex-center uk-padding-large uk-height-medium">
-                            <div class="uk-position-center-top uk-padding-small">
+                            <div class="uk-position-center-top uk-margin-large-top">
                                 {% if video.status == 0 %}
                                     {% set spinner_text = "Downloading" %}
                                 {% else %}
@@ -89,7 +89,7 @@
                     </div>
                 </div>
                 <div class="uk-width-1-1 uk-padding-small">
-                    <h2 class="uk-padding-small">{{ video.title }}</h2>
+                    <h2 class="uk-padding-small uk-margin-remove-bottom">{{ video.title }}</h2>
                     {% for tag in video.tags_by_category %}
                     <span class="uk-label label-small {% if tag.category > 1 %}uk-label-danger{% elif tag.category == 1 %}uk-label-warning{% endif %}">{{ tag.name }}</span>
                     {% endfor %}
