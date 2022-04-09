@@ -63,8 +63,8 @@
                             </video>
                         </div>
                         {% elif video.status == 0  or video.status == 6 %}
-                        <div class="uk-flex uk-margin uk-text-meta uk-flex-center uk-padding-large uk-height-medium">
-                            <div class="uk-position-center-top uk-margin-large-top">
+                        <div class="uk-flex uk-margin uk-text-meta uk-flex-center uk-height-medium" style="padding: 40px;">
+                            <div class="uk-position-center-top" style="margin-top: 50px; margin-bottom: 50px;">
                                 {% if video.status == 0 %}
                                     {% set spinner_text = "Downloading" %}
                                 {% else %}
