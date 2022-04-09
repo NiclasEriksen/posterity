@@ -130,8 +130,7 @@
                     {% endif %}
                     <div class="uk-width-1-1 uk-text-center uk-padding-small">
                     {% if video.status == 0 %}
-                        <h3 class="uk-text-muted uk-margin-remove-bottom">Downloading...</h3>
-                    {% elif video.status == 1 %}
+                    {% elif video.status == 1 or video.status == 6 %}
                         <a href="{{ dl_path }}"><h3 class="uk-text-primary uk-margin-remove-bottom ">Click here to download video in original quality</h3></a>
                     {% elif video.status == 3 %}
                         <h3 class="uk-text-danger">Invalid URL, no video to download.</h3>
@@ -139,8 +138,6 @@
                         <h3 class="uk-text-danger">Video might be region/age restricted and requires cookies (not implemented).</h3>
                     {% elif video.status == 5 %}
                         <h3 class="uk-text-warning">Link is pending approval by an editor and has not started downloading yet.</h3>
-                    {% elif video.status == 6 %}
-                        <h3 class="uk-text-muted">Video is post-processing...</h3>
                     {% else %}
                         <h3 class="uk-text-danger">Download failed.</h3>
                     {% endif %}
