@@ -785,14 +785,18 @@ def list_videos(max_count=10) -> list:
     return videos
 
 
-@cache.cached(timeout=300)
+@cache.cached(timeout=60)
 def get_total_duration() -> float:
+    from sqlalchemy.sql import func
     total = 0.0
     try:
-        for v in db_session.query(Video).all():
-            total += v.duration
+        q = db_session.query(func.sum(Video.duration).label("total_duration"))
     except Exception as e:
         logger.error(e)
+
+    result = q.all()
+    if len(result):
+        total = result[0][0]
 
     return total
 
