@@ -148,15 +148,13 @@ class Video(Base):
         if self.post_processed or not self.ready_to_play or not self.bit_rate:
             return False
 
-        pixels = self.width * self.height * (self.frame_rate / 25.0)
+        pixels = self.width * self.height * (self.frame_rate / 30.0)
         min_bit_rate = pixels * MIN_BIT_RATE_PER_PIXEL
         max_bit_rate = pixels * MAX_BIT_RATE_PER_PIXEL
         r = max_bit_rate - min_bit_rate
-        br = max(0.0, self.bit_rate - min_bit_rate) / r
+        br = min(1.0, max(0.0, self.bit_rate - min_bit_rate) / r)
 
-        if br > PROCESSING_RECOMMENDATION:
-            return True
-        return False
+        return br >= PROCESSING_RECOMMENDATION
 
     @property
     def source_site_name(self) -> str:
