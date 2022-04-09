@@ -1,6 +1,5 @@
 import os
 import functools
-import itertools
 import re
 import mimetypes
 from dotenv import load_dotenv
@@ -34,7 +33,8 @@ from app.serve.db import db_session, Video, User, ContentTag, UserReport, Catego
 from app import get_environment, app_config
 from app.serve.search import search_videos, index_video_data, remove_video_data, remove_video_data_by_id
 from app.extensions import cache
-from app.core.tasks import gen_images_task
+from app.core.tasks import gen_images_task, check_all_duplicates_task, \
+    COMPARE_DURATION_THRESHOLD, COMPARE_RATIO_THRESHOLD, COMPARE_IMAGE_DATA_THRESHOLD
 
 
 # Setup
@@ -43,9 +43,6 @@ load_dotenv()
 APPLICATION_ENV = get_environment()
 MAX_RESULT_PER_PAGE = 30
 TORRENT_NAME = "Posterity.Ukraine.archive.torrent"
-COMPARE_DURATION_THRESHOLD = 0.10
-COMPARE_RATIO_THRESHOLD = 0.25
-COMPARE_IMAGE_DATA_THRESHOLD = 10.0
 
 
 def catch_redis_errors(f):
@@ -709,36 +706,15 @@ def check_duplicates_route(video_id: str):
 
 @serve.route("/check_all_duplicates", methods=["GET"])
 @login_required
+@cache.cached(timeout=30)
 def check_all_duplicates_route():
     if not current_user.check_auth(AUTH_LEVEL_ADMIN):
         flash("You're lacking permissions to do that.", "error")
         return redirect(url_for("serve.dashboard_page"))
 
-    videos = db_session.query(Video).filter_by(status=STATUS_COMPLETED).all()
-    total_duplicates = 0
-    for v1, v2 in itertools.combinations(videos, 2):
-        if (v1.can_be_changed and v2.can_be_changed) and check_duplicate_video(v1, v2):
-            total_duplicates += 1
-            if v2 not in v1.duplicates:
-                v1.duplicates.append(v2)
-            if v1 not in v2.duplicates:
-                v2.duplicates.append(v1)
-        else:
-            if v2 in v1.duplicates:
-                v1.duplicates.remove(v2)
-            if v1 in v2.duplicates:
-                v2.duplicates.remove(v1)
+    check_all_duplicates_task.delay()
 
-        db_session.add(v1)
-        db_session.add(v2)
-        db_session.commit()
-
-    total_duplicates = total_duplicates
-
-    if total_duplicates > 0:
-        flash(f"{total_duplicates} potential duplicates was found.", "warning")
-    else:
-        flash("No potential duplicates was found.", "success")
+    flash("Started full duplicate check, check back in a minute.", "success")
 
     return redirect(url_for("serve.dashboard_page"))
 
@@ -832,40 +808,6 @@ def get_metadata_for_video(video_id: str) -> dict:
         index_video_data(video)
         return video.to_json()
     return {}
-
-
-@cache.memoize(timeout=60)
-def check_duplicate_video(v1: Video, v2: Video) -> bool:
-    try:
-        if not (v1.duration and v2.duration):
-            return False
-        elif abs(1.0 - v1.duration / v2.duration) > COMPARE_DURATION_THRESHOLD:
-            return False
-        elif abs(v1.aspect_ratio - v2.aspect_ratio) > COMPARE_RATIO_THRESHOLD:
-            return False
-
-        from imgcompare import is_equal
-        from PIL import Image
-
-        v1_thumb_path = os.path.join(current_app.config["THUMBNAIL_FOLDER"], v1.video_id + "_thumb.jpg")
-        v2_thumb_path = os.path.join(current_app.config["THUMBNAIL_FOLDER"], v2.video_id + "_thumb.jpg")
-
-        if os.path.isfile(v1_thumb_path) and os.path.isfile(v2_thumb_path):
-            try:
-                img1 = Image.open(v1_thumb_path)
-                img2 = Image.open(v2_thumb_path)
-                img1 = img1.resize((64, 64))
-                img2 = img2.resize((64, 64))
-                return is_equal(img1, img2, tolerance=COMPARE_IMAGE_DATA_THRESHOLD)
-
-            except Exception as e:
-                logger.error(e)
-
-    except Exception as e:
-        logger.error(e)
-
-    return False
-
 
 
 @cache.memoize(timeout=60)

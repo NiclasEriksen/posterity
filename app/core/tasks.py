@@ -1,12 +1,20 @@
 import os.path
+import itertools
 
 from celery.utils.log import get_task_logger
 from datetime import datetime
+from imgcompare import is_equal
+from PIL import Image
 
 from app import celery
+from app.dl.dl import thumbnail_path
 from app.dl.helpers import seconds_to_time
 import time
 
+
+COMPARE_DURATION_THRESHOLD = 0.10
+COMPARE_RATIO_THRESHOLD = 0.25
+COMPARE_IMAGE_DATA_THRESHOLD = 10.0
 
 log = get_task_logger(__name__)
 
@@ -40,6 +48,69 @@ def update_video(video_id: str, status: int, data: dict = {}) -> bool:
         log.error(e)
         return False
     return True
+
+
+def check_duplicate_video(v1, v2) -> bool:
+    try:
+        if not (v1.duration and v2.duration):
+            return False
+        elif abs(1.0 - v1.duration / v2.duration) > COMPARE_DURATION_THRESHOLD:
+            return False
+        elif abs(v1.aspect_ratio - v2.aspect_ratio) > COMPARE_RATIO_THRESHOLD:
+            return False
+
+        v1_thumb_path = os.path.join(thumbnail_path, v1.video_id + "_thumb.jpg")
+        v2_thumb_path = os.path.join(thumbnail_path, v2.video_id + "_thumb.jpg")
+
+        if os.path.isfile(v1_thumb_path) and os.path.isfile(v2_thumb_path):
+            try:
+                img1 = Image.open(v1_thumb_path)
+                img2 = Image.open(v2_thumb_path)
+                img1 = img1.resize((64, 64))
+                img2 = img2.resize((64, 64))
+                return is_equal(img1, img2, tolerance=COMPARE_IMAGE_DATA_THRESHOLD)
+
+            except Exception as e:
+                logger.error(e)
+
+    except Exception as e:
+        logger.error(e)
+
+    return False
+
+
+@celery.task(name="core.tasks.check_all_duplicates", soft_time_limit=3600, time_limit=3660)
+def check_all_duplicates_task():
+    from app.serve.db import Video, session_scope
+    from sqlalchemy import or_
+    from app.dl.dl import STATUS_COMPLETED, STATUS_PROCESSING
+
+    total_duplicates = 0
+    log.info("Checking all videos for duplicates...")
+    with session_scope() as session:
+        videos = session.query(Video).filter(or_(
+            Video.status == STATUS_PROCESSING, Video.status == STATUS_COMPLETED
+        )).all()
+
+        for v1, v2 in itertools.combinations(videos, 2):
+            if (v1.can_be_changed and v2.can_be_changed) and check_duplicate_video(v1, v2):
+                total_duplicates += 1
+                if v2 not in v1.duplicates:
+                    v1.duplicates.append(v2)
+                if v1 not in v2.duplicates:
+                    v2.duplicates.append(v1)
+            else:
+                if v2 in v1.duplicates:
+                    v1.duplicates.remove(v2)
+                if v1 in v2.duplicates:
+                    v2.duplicates.remove(v1)
+
+            session.add(v1)
+            session.add(v2)
+            session.commit()
+
+    log.info(f"Check is done, found {total_duplicates} duplicates.")
+    return total_duplicates
 
 
 @celery.task(name="core.tasks.gen_thumbnail", soft_time_limit=300, time_limit=360)
