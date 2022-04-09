@@ -148,7 +148,7 @@ class Video(Base):
         if self.post_processed or not self.ready_to_play or not self.bit_rate:
             return False
 
-        pixels = self.width * self.height * (self.frame_rate / 30.0)
+        pixels = self.width * self.height * (self.frame_rate / 25.0)
         min_bit_rate = pixels * MIN_BIT_RATE_PER_PIXEL
         max_bit_rate = pixels * MAX_BIT_RATE_PER_PIXEL
         r = max_bit_rate - min_bit_rate
