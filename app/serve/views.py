@@ -199,7 +199,7 @@ def serve_video(video_id):
         "video.html",
         video=video,
         dl_path="/download/" + video_id,
-        stream_path=f"/view/{video_id}.mp4" + "?orig=0" if video.post_processed else "",
+        stream_path=f"/view/{video_id}.mp4" + ("?orig=0" if video.post_processed else ""),
     )
 
 

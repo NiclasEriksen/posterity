@@ -31,7 +31,8 @@ STATUS_INVALID = 3
 STATUS_COOKIES = 4
 STATUS_PENDING = 5
 STATUS_PROCESSING = 6
-CRF = 28
+CRF = 26
+CRF_LOW = 40
 MAX_DURATION_HD: float = 30 * 60.0
 MAX_RESOLUTION_MD: int = 720
 MAX_DURATION_MD: float = 60 * 60.0
@@ -108,6 +109,9 @@ def process_from_json_data(metadata: dict, input_file: str, output_file: str) ->
     elif fps > MAX_FPS:
         fps = MAX_FPS
 
+    print(vid_bit_rate)
+    print(aud_bit_rate)
+
     cmd = get_post_process_ffmpeg_cmd(
         input_file, output_file,
         fps=fps, vid_bit_rate=vid_bit_rate,
@@ -125,7 +129,7 @@ def process_from_json_data(metadata: dict, input_file: str, output_file: str) ->
         pass_2 = []
 
     cur_dir = os.getcwd()
-    os.chdir(tmp_path)
+    #os.chdir(tmp_path)
 
     for i, p in enumerate([pass_1, pass_2]):
         if not len(p):
@@ -147,7 +151,7 @@ def process_from_json_data(metadata: dict, input_file: str, output_file: str) ->
         metadata = add_technical_info_to_metadata(metadata, input_file, post_process=False)
         metadata = add_technical_info_to_metadata(metadata, output_file, post_process=True)
 
-    os.chdir(cur_dir)
+    #os.chdir(cur_dir)
 
     yield metadata
 
@@ -277,11 +281,10 @@ def get_post_process_ffmpeg_cmd(
         "ffmpeg", "-thread_queue_size", f"{queue_size}", "-y",
         "-vsync", "vfr",
         "-i", input_path,
-        "-vf", "yadif=parity=auto",
-        "-c:v", "libx264", "-pix_fmt", "yuv420p", "-vprofile", "main", "-vlevel", "4", "-preset", "veryslow",
-        "-b:v", f"{vid_bit_rate}k", "-filter:v", f"fps={fps}", "-crf", str(CRF),
+        "-c:v", "libx264", "-filter:v", f"yadif=parity=auto[v];[v]fps={fps}", "-pix_fmt", "yuv420p", "-vprofile", "main", "-vlevel", "4", "-preset", "veryslow",
+        "-b:v", f"{vid_bit_rate}k", "-crf", str(CRF_LOW),
         "-c:a", "aac", "-strict", "experimental", "-b:a", f"{aud_bit_rate}k",
-        "-passlogfile", tmp_file_name, "-v", "24", output_path
+        "-passlogfile", tmp_file_name, "-v", "27", output_path
     ]
 
     return pass_1
@@ -293,7 +296,7 @@ def get_post_process_ffmpeg_cmd(
     #     "-i", input_path,
     #     "-vf", "yadif=parity=auto",
     #     "-c:v", "libx264", "-pix_fmt", "yuv420p", "-vprofile", "main", "-vlevel", "4", "-preset", "veryslow",
-    #     "-b:v", f"{vid_bit_rate}k", "-filter:v", f"fps={fps}", "-crf", str(CRF),
+    #     "-b:v", f"{vid_bit_rate}k", "-filter:v", f"fps={fps}", "-crf", str(CRF_LOW),
     #     "-c:a", "aac", "-strict", "experimental", "-b:a", f"{aud_bit_rate}k",
     #     "-passlogfile", tmp_file_name, "-pass" #-v 24
     # ]
