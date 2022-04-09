@@ -29,12 +29,13 @@
                             {% else %}
                             <span class="uk-text-warning" uk-icon="icon: question; ratio: 0.9"></span>
                             {% endif %}
-                            {% if current_user.check_auth(1) %}
+                            {% if video.user_can_edit(current_user) or current_user.check_auth(1) %}
                             {% if video.duplicates|length %}
                             <span uk-tooltip="title: Video has {{ video.duplicates|length }} possible duplicates;pos: top-left;">
                                 <span class="uk-text-warning" uk-icon="icon: copy; ratio: 0.9"></span>
                             </span>
                             {% endif %}
+                            {% if current_user.check_auth(1) %}
                             {% if video.user_reports|length %}
                             <span uk-tooltip="title: Video has {{ video.user_reports|length }} reports pending;pos: top-left;">
                                 <span class="uk-text-danger" uk-icon="icon: warning; ratio: 0.9"></span>
@@ -44,5 +45,6 @@
                             <span uk-tooltip="title: Recommended for post-processing;pos: top-left;">
                                 <span class="uk-text-muted" uk-icon="icon: move; ratio: 0.9"></span>
                             </span>
+                            {% endif %}
                             {% endif %}
                             {% endif %}

@@ -135,6 +135,13 @@ class Video(Base):
     def __init__(self):
         self.upload_time = datetime.now()
 
+    def user_can_edit(self, user: User) -> bool:
+        if user.check_auth(AUTH_LEVEL_EDITOR):
+            return True
+        elif user.username == self.source:
+            return True
+        return False
+
     @property
     def ready_to_play(self) -> bool:
         return self.status == STATUS_COMPLETED

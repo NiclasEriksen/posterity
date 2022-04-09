@@ -210,6 +210,10 @@ def edit_video_page(video_id: str):
     if not video:
         return render_template("not_found.html")
 
+    if not video.user_can_edit(current_user):
+        flash("Lacking permissions to edit that video.", "error")
+        return serve_video(video.video_id)
+
     available_tags = ContentTag.query.order_by(ContentTag.category.desc(), ContentTag.name).all()
     available_categories = Category.query.order_by(Category.name).all()
 
@@ -238,6 +242,10 @@ def edit_video_post(video_id: str):
     video: Video = Video.query.filter_by(video_id=video_id).first()
     if not video:
         return render_template("not_found.html")
+
+    if not video.user_can_edit(current_user):
+        flash("Lacking permissions to edit that video.", "error")
+        return serve_video(video.video_id)
 
     title = request.form.get("custom_title")
     private = request.form.get("private-checkbox")
