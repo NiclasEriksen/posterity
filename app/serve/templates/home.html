@@ -198,6 +198,11 @@
                                 <span class="uk-text-danger" uk-icon="icon: warning; ratio: 0.9"></span>
                             </span>
                             {% endif %}
+                            {% if video.recommend_post_process %}
+                            <span uk-tooltip="title: Recommended for post-processing;pos: top-left;">
+                                <span class="uk-text-muted" uk-icon="icon: move; ratio: 0.9"></span>
+                            </span>
+                            {% endif %}
                             {% endif %}
 
                             <span uk-tooltip="title: {{ video.url }};pos: top-left;">
