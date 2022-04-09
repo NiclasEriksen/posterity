@@ -92,7 +92,9 @@ def check_all_duplicates_task():
             Video.status == STATUS_PROCESSING, Video.status == STATUS_COMPLETED
         )).all()
 
-        for v1, v2 in itertools.combinations(videos, 2):
+        combinations = itertools.combinations(videos, 2)
+        log.info(f"There are {combinations} combinations to test.")
+        for v1, v2 in combinations:
             if (v1.can_be_changed and v2.can_be_changed) and check_duplicate_video(v1, v2):
                 total_duplicates += 1
                 if v2 not in v1.duplicates:
@@ -107,7 +109,7 @@ def check_all_duplicates_task():
 
             session.add(v1)
             session.add(v2)
-        session.commit()
+            session.commit()
 
     log.info(f"Check is done, found {total_duplicates} duplicates.")
     return total_duplicates
