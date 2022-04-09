@@ -32,13 +32,14 @@ STATUS_COOKIES = 4
 STATUS_PENDING = 5
 STATUS_PROCESSING = 6
 CRF = 26
-CRF_LOW = 40
+CRF_LOW = 35
 MAX_DURATION_HD: float = 30 * 60.0
 MAX_RESOLUTION_MD: int = 720
 MAX_DURATION_MD: float = 60 * 60.0
 MAX_RESOLUTION_SD: int = 480
 MAX_DURATION_SD: float = 480 * 60.0     # 8 hours maximum.
-MAX_BIT_RATE_PER_PIXEL = 1.013
+MIN_BIT_RATE_PER_PIXEL = 0.5
+MAX_BIT_RATE_PER_PIXEL = 2.75
 MAX_AUD_BIT_RATE = 128
 MAX_FPS = 60
 SPLIT_FPS_THRESHOLD = 40.0
@@ -100,22 +101,30 @@ def process_from_json_data(metadata: dict, input_file: str, output_file: str) ->
         pixels = 921600     # 720p
 
     max_bit_rate = pixels * MAX_BIT_RATE_PER_PIXEL
+    min_bit_rate = pixels * MIN_BIT_RATE_PER_PIXEL
+    r = max_bit_rate - min_bit_rate
+    br = min(1.0, max(0.0, vid_bit_rate - min_bit_rate) / r)
 
+    crf = int(CRF + (CRF_LOW - CRF) * br)
+
+    print(max_bit_rate)
+    print(f"CRF: {crf}, BR: {br}")
     vid_bit_rate = min(vid_bit_rate, max_bit_rate) // 1000
     aud_bit_rate = min(aud_bit_rate // 1000, MAX_AUD_BIT_RATE)
+
 
     if fps >= SPLIT_FPS_THRESHOLD and fps <= MAX_FPS:
         fps *= 0.5
     elif fps > MAX_FPS:
         fps = MAX_FPS
 
-    print(vid_bit_rate)
-    print(aud_bit_rate)
+    # print(vid_bit_rate)
+    # print(aud_bit_rate)
 
     cmd = get_post_process_ffmpeg_cmd(
         input_file, output_file,
         fps=fps, vid_bit_rate=vid_bit_rate,
-        aud_bit_rate=aud_bit_rate
+        aud_bit_rate=aud_bit_rate, crf=crf
     )
 
     # metadata["processed_bit_rate"] = (vid_bit_rate + aud_bit_rate) * 1000
@@ -272,7 +281,7 @@ def download_from_json_data(metadata: dict, file_name: str):
 
 def get_post_process_ffmpeg_cmd(
         input_path: str, output_path: str, queue_size=512,
-        fps=25, vid_bit_rate=2000, aud_bit_rate=128,
+        fps=25, vid_bit_rate=2000, aud_bit_rate=128, crf=CRF
     ) -> list:
 
     tmp_file_name = os.path.split(input_path)[1].split(".mp4")[0]
@@ -282,7 +291,7 @@ def get_post_process_ffmpeg_cmd(
         "-vsync", "vfr",
         "-i", input_path,
         "-c:v", "libx264", "-filter:v", f"yadif=parity=auto[v];[v]fps={fps}", "-pix_fmt", "yuv420p", "-vprofile", "main", "-vlevel", "4", "-preset", "veryslow",
-        "-b:v", f"{vid_bit_rate}k", "-crf", str(CRF_LOW),
+        "-b:v", f"{vid_bit_rate}k", "-crf", str(crf),
         "-c:a", "aac", "-strict", "experimental", "-b:a", f"{aud_bit_rate}k",
         "-passlogfile", tmp_file_name, "-v", "27", output_path
     ]
@@ -308,7 +317,7 @@ def get_post_process_ffmpeg_cmd(
 
 def get_ffmpeg_cmd(
     vid_url, aud_url, sub_url, save_path, local_audio_channel=-1, normalize=True,
-    http_persistent=True, queue_size=512
+    http_persistent=True, queue_size=512, crf=26
 ) -> list:
 
     cmd = ["ffmpeg", "-i", "-thread_queue_size", f"{queue_size}"]
@@ -332,7 +341,7 @@ def get_ffmpeg_cmd(
         #     cmd += ["-map", "1:s", "-c:s", "mov_text"]
 
         cmd += ["-vf", "yadif=parity=auto"]
-        cmd += ["-vcodec", "libx264", "-crf", str(CRF), "-vb", "2500k", "-f", "mp4"]
+        cmd += ["-vcodec", "libx264", "-crf", crf, "-vb", "2500k", "-f", "mp4"]
         # cmd += ["-c:v", "h264", "-f", "mp4"]
 
     # Only audio, export to ogg.
