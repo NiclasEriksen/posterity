@@ -1,5 +1,6 @@
 import os
 import functools
+import itertools
 import re
 import mimetypes
 from dotenv import load_dotenv
@@ -715,27 +716,26 @@ def check_all_duplicates_route():
 
     videos = db_session.query(Video).filter_by(status=STATUS_COMPLETED).all()
     total_duplicates = 0
-    for video in videos:
-        duplicate_ids = get_possible_duplicates(video.video_id)
-        total_duplicates += len(duplicate_ids)
-        duplicates = []
+    for v1, v2 in itertools.combinations(videos, 2):
+        print(f"{v1.video_id}  <---->  {v2.video_id}")
+        if check_duplicate_video(v1, v2):
+            total_duplicates += 1
+            if v2 not in v1.duplicates:
+                v1.duplicates.append(v2)
+            if v1 not in v2.duplicates:
+                v2.duplicates.append(v1)
+        else:
+            if v2 in v1.duplicates:
+                v1.duplicates.remove(v2)
+            if v1 in v2.duplicates:
+                v2.duplicates.remove(v1)
 
-        for d_id in duplicate_ids:
-            v = db_session.query(Video).filter_by(video_id=d_id).first()
-            if v:
-                duplicates.append(v)
+        db_session.add(v1)
+        db_session.add(v2)
 
-        for vd in video.duplicates:
-            if vd not in duplicates:
-                video.duplicates.remove(vd)
-        for d in duplicates:
-            if d not in video.duplicates:
-                video.duplicates.append(d)
+    db_session.commit()
 
-        db_session.add(video)
-        db_session.commit()
-
-    total_duplicates = total_duplicates // 2
+    total_duplicates = total_duplicates
 
     if total_duplicates > 0:
         flash(f"{total_duplicates} potential duplicates was found.", "warning")
@@ -834,6 +834,40 @@ def get_metadata_for_video(video_id: str) -> dict:
         index_video_data(video)
         return video.to_json()
     return {}
+
+
+@cache.memoize(timeout=60)
+def check_duplicate_video(v1: Video, v2: Video) -> bool:
+    try:
+        if not (v1.duration and v2.duration):
+            return False
+        elif abs(1.0 - v1.duration / v2.duration) > COMPARE_DURATION_THRESHOLD:
+            return False
+        elif abs(v1.aspect_ratio - v2.aspect_ratio) > COMPARE_RATIO_THRESHOLD:
+            return False
+
+        from imgcompare import is_equal
+        from PIL import Image
+
+        v1_thumb_path = os.path.join(current_app.config["THUMBNAIL_FOLDER"], v1.video_id + "_thumb.jpg")
+        v2_thumb_path = os.path.join(current_app.config["THUMBNAIL_FOLDER"], v2.video_id + "_thumb.jpg")
+
+        if os.path.isfile(v1_thumb_path) and os.path.isfile(v2_thumb_path):
+            try:
+                img1 = Image.open(v1_thumb_path)
+                img2 = Image.open(v2_thumb_path)
+                img1 = img1.resize((64, 64))
+                img2 = img2.resize((64, 64))
+                return is_equal(img1, img2, tolerance=COMPARE_IMAGE_DATA_THRESHOLD)
+
+            except Exception as e:
+                logger.error(e)
+
+    except Exception as e:
+        logger.error(e)
+
+    return False
+
 
 
 @cache.memoize(timeout=60)
