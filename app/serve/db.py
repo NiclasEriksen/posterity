@@ -31,6 +31,8 @@ AUTH_LEVEL_USER = 0
 AUTH_LEVEL_EDITOR = 1
 AUTH_LEVEL_ADMIN = 2
 
+PROCESSING_RECOMMENDATION = 0.5
+
 REASON_DUPLICATE        = 0
 REASON_MISSING_TAGS     = 1
 REASON_WRONG_TAGS       = 2
@@ -152,7 +154,7 @@ class Video(Base):
         r = max_bit_rate - min_bit_rate
         br = max(0.0, self.bit_rate - min_bit_rate) / r
 
-        if br > 0.5:
+        if br > PROCESSING_RECOMMENDATION:
             return True
         return False
 
