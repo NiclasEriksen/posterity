@@ -212,12 +212,21 @@ function redirectOnProgress(video_id) {
 
 
 function redirectOnComplete(video_id) {
+    var progress_text = document.getElementById("progress-text");
     var request = new XMLHttpRequest(); 
     request.open('GET', '/check_progress/' + video_id, true);
     request.onload = function() {
         if (this.status == 200 || this.status == 201 || this.status == 415) {
             window.location.reload();
         } else {
+            if (this.status == 206 && progress_text) {
+                var prog = parseFloat(this.response);
+                if (!prog) {
+                    prog = 0.0;
+                }
+                progress_text.innerHTML = Math.floor(prog * 100.0).toString() + "%";
+                console.log(prog);
+            }
             setTimeout(() => { redirectOnComplete(video_id); }, 1000);
         }
     }

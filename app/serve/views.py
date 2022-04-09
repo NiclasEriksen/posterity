@@ -26,7 +26,8 @@ logger = LocalProxy(lambda: current_app.logger)
 from app.dl.dl import media_path, \
     STATUS_COMPLETED, STATUS_COOKIES, STATUS_DOWNLOADING, STATUS_FAILED, STATUS_INVALID, \
     STATUS_PROCESSING, STATUS_PENDING, \
-    get_celery_scheduled, get_celery_active, write_metadata_to_disk
+    get_celery_scheduled, get_celery_active, write_metadata_to_disk, \
+    get_progress_for_video
 from app.dl.helpers import seconds_to_verbose_time
 from app.serve.db import db_session, Video, User, ContentTag, UserReport, Category,\
     init_db, AUTH_LEVEL_ADMIN, AUTH_LEVEL_EDITOR, AUTH_LEVEL_USER, REASON_TEXTS
@@ -644,6 +645,7 @@ def serve_favicon():
 
 
 @serve.route("/check_progress/<video_id>", methods=["GET"])
+@cache.memoize(timeout=1)
 def check_progress(video_id):
 
     video = Video.query.filter_by(video_id=video_id).first()
@@ -660,7 +662,8 @@ def check_progress(video_id):
         #     flash("Video has downloaded successfully", "success")
         return "", 200
     if s == STATUS_DOWNLOADING or s == STATUS_PROCESSING:
-        return "", 206
+        p = get_progress_for_video(video)
+        return f"{p}", 206
     if s == STATUS_FAILED:
         return "", 200
     if s == STATUS_INVALID or s == STATUS_COOKIES:

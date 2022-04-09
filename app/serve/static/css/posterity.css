@@ -427,7 +427,27 @@ body, html {
         width: 70%;
     }
 }
-.shadow-spinner span {
+.shadow-spinner .shadow-spinner-progress {
+    box-sizing: border-box;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    padding-top: 75px;
+    z-index: 2;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    font-weight: 500;
+    font-size: 24px;
+    color: var(--grey);
+}
+
+.shadow-spinner .shadow-spinner-text {
     box-sizing: border-box;
     position: absolute;
     top: 0;
@@ -471,7 +491,7 @@ body, html {
     transform: rotate(720deg);
   }
 }
-.shadow-spinner span::before
+.shadow-spinner .shadow-spinner-text::before
 {
     content: "";
     position: absolute;

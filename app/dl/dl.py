@@ -4,7 +4,7 @@ import os
 import subprocess
 from datetime import datetime
 from typing import Union
-from .helpers import seconds_to_time, resource_path, unique_filename
+from .helpers import seconds_to_time, resource_path, unique_filename, reverse_readline
 from .youtube import valid_video_url, get_content_info, AgeRestrictedError
 from .metadata import generate_video_images, technical_info
 from app import celery
@@ -47,6 +47,46 @@ SPLIT_FPS_THRESHOLD = 40.0
 
 if not os.path.isfile(url_file_path):
     open(url_file_path, "a").close()
+
+
+def get_progress_for_video(video) -> float:
+    log_path = os.path.join(tmp_path, f"{video.video_id}_progress.log")
+    if not os.path.isfile(log_path) or not video.duration:
+        return 0.0
+    progress_time = get_last_time_from_log(log_path)
+    if progress_time <= 0:
+        return 0.0
+    elif progress_time >= video.duration:
+        return 1.0
+
+    return progress_time / video.duration
+
+
+def get_last_time_from_log(log_path, max_search=100) -> float:
+    try:
+        i = 0
+        for l in reverse_readline(log_path):
+            if l.startswith("out_time="):
+                ts = l.split("out_time=")[1].strip()
+                try:
+                    hrs, mins, sec = ts.split(":")
+                except ValueError:  # not enough/too many
+                    hrs, mins, sec = "00", "00", "00.00"
+                try:
+                    hrs, mins, sec = int(hrs), int(mins), float(sec)
+                except (TypeError, ValueError):
+                    hrs, mins, sec = 0, 0, 0.0
+
+                time = (hrs * 3600) + (mins * 60) + sec
+                return time
+
+            i += 1
+            if i >= max_search:
+                return 0
+    except OSError:
+        pass
+
+    return 0
 
 
 def write_metadata_to_db(video_id: str, md: dict):
@@ -115,14 +155,17 @@ def process_from_json_data(metadata: dict, input_file: str, output_file: str) ->
     vid_bit_rate = min(vid_bit_rate, max_bit_rate) // 1000
     aud_bit_rate = min(aud_bit_rate // 1000, MAX_AUD_BIT_RATE)
 
-
-    # print(vid_bit_rate)
-    # print(aud_bit_rate)
+    log_path = os.path.join(tmp_path, metadata['video_id'] + "_progress.log")
+    try:
+        open(log_path, "w").close()
+    except:
+        log_path = "/dev/null"
 
     cmd = get_post_process_ffmpeg_cmd(
         input_file, output_file,
         fps=fps, vid_bit_rate=vid_bit_rate,
-        aud_bit_rate=aud_bit_rate, crf=crf
+        aud_bit_rate=aud_bit_rate, crf=crf,
+        log_path=log_path
     )
 
     # metadata["processed_bit_rate"] = (vid_bit_rate + aud_bit_rate) * 1000
@@ -135,7 +178,7 @@ def process_from_json_data(metadata: dict, input_file: str, output_file: str) ->
         pass_1 = cmd
         pass_2 = []
 
-    cur_dir = os.getcwd()
+    #cur_dir = os.getcwd()
     #os.chdir(tmp_path)
 
     for i, p in enumerate([pass_1, pass_2]):
@@ -143,8 +186,12 @@ def process_from_json_data(metadata: dict, input_file: str, output_file: str) ->
             continue
 
         log.info(f"{metadata['video_id']} | Running pass {i}...")
-        result = subprocess.run(p)
+        result = subprocess.run(p, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         if result.returncode != 0:
+            try:
+                open(log_path, "w").close()
+            except:
+                pass
             log.error(result)
             log.error("Well this all went to shit. Removing video.")
             try:
@@ -157,6 +204,10 @@ def process_from_json_data(metadata: dict, input_file: str, output_file: str) ->
         metadata["status"] = STATUS_COMPLETED
         metadata = add_technical_info_to_metadata(metadata, input_file, post_process=False)
         metadata = add_technical_info_to_metadata(metadata, output_file, post_process=True)
+        try:
+            open(log_path, "w").close()
+        except:
+            pass
 
     #os.chdir(cur_dir)
 
@@ -231,7 +282,13 @@ def download_from_json_data(metadata: dict, file_name: str):
     else:
         sub_url = ""
 
-    cmd = get_ffmpeg_cmd(video_url, audio_url, sub_url, vid_save_path)
+    log_path = os.path.join(tmp_path, metadata['video_id'] + "_progress.log")
+    try:
+        open(log_path, "w").close()
+    except:
+        log_path = "/dev/null"
+
+    cmd = get_ffmpeg_cmd(video_url, audio_url, sub_url, vid_save_path, log_path=log_path)
 
     metadata["video_title"] = video_title
     metadata["format"] = f
@@ -240,7 +297,7 @@ def download_from_json_data(metadata: dict, file_name: str):
 
     yield metadata
 
-    result = subprocess.run(cmd)
+    result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 
     if result.returncode != 0:
         log.error(result)
@@ -250,12 +307,20 @@ def download_from_json_data(metadata: dict, file_name: str):
             os.remove(vid_save_path)
         except (FileNotFoundError, OSError):
             pass
+        try:
+            open(log_path, "w").close()
+        except:
+            pass
 
         metadata["status"] = STATUS_FAILED
         yield metadata
 
     else:
         metadata["status"] = STATUS_COMPLETED
+        try:
+            open(log_path, "w").close()
+        except:
+            pass
         try:
             if len(thumbnail_path) and len(preview_path):
                 generate_video_images(
@@ -280,10 +345,8 @@ def download_from_json_data(metadata: dict, file_name: str):
 
 def get_post_process_ffmpeg_cmd(
         input_path: str, output_path: str, queue_size=512,
-        fps=25, vid_bit_rate=2000, aud_bit_rate=128, crf=CRF
+        fps=25, vid_bit_rate=2000, aud_bit_rate=128, crf=CRF, log_path="/dev/null"
     ) -> list:
-
-    tmp_file_name = os.path.split(input_path)[1].split(".mp4")[0]
 
     pass_1 = [
         "ffmpeg", "-thread_queue_size", f"{queue_size}", "-y",
@@ -292,7 +355,7 @@ def get_post_process_ffmpeg_cmd(
         "-c:v", "libx264", "-filter:v", f"yadif=parity=auto[v];[v]fps={fps}", "-pix_fmt", "yuv420p", "-vprofile", "main", "-vlevel", "4", "-preset", "veryslow",
         "-b:v", f"{vid_bit_rate}k", "-crf", str(crf),
         "-c:a", "aac", "-strict", "experimental", "-b:a", f"{aud_bit_rate}k",
-        "-passlogfile", tmp_file_name, "-v", "24", output_path
+        "-progress", log_path, "-v", "34", output_path
     ]
 
     return pass_1
@@ -316,10 +379,10 @@ def get_post_process_ffmpeg_cmd(
 
 def get_ffmpeg_cmd(
     vid_url, aud_url, _sub_url, save_path, local_audio_channel=-1, normalize=True,
-    http_persistent=True, queue_size=512, crf=25
+    http_persistent=True, queue_size=512, crf=25, log_path="/dev/null"
 ) -> list:
 
-    cmd = ["ffmpeg", "-thread_queue_size", f"{queue_size}", "-i"]
+    cmd = ["ffmpeg", "-thread_queue_size", f"{queue_size}", "-y", "-i"]
 
     if len(vid_url):
         cmd.append(vid_url)
@@ -361,7 +424,7 @@ def get_ffmpeg_cmd(
     else:
         cmd += ["-http_persistent", "0"]
 
-    cmd += ["-v", "32", "-y", save_path]
+    cmd += ["-progress", log_path, "-v", "34", save_path]
 
     return cmd
 

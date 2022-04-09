@@ -1,4 +1,7 @@
 <div class="shadow-spinner">
-    <span>{% if spinner_text %}{{ spinner_text }}{% else %}Waiting...{% endif %}</span>
+    <span class="shadow-spinner-text">
+        {% if spinner_text %}{{ spinner_text }}{% else %}Waiting...{% endif %}
+    </span>
+    <div class="shadow-spinner-progress" id="progress-text"></div>
     <div class="shadow-spinner-bg"></div>
 </div>
