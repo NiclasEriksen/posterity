@@ -279,7 +279,7 @@ def get_post_process_ffmpeg_cmd(
         "-c:v", "libx264", "-pix_fmt", "yuv420p", "-vprofile", "main", "-vlevel", "4", "-preset", "veryslow",
         "-b:v", f"{vid_bit_rate}k", "-filter:v", f"fps={fps}", "-crf", str(CRF),
         "-c:a", "aac", "-strict", "experimental", "-b:a", f"{aud_bit_rate}k",
-        output_path
+        "-passlogfile", tmp_file_name, output_path
     ]
 
     return pass_1
