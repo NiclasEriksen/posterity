@@ -114,9 +114,8 @@ def process_from_json_data(metadata: dict, input_file: str, output_file: str) ->
         aud_bit_rate=aud_bit_rate
     )
 
-    metadata["processed_bit_rate"] = (vid_bit_rate + aud_bit_rate) * 1000
-    metadata["process"] = (vid_bit_rate + aud_bit_rate) * 1000
-    metadata["processed_frame_rate"] = (vid_bit_rate + aud_bit_rate) * 1000
+    # metadata["processed_bit_rate"] = (vid_bit_rate + aud_bit_rate) * 1000
+    # metadata["processed_frame_rate"] = (vid_bit_rate + aud_bit_rate) * 1000
 
     if "&&" in cmd:
         pass_1 = cmd[:cmd.index("&&")]
@@ -129,6 +128,9 @@ def process_from_json_data(metadata: dict, input_file: str, output_file: str) ->
     os.chdir(tmp_path)
 
     for i, p in enumerate([pass_1, pass_2]):
+        if not len(p):
+            continue
+
         log.info(f"{metadata['video_id']} | Running pass {i}...")
         result = subprocess.run(p)
         if result.returncode != 0:
@@ -282,6 +284,8 @@ def get_post_process_ffmpeg_cmd(
 
     return pass_1
 
+
+    # tmp_file_name = os.path.split(input_path)[1].split(".mp4")[0]
     # pass_base = [
     #     "ffmpeg", "-thread_queue_size", f"{queue_size}", "-y",
     #     "-vsync", "vfr",
@@ -290,7 +294,7 @@ def get_post_process_ffmpeg_cmd(
     #     "-c:v", "libx264", "-pix_fmt", "yuv420p", "-vprofile", "main", "-vlevel", "4", "-preset", "veryslow",
     #     "-b:v", f"{vid_bit_rate}k", "-filter:v", f"fps={fps}", "-crf", str(CRF),
     #     "-c:a", "aac", "-strict", "experimental", "-b:a", f"{aud_bit_rate}k",
-    #     "-pass" #-v 24
+    #     "-passlogfile", tmp_file_name, "-pass" #-v 24
     # ]
     #
     # pass_1 = pass_base + ["1", "-f", "mp4", "/dev/null"]
