@@ -188,7 +188,7 @@ def download_task(data: dict, file_name: str):
             status = data["status"]
             if status == STATUS_DOWNLOADING:
                 log.info("Update from download process...")
-                update_video(file_name, STATUS_DOWNLOADING, data=data)
+                update_video(file_name, status, data=data)
                 continue
             elif status == STATUS_COMPLETED:
                 log.info("Download function has completed with no errors.")

@@ -239,6 +239,7 @@ def download_from_json_data(metadata: dict, file_name: str):
     metadata["status"] = STATUS_DOWNLOADING
 
     yield metadata
+
     result = subprocess.run(cmd)
 
     if result.returncode != 0:
@@ -291,7 +292,7 @@ def get_post_process_ffmpeg_cmd(
         "-c:v", "libx264", "-filter:v", f"yadif=parity=auto[v];[v]fps={fps}", "-pix_fmt", "yuv420p", "-vprofile", "main", "-vlevel", "4", "-preset", "veryslow",
         "-b:v", f"{vid_bit_rate}k", "-crf", str(crf),
         "-c:a", "aac", "-strict", "experimental", "-b:a", f"{aud_bit_rate}k",
-        "-passlogfile", tmp_file_name, "-v", "27", output_path
+        "-passlogfile", tmp_file_name, "-v", "24", output_path
     ]
 
     return pass_1
@@ -314,11 +315,11 @@ def get_post_process_ffmpeg_cmd(
 
 
 def get_ffmpeg_cmd(
-    vid_url, aud_url, sub_url, save_path, local_audio_channel=-1, normalize=True,
+    vid_url, aud_url, _sub_url, save_path, local_audio_channel=-1, normalize=True,
     http_persistent=True, queue_size=512, crf=26
 ) -> list:
 
-    cmd = ["ffmpeg", "-i", "-thread_queue_size", f"{queue_size}"]
+    cmd = ["ffmpeg", "-thread_queue_size", f"{queue_size}", "-i"]
 
     if len(vid_url):
         cmd.append(vid_url)
@@ -339,7 +340,7 @@ def get_ffmpeg_cmd(
         #     cmd += ["-map", "1:s", "-c:s", "mov_text"]
 
         cmd += ["-vf", "yadif=parity=auto"]
-        cmd += ["-vcodec", "libx264", "-crf", crf, "-vb", "2500k", "-f", "mp4"]
+        cmd += ["-vcodec", "libx264", "-crf", str(crf), "-vb", "2500k", "-f", "mp4"]
         # cmd += ["-c:v", "h264", "-f", "mp4"]
 
     # Only audio, export to ogg.
@@ -360,7 +361,7 @@ def get_ffmpeg_cmd(
     else:
         cmd += ["-http_persistent", "0"]
 
-    cmd += ["-v", "24", "-y", save_path]
+    cmd += ["-v", "32", "-y", save_path]
 
     return cmd
 
