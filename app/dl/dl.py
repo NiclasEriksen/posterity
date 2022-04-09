@@ -269,7 +269,7 @@ def get_post_process_ffmpeg_cmd(
         fps=25, vid_bit_rate=2000, aud_bit_rate=128,
     ) -> list:
 
-    pass_base = [
+    pass_1 = [
         "ffmpeg", "-thread_queue_size", f"{queue_size}", "-y",
         "-vsync", "vfr",
         "-i", input_path,
@@ -277,12 +277,25 @@ def get_post_process_ffmpeg_cmd(
         "-c:v", "libx264", "-pix_fmt", "yuv420p", "-vprofile", "main", "-vlevel", "4", "-preset", "veryslow",
         "-b:v", f"{vid_bit_rate}k", "-filter:v", f"fps={fps}", "-crf", str(CRF),
         "-c:a", "aac", "-strict", "experimental", "-b:a", f"{aud_bit_rate}k",
-        "-pass" #-v 24
+        output_path
     ]
 
-    pass_1 = pass_base + ["1", "-f", "mp4", "/dev/null"]
-    pass_2 = pass_base + ["2", output_path]
-    return pass_1 + ["&&"] + pass_2
+    return pass_1
+
+    # pass_base = [
+    #     "ffmpeg", "-thread_queue_size", f"{queue_size}", "-y",
+    #     "-vsync", "vfr",
+    #     "-i", input_path,
+    #     "-vf", "yadif=parity=auto",
+    #     "-c:v", "libx264", "-pix_fmt", "yuv420p", "-vprofile", "main", "-vlevel", "4", "-preset", "veryslow",
+    #     "-b:v", f"{vid_bit_rate}k", "-filter:v", f"fps={fps}", "-crf", str(CRF),
+    #     "-c:a", "aac", "-strict", "experimental", "-b:a", f"{aud_bit_rate}k",
+    #     "-pass" #-v 24
+    # ]
+    #
+    # pass_1 = pass_base + ["1", "-f", "mp4", "/dev/null"]
+    # pass_2 = pass_base + ["2", output_path]
+    # return pass_1 + ["&&"] + pass_2
 
 
 def get_ffmpeg_cmd(
