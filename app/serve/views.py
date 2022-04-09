@@ -717,8 +717,7 @@ def check_all_duplicates_route():
     videos = db_session.query(Video).filter_by(status=STATUS_COMPLETED).all()
     total_duplicates = 0
     for v1, v2 in itertools.combinations(videos, 2):
-        print(f"{v1.video_id}  <---->  {v2.video_id}")
-        if check_duplicate_video(v1, v2):
+        if (v1.can_be_changed and v2.can_be_changed) and check_duplicate_video(v1, v2):
             total_duplicates += 1
             if v2 not in v1.duplicates:
                 v1.duplicates.append(v2)
@@ -732,8 +731,7 @@ def check_all_duplicates_route():
 
         db_session.add(v1)
         db_session.add(v2)
-
-    db_session.commit()
+        db_session.commit()
 
     total_duplicates = total_duplicates
 
