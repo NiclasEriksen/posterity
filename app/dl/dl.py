@@ -271,6 +271,7 @@ def get_post_process_ffmpeg_cmd(
         fps=25, vid_bit_rate=2000, aud_bit_rate=128,
     ) -> list:
 
+    tmp_file_name = os.path.split(input_path)[1].split(".mp4")[0]
     pass_1 = [
         "ffmpeg", "-thread_queue_size", f"{queue_size}", "-y",
         "-vsync", "vfr",
@@ -285,7 +286,6 @@ def get_post_process_ffmpeg_cmd(
     return pass_1
 
 
-    # tmp_file_name = os.path.split(input_path)[1].split(".mp4")[0]
     # pass_base = [
     #     "ffmpeg", "-thread_queue_size", f"{queue_size}", "-y",
     #     "-vsync", "vfr",
