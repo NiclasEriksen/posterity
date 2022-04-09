@@ -445,6 +445,7 @@ body, html {
     font-weight: 500;
     font-size: 24px;
     color: var(--grey);
+    transition: 1s ease-in-out all;
 }
 
 .shadow-spinner .shadow-spinner-text {
