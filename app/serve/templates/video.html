@@ -223,7 +223,7 @@
                                 <p class="uk-text-small">
                                     <span class="uk-text-meta">Duration:</span> {{ video.duration_str_verbose }}<br>
                                     {% if video.post_processed %}
-                                    <span class="uk-text-meta">File size:</span> {{ video.processed_file_size_str }} <i class="uk-text-meta">({{ video.file_size_str }})</i>
+                                    <span class="uk-text-meta">File size:</span> {{ video.file_size_str }} <i class="uk-text-meta">({{ video.processed_file_size_str }})</i>
                                     {% else %}
                                     <span class="uk-text-meta">File size:</span> {{ video.file_size_str }}
                                     {% endif %}
@@ -241,8 +241,8 @@
                                     <span class="uk-text-meta">Dimensions:</span> {{ video.dimensions_str }}<br>
                                     <span class="uk-text-meta">Codecs:</span> {{ video.format_str }}<br>
                                     {% if video.post_processed %}
-                                    <span class="uk-text-meta">FPS:</span> {{ video.processed_frame_rate_str }} <i>(<span class="uk-text-meta">{{ video.frame_rate_str }}</span>)</i><br>
-                                    <span class="uk-text-meta">Bit rate:</span> {{ video.processed_bit_rate_str }} <i>(<span class="uk-text-meta">{{ video.bit_rate_str }}</span>)</i><br>
+                                    <span class="uk-text-meta">FPS:</span> {{ video.frame_rate_str }} <i>(<span class="uk-text-meta">{{ video.processed_frame_rate_str }}</span>)</i><br>
+                                    <span class="uk-text-meta">Bit rate:</span> {{ video.bit_rate_str }} <i>(<span class="uk-text-meta">{{ video.processed_bit_rate_str }}</span>)</i><br>
                                     {% else %}
                                     <span class="uk-text-meta">FPS:</span> {{ video.frame_rate_str }}<br>
                                     <span class="uk-text-meta">Bit rate:</span> {{ video.bit_rate_str }}
