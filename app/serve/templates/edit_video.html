@@ -42,12 +42,14 @@
                     </div>
 
                     <div class="uk-width-1-1 uk-grid uk-grid-small">
+                        {% if video.can_be_changed %}
                         <div class="uk-width-1-1 uk-width-1-2@s uk-padding-small">
                             <a class="uk-input uk-button uk-button-danger" href="/remove/{{ video.video_id }}" onclick="return confirm('Are you sure you want to delete this video?');"><span uk-icon="icon: trash"></span> Delete</a>
                         </div>
                         <div class="uk-width-1-1 uk-width-1-2@s uk-padding-small">
-                            <a class="uk-input uk-button uk-button-warning" href="/check_duplicates/{{ video.video_id }}"><span uk-icon="icon: copy"></span> Duplicate check</a>
+                            <a class="uk-input uk-button uk-button-warning {% if video.ready_to_play %}" href="/check_duplicates/{{ video.video_id }}"{% else %}uk-button-disabled"{% endif %}><span uk-icon="icon: copy"></span> Duplicate check</a>
                         </div>
+                        {% endif %}
 
                         <div class="uk-width-1-1 uk-width-1-2@s uk-padding-small">
                             <a class="uk-input uk-button uk-button-muted" href="/{{ video.video_id }}"><span uk-icon="icon: close"></span> Cancel</a>

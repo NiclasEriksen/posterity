@@ -113,9 +113,10 @@ body, html {
 .uk-button-danger:hover, .uk-button-warning:hover, .uk-button-primary:hover, .uk-button-secondary:hover {
     border-color: var(--grey);
 }
-.uk-button-primary:disabled, .uk-button-warning:disabled, .uk-button-danger:disabled, .uk-button-secondary:disabled {
+.uk-button-primary:disabled, .uk-button-warning:disabled, .uk-button-danger:disabled, .uk-button-secondary:disabled, .uk-button-disabled {
     border: 1px dashed var(--light-grey);
     background: none!important;
+    pointer-events: none;
 }
 .uk-input.uk-button {
     overflow: hidden;
@@ -123,6 +124,12 @@ body, html {
     text-overflow: ellipsis;
 }
 
+.isDisabled {
+  color: currentColor;
+  cursor: not-allowed;
+  opacity: 0.5;
+  text-decoration: none;
+}
 
 .uk-text-success {
     color: var(--success)!important;
