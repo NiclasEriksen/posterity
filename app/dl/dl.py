@@ -19,11 +19,10 @@ media_path = os.environ.get("MEDIA_FOLDER", "")
 original_path = os.path.join(media_path, "original")
 processed_path = os.path.join(media_path, "processed")
 tmp_path = os.path.join(media_path, "tmp")
+json_path = media_path
 
-json_path = os.environ.get("MEDIA_FOLDER", "")
 thumbnail_path = os.environ.get("THUMBNAIL_FOLDER", "")
 preview_path = os.environ.get("PREVIEW_FOLDER", "")
-url_file_path = os.path.join(media_path, "urls.store")
 
 STATUS_DOWNLOADING = 0
 STATUS_COMPLETED = 1
@@ -44,10 +43,6 @@ MAX_BIT_RATE_PER_PIXEL = 2.7
 MAX_AUD_BIT_RATE = 128
 MAX_FPS = 60
 SPLIT_FPS_THRESHOLD = 40.0
-
-
-if not os.path.isfile(url_file_path):
-    open(url_file_path, "a").close()
 
 
 def get_progress_for_video(video) -> float:
