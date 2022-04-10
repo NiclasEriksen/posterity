@@ -1,96 +1,78 @@
 
+def clean_up_media_dir():
+    from app.serve.db import Video, session_scope
+    from app.dl.dl import media_path
 
+    from os import listdir, remove
+    from os.path import isfile, join, exists
 
-def parse_ffmpeg_output(line: str) -> (int, int, float):
-    frame = 0
-    fps = 0
-    time = 0.0
-    if "frame" in line and "fps" in line and "time" in line:
-        pass
-    else:
-        return frame, fps, time
+    original_path = media_path
+    processed_path = join(media_path, "processed")
+    json_path = media_path
 
-    line_segments = []
-    for seg in line.split("="):
-        for s in seg.split(" "):
-            if len(s):
-                line_segments.append(s.strip())
+    video_files = [f for f in listdir(original_path) if isfile(join(original_path, f)) and f.endswith(".mp4")]
+    processed_files = [f for f in listdir(processed_path) if isfile(join(processed_path, f)) and f.endswith(".mp4")]
+    json_files = [f for f in listdir(json_path) if isfile(join(json_path, f)) and f.endswith(".json")]
 
+    video_to_delete = []
+    processed_to_delete = []
+    json_to_delete = []
+    with session_scope() as db_session:
+        for vf in video_files:
+            video = db_session.query(Video).filter_by(video_id=vf.split(".mp4")[0]).first()
+            if video:
+                continue
+            video_to_delete.append(vf)
+        for vf in processed_files:
+            video = db_session.query(Video).filter_by(video_id=vf.split(".mp4")[0]).filter_by(post_processed=True).first()
+            if video:
+                continue
+            processed_to_delete.append(vf)
+        for jf in json_files:
+            video = db_session.query(Video).filter_by(video_id=jf.split(".json")[0]).first()
+            if video:
+                continue
+            json_to_delete.append(jf)
+
+    while True:
+        total = f"{len(video_to_delete)} originals, {len(processed_to_delete)} processed, {len(json_to_delete)} json to delete. Confirm?"
+        confirm = input(f'{total}\n[y]Yes or [n]No or [l]List files: ')
+        if confirm == "y":
+            break
+        elif confirm == "n":
+            return  # cancel
+        elif confirm == "l":
+            for o in video_to_delete:
+                print(join(original_path, o))
+            for p in processed_to_delete:
+                print(join(processed_path, p))
+            for j in json_to_delete:
+                print(join(json_path, j))
+        else:
+            print("\n Invalid Option. Please Enter a Valid Option.")
+
+    deleted = 0
     try:
-        s = line_segments
-        d = {s[i]: s[i+1] for i in range(0, len(s) - 1, 2)}
-    except IndexError:
-        print(f"Invalid ffmpeg line? {len(s)} items")
-        return frame, fps, time
+        for j in json_to_delete:
+            p = join(json_path, j)
+            if exists(p):
+                remove(p)
+                deleted += 1
+        for v in video_to_delete:
+            p = join(original_path, v)
+            if exists(p):
+                remove(p)
+                deleted += 1
+        for v in processed_to_delete:
+            p = join(processed_path, v)
+            if exists(p):
+                remove(p)
+                deleted += 1
+    except OSError as e:
+        print(e)
 
-    if "frame" in d.keys():
-        try:
-            frame = int(d["frame"])
-        except (TypeError, ValueError):
-            frame = 0
-    if "fps" in d.keys():
-        try:
-            fps = int(d["fps"])
-        except (TypeError, ValueError):
-            fps = 0
-    if "time" in d.keys():
-        try:
-            hrs, mins, sec = d["time"].split(":")
-        except ValueError:  # not enough/too many
-            hrs, mins, sec = "00", "00", "00.00"
-        try:
-            hrs, mins, sec = int(hrs), int(mins), float(sec)
-        except (TypeError, ValueError):
-            hrs, mins, sec = 0, 0, 0.0
-
-        time = (hrs * 3600) + (mins * 60) + sec
-
-    return frame, fps, time
-
-
-def get_last_time(log_path, max_search=100) -> float:
-    try:
-        i = 0
-        for l in reverse_readline(log_file):
-            if l.startswith("out_time="):
-                ts = l.split("out_time=")[1].strip()
-                try:
-                    hrs, mins, sec = ts.split(":")
-                except ValueError:  # not enough/too many
-                    hrs, mins, sec = "00", "00", "00.00"
-                try:
-                    hrs, mins, sec = int(hrs), int(mins), float(sec)
-                except (TypeError, ValueError):
-                    hrs, mins, sec = 0, 0, 0.0
-
-                time = (hrs * 3600) + (mins * 60) + sec
-                return time
-
-            i += 1
-            if i >= max_search:
-                return 0
-    except OSError:
-        return 0
+    print(f"Deleted {deleted} files.")
 
 
 if __name__ == "__main__":
-    from app.dl.dl import add_technical_info_to_all, refresh_json_on_all
-    # add_technical_info_to_all()
-    # refresh_json_on_all()
-    import subprocess
-    pass
-
-
-    # open(log_file, "w").close()
-    # input_fps = 25
-    # input_duration = 67.0
-    #
-    # line = "frame= 2377 fps= 33 q=39.4 Lsize=   36693kB time=00:00:39.87 bitrate=7538.8kbits/s speed=0.553x "
-    #
-    # cmd = [
-    #     "ffmpeg", "-i", input_file, "-v", "34", "-y",
-    #     "-progress", log_file,
-    #     "-f", "mp4", output_file,
-    # ]
-    # process = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-
+    clean_up_media_dir()

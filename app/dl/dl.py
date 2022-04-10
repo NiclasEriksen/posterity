@@ -19,10 +19,14 @@ if celery:
     inspector = celery.control.inspect()
 
 media_path = os.environ.get("MEDIA_FOLDER", "")
+original_path = os.path.join(media_path, "original")
+processed_path = os.path.join(media_path, "processed")
+tmp_path = os.path.join(media_path, "tmp")
+
+json_path = os.environ.get("MEDIA_FOLDER", "")
 thumbnail_path = os.environ.get("THUMBNAIL_FOLDER", "")
 preview_path = os.environ.get("PREVIEW_FOLDER", "")
 url_file_path = os.path.join(media_path, "urls.store")
-tmp_path = os.path.join(media_path, "tmp")
 
 STATUS_DOWNLOADING = 0
 STATUS_COMPLETED = 1
