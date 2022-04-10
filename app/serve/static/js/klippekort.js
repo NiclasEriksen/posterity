@@ -225,7 +225,7 @@ function redirectOnComplete(video_id) {
                     prog = 0.0;
                 }
                 if (prog == 0.0) {
-                    progress_text.innerHTML = "Waiting";
+                    progress_text.innerHTML = "<span class='uk-text-small'>Waiting...</span>";
                 } else {
                     progress_text.innerHTML = Math.floor(prog * 100.0).toString() + "%";
                 }
