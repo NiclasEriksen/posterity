@@ -69,7 +69,7 @@ def start_download(video_id: str):
 
     try:
 
-        task_id = download_task.apply_async(args=[video.to_json(), video.video_id], priority=5)
+        task_id = download_task.apply_async(args=[video.to_json(), video.video_id], priority=1)
     except Exception as e:
         video.status = STATUS_PENDING
         db_session.add(video)
