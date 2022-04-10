@@ -37,7 +37,7 @@ def start_processing(video_id: str):
         return Response("Video is not ready to be processed right now.", status=400)
 
     try:
-        task_id = post_process_task.delay(video.to_json(), video.video_id)
+        task_id = post_process_task.apply_async(args=[video.to_json(), video.video_id], priority=9)
     except Exception as e:
         video.status = STATUS_COMPLETED
         video.post_processed = False
@@ -68,7 +68,8 @@ def start_download(video_id: str):
         return Response("That video is already downloaded.", status=400)
 
     try:
-        task_id = download_task.delay(video.to_json(), video.video_id)
+
+        task_id = download_task.apply_async(args=[video.to_json(), video.video_id], priority=5)
     except Exception as e:
         video.status = STATUS_PENDING
         db_session.add(video)

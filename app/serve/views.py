@@ -287,7 +287,7 @@ def edit_video_post(video_id: str):
 
     if video.ready_to_play:
         try:
-            _task_id = gen_images_task.delay(video.to_json())
+            _task_id = gen_images_task.apply_async(args=[video.to_json()], priority=0)
         except Exception as e:
             logger.error(e)
 
