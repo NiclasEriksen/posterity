@@ -30,7 +30,8 @@ from app.dl.dl import media_path, original_path, json_path, processed_path, \
     get_progress_for_video
 from app.dl.helpers import seconds_to_verbose_time
 from app.serve.db import db_session, Video, User, ContentTag, UserReport, Category,\
-    init_db, AUTH_LEVEL_ADMIN, AUTH_LEVEL_EDITOR, AUTH_LEVEL_USER, REASON_TEXTS
+    init_db, AUTH_LEVEL_ADMIN, AUTH_LEVEL_EDITOR, AUTH_LEVEL_USER, REASON_TEXTS,\
+    RegisterToken, MAX_TOKEN_USES
 from app import get_environment, app_config
 from app.serve.search import search_videos, index_video_data, remove_video_data, remove_video_data_by_id
 from app.extensions import cache
@@ -310,7 +311,9 @@ def register_user_post():
     password = request.form.get("password")
     token = request.form.get("token")
 
-    if token != app_config[APPLICATION_ENV].REGISTER_TOKEN:
+    existing_token = db_session.query(RegisterToken).filter_by(token=token).first()
+
+    if not existing_token:
         flash(f"Invalid token for user registration.", "error")
         logger.error(f"Invalid token for user registration.")
         return redirect(url_for("serve.register_user_page"))
@@ -324,21 +327,29 @@ def register_user_post():
         return redirect(url_for("serve.register_user_page"))
 
     existing_user = User.query.filter_by(username=username).first()
-    if existing_user:
+    if existing_user or username == "Anonymous":
         flash("Username already taken, please choose another one.", "error")
         return redirect(url_for("serve.register_user_page"))
+
+    if not existing_token.is_valid():
+        flash("That token is expired or spent and can no longer be used.", "error")
+        return redirect(url_for("serve.register_user_page"))
+
+    existing_token.spend_token()
 
     password_hash = generate_password_hash(password)
 
     user = User()
     user.username = username
     user.password = password_hash
-    user.auth_level = AUTH_LEVEL_MOD
+    user.auth_level = existing_token.auth_level
 
+    db_session.add(existing_token)
     db_session.add(user)
     db_session.commit()
 
     login_user(user, remember=True)
+    flash(f"User registered and logged in. Welcome to Posterity!", "success")
 
     return redirect(url_for("serve.front_page"))
 
@@ -458,7 +469,8 @@ def add_category_post():
 @serve.route("/dashboard")
 @login_required
 def dashboard_page():
-    return render_template("dashboard.html", user=current_user)
+    tokens = db_session.query(RegisterToken).filter(RegisterToken.auth_level <= current_user.auth_level).all()
+    return render_template("dashboard.html", user=current_user, tokens=tokens)
 
 
 @serve.route("/about", methods=["GET"])
@@ -733,6 +745,73 @@ def check_status():
         "scheduled": len(scheduled_tasks) if scheduled_tasks else 0,
         "total_videos": total_videos
     }
+
+
+@serve.route("/dashboard/create_token", methods=["POST"])
+@login_required
+def create_token_route():
+    name = request.form.get("token_name", default="New token")
+    auth_level = request.form.get("auth_level", default=0)
+    uses = request.form.get("token_uses", default=1)
+
+    try:
+        auth_level = int(auth_level)
+    except (ValueError, TypeError):
+        auth_level = 0
+    try:
+        uses = int(uses)
+    except (ValueError, TypeError):
+        uses = 0
+
+    if auth_level > current_user.auth_level or auth_level < 0:
+        flash("Invalid auth level given.", "error")
+        return redirect(url_for("serve.dashboard_page"))
+    elif uses > MAX_TOKEN_USES or not uses > 0:
+        flash("Invalid number of uses given.", "error")
+        return redirect(url_for("serve.dashboard_page"))
+
+    try:
+        token = RegisterToken(name, auth_level=auth_level, uses=uses)
+        token.generate()
+        db_session.add(token)
+        db_session.commit()
+    except Exception as e:
+        flash("Database error during creation of token", "error")
+        return redirect(url_for("serve.dashboard_page"))
+
+    flash("Token has been created and is active", "success")
+    return redirect(url_for("serve.dashboard_page"))
+
+
+@serve.route("/dashboard/delete_token/<token_id>", methods=["GET"])
+@login_required
+def delete_token_route(token_id):
+    try:
+        token_id = int(token_id)
+    except (ValueError, TypeError):
+        flash("Invalid token ID given", "error")
+        return redirect(url_for("serve.dashboard_page"))
+
+    token = db_session.query(RegisterToken).filter_by(id=token_id).first()
+
+    if not token:
+        flash("Token not found, aborting.", "error")
+        return redirect(url_for("serve.dashboard_page"))
+
+    if token.auth_level > current_user.auth_level:
+        flash("You don't have permissions to delete that token.", "error")
+        return redirect(url_for("serve.dashboard_page"))
+
+    try:
+        db_session.delete(token)
+        db_session.commit()
+    except Exception as e:
+        logger.error(e)
+        flash("Database error under deletion of token", "error")
+        return redirect(url_for("serve.dashboard_page"))
+
+    flash("Token has been deleted and is no longer active", "success")
+    return redirect(url_for("serve.dashboard_page"))
 
 
 def delete_video_by_id(video_id: str) -> bool:

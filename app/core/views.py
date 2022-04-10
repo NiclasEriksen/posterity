@@ -98,6 +98,10 @@ def post_link():
         else:
             download_now = True
 
+        data["source"] = current_user.username
+    else:
+        data["source"] = "Anonymous"
+
     data = parse_input_data(data)
 
     if data and len(data.keys()):

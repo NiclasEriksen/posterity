@@ -7,6 +7,7 @@ import json
 from datetime import datetime, timedelta
 import time
 # import logging
+import shortuuid
 from contextlib import contextmanager
 from werkzeug.local import LocalProxy
 from flask import current_app
@@ -30,6 +31,9 @@ Base.query = db_session.query_property()
 AUTH_LEVEL_USER = 0
 AUTH_LEVEL_EDITOR = 1
 AUTH_LEVEL_ADMIN = 2
+
+TOKEN_BASE_LENGTH = 8
+MAX_TOKEN_USES = 20
 
 PROCESSING_RECOMMENDATION = 0.5
 
@@ -521,9 +525,24 @@ class RegisterToken(Base):
     __tablename__ = "tokens"
     id = Column(Integer, primary_key=True)
     name = Column(String)
-    token = Column(String)
+    token = Column(String, unique=True)
     expires = Column(DateTime)
-    uses = Column(Integer)
+    uses = Column(Integer, default=0)
+    auth_level = Column(Integer, default=0)
+
+    def __init__(self, name: str, expires=None, uses: int = 0, auth_level: int = 0):
+        self.name = name
+        self.uses = uses
+        self.auth_level = auth_level
+        if not expires or not isinstance(expires, datetime):
+            self.expires = datetime.now() + timedelta(days=30)
+        else:
+            self.expires = expires
+
+    def generate(self):
+        self.token = shortuuid.ShortUUID().random(
+            length=TOKEN_BASE_LENGTH + (self.auth_level * TOKEN_BASE_LENGTH)
+        )
 
     def spend_token(self) -> bool:
         if self.uses > 0:
@@ -533,8 +552,8 @@ class RegisterToken(Base):
             log.info("No more tokens to spend!")
             return False
 
-    def check(self, other: str) -> bool:
-        return other.strip() == self.token.strip()
+    def is_valid(self) -> bool:
+        return self.expires >= datetime.now() and self.uses > 0
 
 
 class ContentTag(Base):

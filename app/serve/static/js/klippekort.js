@@ -76,8 +76,8 @@ function startDownload(video_id) {
     var dl_old_text = "";
     if (dl_btn) {
         dl_btn.disabled = true;
-        dl_old_text = dl_btn.textContent
-        dl_btn.textContent = "Starting download task...";
+        dl_old_text = dl_btn.innerHTML
+        dl_btn.innerHTML = "<div uk-spinner></div> Starting task..."
     }
     if (status_field) {
         status_field.textContent = "";
@@ -91,14 +91,14 @@ function startDownload(video_id) {
             window.location.href = '/' + video_id;
         } else if (this.status >= 400) {
             dl_btn.disabled = false;
-            dl_btn.textContent = dl_old_text;
+            dl_btn.innerHTML = dl_old_text;
             if (status_field) {
                 status_field.innerHTML = '<span class="uk-text-danger">' + this.response + '</span>';
             }
             console.log(this.response);
         } else {
             dl_btn.disabled = false;
-            dl_btn.textContent = dl_old_text;
+            dl_btn.innerHTML = dl_old_text;
             if (status_field) {
                 status_field.innerHTML = '<span class="uk-text-warning">Unknown server error :(</span>';
             }
@@ -109,7 +109,7 @@ function startDownload(video_id) {
     request.onerror = function(err) {
         console.error(err);
         dl_btn.disabled = false;
-        dl_btn.textContent = dl_old_text;
+        dl_btn.innerHTML = dl_old_text;
         if (status_field) {
             status_field.innerHTML = '<span class="uk-text-danger">Unknown error when contacting server.</span>';
         }
@@ -129,8 +129,8 @@ function startProcessing(video_id) {
     var dl_old_text = "";
     if (dl_btn) {
         dl_btn.disabled = true;
-        dl_old_text = dl_btn.textContent
-        dl_btn.textContent = "Starting task...";
+        dl_old_text = dl_btn.innerHTML
+        dl_btn.innerHTML = "<div uk-spinner></div> Starting task..."
     }
     if (status_field) {
         status_field.textContent = "";
@@ -144,14 +144,14 @@ function startProcessing(video_id) {
             window.location.href = '/' + video_id;
         } else if (this.status >= 400) {
             dl_btn.disabled = false;
-            dl_btn.textContent = dl_old_text;
+            dl_btn.innerHTML = dl_old_text;
             if (status_field) {
                 status_field.innerHTML = '<span class="uk-text-danger">' + this.response + '</span>';
             }
             console.log(this.response);
         } else {
             dl_btn.disabled = false;
-            dl_btn.textContent = dl_old_text;
+            dl_btn.innerHTML = dl_old_text;
             if (status_field) {
                 status_field.innerHTML = '<span class="uk-text-warning">Unknown server error :(</span>';
             }
@@ -162,7 +162,7 @@ function startProcessing(video_id) {
     request.onerror = function(err) {
         console.error(err);
         dl_btn.disabled = false;
-        dl_btn.textContent = dl_old_text;
+        dl_btn.innerHTML = dl_old_text;
         if (status_field) {
             status_field.innerHTML = '<span class="uk-text-danger">Unknown error when contacting server.</span>';
         }
