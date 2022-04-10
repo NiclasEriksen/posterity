@@ -517,7 +517,7 @@ def report_video_post(video_id):
     db_session.commit()
 
     flash("Video has been reported to the editors. Thank you!", "success")
-    return serve_video(video_id)
+    return redirect(url_for("serve.serve_video", video_id=video.video_id))
 
 
 @serve.route("/clear_report/<report_id>", methods=["GET"])
@@ -541,7 +541,7 @@ def clear_report_route(report_id):
     db_session.commit()
     flash("User report has been deleted.", "success")
 
-    return serve_video(video_id)
+    return redirect(url_for("serve.serve_video", video_id=video.video_id))
 
 
 @serve.route("/download_archive", methods=["GET"])
