@@ -124,6 +124,19 @@ body, html {
     white-space: nowrap;
     text-overflow: ellipsis;
 }
+.uk-icon-button {
+    width: 36px;
+    height: 36px;
+    border-radius: 36px;
+    background: var(--charcoal);
+    color: var(--grey);
+    vertical-align: middle;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    transition: .1s ease-in-out;
+    transition-property: color,background-color;
+}
 
 .isDisabled {
   color: currentColor;

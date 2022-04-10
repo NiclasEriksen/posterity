@@ -10,8 +10,8 @@
         class="uk-width-1-1 uk-width-1-4@l uk-dark uk-background-secondary uk-height-1-1 uk-margin uk-padding-remove"
         style="border: 1px dashed #CCC;border-top: 0;"
     >
-
-        <form action="" id="link-form" class="uk-form uk-padding-small uk-width-1-1 uk-height-1-1">
+        {% if keyword|length or current_page > 1 %}{% set hide_first = True %}{% else %}{% set hide_first = False %}{% endif %}
+        <form action="" id="link-form" class="uk-form uk-padding-small uk-width-1-1 uk-height-1-1 link-form-toggle"{% if hide_first %} hidden{% endif %}>
             <input type="hidden" id="source_user" name="source_user" value="{{ current_user.username }}">
             <fieldset class="uk-fieldset uk-grid">
 
@@ -56,7 +56,7 @@
                     </div>
                 </div>
 
-                <p class="">
+                <div class="uk-width-1-1">
                     <span class="uk-text-small">
                         <span class="content-tag-option-2">Graphic</span> /
                         <span class="content-tag-option-1">Emotional</span> /
@@ -68,14 +68,24 @@
                     {% else %}
                     <span class="uk-text-meta"><i>Link will need to be approved by an editor before it's archived.</i></span>
                     {% endif %}
-                </p>
+                </div>
 
-                <div class="uk-margin uk-width-1-1">
+                <div class="uk-margin-left uk-width-1-1 uk-padding-small uk-flex uk-flex-center">
                     <button class="uk-button uk-button-default" type="submit" id="submit-button">Save for posterity</button>
                 </div>
                 <p id="video-post-status" class="uk-text-small uk-text-meta"></p>
             </fieldset>
         </form>
+        {% if hide_first %}
+        <div class="uk-width-1-1 uk-position-relative" style="height: 48px;">
+            <a
+                class="uk-icon-button uk-position-center"
+                uk-icon="plus"
+                uk-toggle="target: .link-form-toggle; animation: uk-animation-fade"
+            >
+            </a>
+        </div>
+        {% endif %}
     </div>
     <div class="uk-width-1-1 uk-width-3-4@l uk-padding-small">
         <div class="uk-grid uk-grid-small uk-text-small uk-padding-small uk-padding-remove-vertical">
