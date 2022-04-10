@@ -1,3 +1,8 @@
+                            {% if video.private %}
+                            <span uk-tooltip="title: Video is private;pos: top-left;">
+                                <span class="uk-text-danger" uk-icon="icon: ban; ratio: 0.9"></span>
+                            </span>
+                            {% endif %}
                             {% if video.status == 0 %}
                             <span uk-tooltip="title: Video is downloading;pos: top-left;">
                                 <span class="uk-text-primary" uk-icon="icon: download; ratio: 0.9"></span>

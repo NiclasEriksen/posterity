@@ -164,13 +164,8 @@
                             {% endif %}
                         </div>
                     </td>
-                    <td class="uk-text-muted uk-text-small uk-visible@s" style="max-width: 20vw;">                        <div>
-                            {% if video.private %}
-                            <span uk-tooltip="title: Video is private;pos: top-left;">
-                                <span class="uk-text-danger" uk-icon="icon: ban; ratio: 0.9"></span>
-                            </span>
-                            {% endif %}
-
+                    <td class="uk-text-muted uk-text-small uk-visible@s" style="max-width: 20vw;">
+                        <div>
                             <span class="uk-visible@m">
                                 {% include "video_status_icons.html" %}
                             </span>
