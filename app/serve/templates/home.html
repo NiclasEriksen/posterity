@@ -64,6 +64,11 @@
                         <span class="uk-text-category">Video type</span>
                     </span><br>
                     {% if current_user.is_authenticated %}
+                    {% if current_user.check_auth(1) %}
+                    <div class="uk-margin">
+                        <label><input class="uk-checkbox" id="private-checkbox" name="private-checkbox" type="checkbox"> Mark as private</label>
+                    </div>
+                    {% endif %}
                     <span class="uk-text-meta"><i>You can add more tags and categories later</i></span>
                     {% else %}
                     <span class="uk-text-meta"><i>Link will need to be approved by an editor before it's archived.</i></span>

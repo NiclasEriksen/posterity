@@ -401,6 +401,10 @@ class Video(Base):
         except KeyError:
             self.verified = False
         try:
+            self.private = d["private"]
+        except KeyError:
+            pass
+        try:
             self.width = d["width"]
         except KeyError:
             self.width = 0

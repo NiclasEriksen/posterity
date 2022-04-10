@@ -12,7 +12,8 @@ function handleFormSubmit(event) {
     var cw_field = document.getElementById("content_warning");
     var category_field = document.getElementById("category");
     submit_btn.disabled = true;
-    submit_btn.textContent = "Waiting for download task...";
+    submit_btn_old_text = submit_btn.innerHTML
+    submit_btn.innerHTML = "<div uk-spinner></div> Submitting link..."
     if (status_field) {
         status_field.textContent = "";
     }
@@ -28,7 +29,7 @@ function handleFormSubmit(event) {
             }
         } else if (this.status == 202) {
             submit_btn.disabled = false;
-            submit_btn.textContent = "Save for posterity";
+            submit_btn.innerHTML = submit_btn_old_text;
             if (status_field) { status_field.innerHTML = '<span class="uk-text-success">' + this.response + '</span>'; }
             if (title_field) { title_field.value = ""; }
             if (url_field) { url_field.value = ""; }
@@ -38,17 +39,24 @@ function handleFormSubmit(event) {
 
         } else if (this.status < 200) {
             submit_btn.disabled = false;
-            submit_btn.textContent = "Save for posterity";
+            submit_btn.innerHTML = submit_btn_old_text;
             if (status_field) {
                 status_field.innerHTML = '<span class="uk-text-danger">Unknown error when contacting server.</span>';
             }
             console.log(this.status);
             console.log(this.response);
+        } else if (this.status > 203 && this.status < 500) {
+            submit_btn.disabled = false;
+            submit_btn.innerHTML = submit_btn_old_text;
+            if (status_field) {
+                status_field.innerHTML = '<span class="uk-text-primary">' + this.response + '</span>';
+            }
+            console.log(this.response);
         } else {
             submit_btn.disabled = false;
-            submit_btn.textContent = "Save for posterity";
+            submit_btn.innerHTML = submit_btn_old_text;
             if (status_field) {
-                status_field.innerHTML = '<span class="uk-text-danger">' + this.response + '</span>';
+                status_field.innerHTML = '<span class="uk-text-danger">Unknown error when contacting server</span>';
             }
             console.log(this.response);
         }
@@ -56,7 +64,7 @@ function handleFormSubmit(event) {
     request.onerror = function(err) {
         console.error(err);
         submit_btn.disabled = false;
-        submit_btn.textContent = "Save for posterity";
+        submit_btn.innerHTML = submit_btn_old_text;
         if (status_field) {
             status_field.innerHTML = '<span class="uk-text-danger">Unknown error when contacting server.</span>';
         }
@@ -89,13 +97,12 @@ function startDownload(video_id) {
     request.onload = function() {
         if (this.status == 201) {
             window.location.href = '/' + video_id;
-        } else if (this.status >= 400) {
+        } else if (this.status >= 400 && this.status < 500) {
             dl_btn.disabled = false;
             dl_btn.innerHTML = dl_old_text;
-            if (status_field) {
+            if (status_field && this.response.length() < 1000) {
                 status_field.innerHTML = '<span class="uk-text-danger">' + this.response + '</span>';
             }
-            console.log(this.response);
         } else {
             dl_btn.disabled = false;
             dl_btn.innerHTML = dl_old_text;
@@ -103,7 +110,6 @@ function startDownload(video_id) {
                 status_field.innerHTML = '<span class="uk-text-warning">Unknown server error :(</span>';
             }
             console.log(this.status);
-            console.log(this.response);
         }
     }
     request.onerror = function(err) {

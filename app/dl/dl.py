@@ -492,6 +492,7 @@ def parse_input_data(data: dict) -> dict:
         "height": 0,
         "format": "",
         "duration": 0,
+        "private": False,
         "upload_time": datetime.now().timestamp(),
         "status": STATUS_DOWNLOADING,
         "video_id": "",
@@ -519,6 +520,11 @@ def parse_input_data(data: dict) -> dict:
             pass
     try:
         metadata["category"] = data["category"]
+    except KeyError:
+        pass
+    try:
+        if data["private-checkbox"] == "on":
+            metadata["private"] = True
     except KeyError:
         pass
     metadata["content_warning"] = metadata["content_warning"].replace("default", "")

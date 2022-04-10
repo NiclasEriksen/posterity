@@ -9,7 +9,7 @@ from app.dl.youtube import valid_video_url, minimize_url
 from app.dl.helpers import unique_filename
 from app.dl.dl import parse_input_data, find_duplicate_video_by_url,\
     STATUS_DOWNLOADING, STATUS_PENDING, STATUS_FAILED, STATUS_COMPLETED, STATUS_PROCESSING
-from app.serve.db import db_session, Video
+from app.serve.db import db_session, Video, AUTH_LEVEL_EDITOR
 
 core = Blueprint('core', __name__)
 logger = LocalProxy(lambda: current_app.logger)
@@ -92,11 +92,14 @@ def post_link():
 
     logger.info("Link posted.")
     data = request.get_json()
+
     if current_user.is_authenticated:
         if "download_now" in data and isinstance(data["download_now"], bool):
             download_now = data["download_now"]
         else:
             download_now = True
+        if "private-checkbox" in data and isinstance(data["private-checkbox"], bool):
+            print("PRIVATE!!!!!")
 
         data["source"] = current_user.username
     else:
@@ -113,6 +116,9 @@ def post_link():
             return Response("No url in posted data.", status=400)
         if not valid_video_url(data["url"]):
             return Response("That url doesn't seem valid.", status=400)
+        if "private" in data and data["private"]:
+            if not current_user.check_auth(AUTH_LEVEL_EDITOR):
+                return Response("You don't have permissions to post private videos.", status=400)
 
         data["url"] = minimize_url(data["url"])
 
