@@ -107,7 +107,7 @@ def write_metadata_to_db(video_id: str, md: dict):
 
 
 def write_metadata_to_disk(video_id: str, md: dict):
-    json_save_path = os.path.join(media_path, video_id + ".json")
+    json_save_path = os.path.join(json_path, video_id + ".json")
     try:
         with open(json_save_path, "w") as json_file:
             json.dump(md, json_file)
@@ -212,14 +212,14 @@ def process_from_json_data(metadata: dict, input_file: str, output_file: str) ->
 
 def download_from_json_data(metadata: dict, file_name: str):
     from app.serve.db import Video
-    vid_save_path = os.path.join(media_path, file_name + ".mp4")
+    vid_save_path = os.path.join(original_path, file_name + ".mp4")
 
     if not valid_video_url(metadata["url"]):
         log.error("Invalid video url...")
         metadata["status"] = STATUS_INVALID
         yield metadata
 
-    elif media_path == "":
+    elif original_path == "":
         log.error("No path to save video (MEDIA_FOLDER)...")
         metadata["status"] = STATUS_FAILED
         yield metadata
@@ -554,7 +554,7 @@ def add_technical_info_to_all():
     with session_scope() as db_session:
         videos = db_session.query(Video).all()
         for v in videos:
-            p = os.path.join(media_path, v.video_id + ".mp4")
+            p = os.path.join(original_path, v.video_id + ".mp4")
             if os.path.exists(p):
                 metadata = v.to_json()
                 metadata = add_technical_info_to_metadata(metadata, p)
