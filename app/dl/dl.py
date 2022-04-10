@@ -361,22 +361,6 @@ def get_post_process_ffmpeg_cmd(
     return pass_1
 
 
-    # pass_base = [
-    #     "ffmpeg", "-thread_queue_size", f"{queue_size}", "-y",
-    #     "-vsync", "vfr",
-    #     "-i", input_path,
-    #     "-vf", "yadif=parity=auto",
-    #     "-c:v", "libx264", "-pix_fmt", "yuv420p", "-vprofile", "main", "-vlevel", "4", "-preset", "veryslow",
-    #     "-b:v", f"{vid_bit_rate}k", "-filter:v", f"fps={fps}", "-crf", str(CRF_LOW),
-    #     "-c:a", "aac", "-strict", "experimental", "-b:a", f"{aud_bit_rate}k",
-    #     "-passlogfile", tmp_file_name, "-pass" #-v 24
-    # ]
-    #
-    # pass_1 = pass_base + ["1", "-f", "mp4", "/dev/null"]
-    # pass_2 = pass_base + ["2", output_path]
-    # return pass_1 + ["&&"] + pass_2
-
-
 def get_ffmpeg_cmd(
     vid_url, aud_url, _sub_url, save_path, normalize=True,
     http_persistent=True, queue_size=512, crf=24, log_path="/dev/null"
@@ -393,15 +377,11 @@ def get_ffmpeg_cmd(
         cmd += ["-c:a", "aac"]
 
     cmd += ["-vcodec", "libx264", "-crf", str(crf), "-f", "mp4"]
-        # cmd += ["-c:v", "h264", "-f", "mp4"]
 
     # Apply sound normalization
     if normalize:
         # dynamic norm
         cmd += ["-af", "dynaudnorm=p=0.85"]
-
-        # linear norm
-        # cmd += ["-af", "loudnorm=I=-16:TP=-1.5:LRA=11"]
 
     if http_persistent:
         cmd += ["-http_persistent", "1"]
