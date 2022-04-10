@@ -79,7 +79,7 @@ def check_duplicate_video(v1, v2) -> bool:
     return False
 
 
-@celery.task(name="core.tasks.check_all_duplicates", soft_time_limit=3600, time_limit=3660, priority=9)
+@celery.task(name="core.tasks.check_all_duplicates", soft_time_limit=3600, time_limit=3660, priority=9, queue="fast")
 def check_all_duplicates_task():
     from app.serve.db import Video, session_scope
     from sqlalchemy import or_
@@ -114,7 +114,7 @@ def check_all_duplicates_task():
     return total_duplicates
 
 
-@celery.task(name="core.tasks.gen_thumbnail", soft_time_limit=300, time_limit=360, priority=0)
+@celery.task(name="core.tasks.gen_thumbnail", soft_time_limit=300, time_limit=360, priority=0, queue="fast")
 def gen_images_task(metadata: dict):
     from app.dl.metadata import generate_video_images
     from app.dl.dl import original_path, thumbnail_path, preview_path
@@ -150,7 +150,7 @@ def gen_images_task(metadata: dict):
     log.info(f"Images generated in {minutes} minutes, {seconds:.2f} seconds: {video_id}")
 
 
-@celery.task(name="core.tasks.post_process", soft_time_limit=7200, time_limit=7260, priority=5)
+@celery.task(name="core.tasks.post_process", soft_time_limit=7200, time_limit=7260, priority=5, queue="processing")
 def post_process_task(data: dict, video_id: str):
     from app.dl.dl import (
         process_from_json_data,
@@ -233,7 +233,7 @@ def post_process_task(data: dict, video_id: str):
             log.error(f"Post-process failed after {minutes} minutes, {seconds:.0f} seconds: {video_id}")
 
 
-@celery.task(name="core.tasks.download", soft_time_limit=14400, time_limit=14700, priority=1)    #, base=SQLAlchemyTask)
+@celery.task(name="core.tasks.download", soft_time_limit=14400, time_limit=14700, priority=1, queue="downloads")    #, base=SQLAlchemyTask)
 def download_task(data: dict, file_name: str):
     from app.serve.search import index_video_data
     from app.dl.dl import (
