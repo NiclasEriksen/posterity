@@ -78,6 +78,73 @@ function handleFormSubmit(event) {
 
 }
 
+
+function suggestTitle() {
+    var url_field = document.getElementById("url");
+    var title_field = document.getElementById("title");
+    var suggest_btn = document.getElementById("suggest-button");
+    console.log("Asking for title suggestion.");
+    if (!url_field || !title_field) {
+        return;
+    }
+    var url = url_field.value;
+    if (url.length <= 0) {
+        return;
+    }
+
+
+
+    var suggest_btn_old_text = "";
+    if (suggest_btn) {
+        suggest_btn.disabled = true;
+        suggest_btn_old_text = suggest_btn.innerHTML;
+        suggest_btn.innerHTML = "<div uk-spinner='ratio: 0.5'></div> Awaiting suggestion";
+    }
+
+    var request = new XMLHttpRequest();
+    request.open('POST', '/api/v1/core/title_suggestion', true);
+    request.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
+    request.onload = function() {
+        if (suggest_btn) {
+            suggest_btn.disabled = false;
+            suggest_btn.innerHTML = suggest_btn_old_text;
+        }
+        if (this.status == 200) {
+            if (this.response.length > 0) {
+                title_field.value = this.response;
+                url_field.setCustomValidity("");
+            } else if (title_field.value.length == 0) {
+                title_field.value = "No title found";
+            }
+        } else if (this.status == 418 || this.status == 406) {
+            url_field.setCustomValidity(this.response);
+        } else if (this.status >= 400 && this.status < 500) {
+            if (suggest_btn) {
+                suggest_btn.classList.add("uk-animation-shake");
+            }
+            url_field.setCustomValidity("Unknown error when requesting that URL");
+            console.log(this.response);
+        } else {
+            console.log("Unknown error from server when requesting title suggestion.");
+        }
+        url_field.reportValidity();
+    }
+    request.onerror = function(err) {
+        console.error(err);
+        if (suggest_btn) {
+            suggest_btn.disabled = false;
+            suggest_btn.innerHTML = suggest_btn_old_text;
+        }
+        return;
+    }
+    try {
+        request.send(JSON.stringify({'url': url}));
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+
 function startDownload(video_id) {
     var dl_btn = document.getElementById("start-download-button");
     var status_field = document.getElementById("video-download-status");
@@ -100,7 +167,7 @@ function startDownload(video_id) {
         } else if (this.status >= 400 && this.status < 500) {
             dl_btn.disabled = false;
             dl_btn.innerHTML = dl_old_text;
-            if (status_field && this.response.length() < 1000) {
+            if (status_field && this.response.length < 1000) {
                 status_field.innerHTML = '<span class="uk-text-danger">' + this.response + '</span>';
             }
         } else {

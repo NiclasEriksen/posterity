@@ -288,6 +288,23 @@ def get_og_tags(html: str, title_only=False):
     return [unescape(t) for t in titles] + [unescape(t) for t in descs] + [unescape(t) for t in names]
 
 
+def get_title_from_html(html: str) -> list:
+    title = "No title"
+    titles = get_og_tags(html, title_only=True)
+    if len(titles) > 0:
+        title = titles[0]
+    else:
+        titles = re.findall(r"<title>(.*?)</title>", html)
+        if len(titles) > 0:
+            title = titles[0]
+        else:
+            titles = get_og_tags(html, title_only=False)    # Broader search
+            if len(titles) > 0:
+                title = titles[0]
+
+    return title
+
+
 def get_source_links(url: str) -> (str, list):
     headers = {'Accept-Encoding': 'identity'}
 
@@ -302,19 +319,9 @@ def get_source_links(url: str) -> (str, list):
 
     html = r.text
 
-    titles = get_og_tags(html, title_only=True)
-    if len(titles) > 0:
-        title = titles[0]
-    else:
-        titles = re.findall(r"<title>(.*?)</title>", html)
-        if len(titles) > 0:
-            title = titles[0]
-        else:
-            titles = get_og_tags(html, title_only=False)    # Broader search
-            if len(titles) > 0:
-                title = titles[0]
-            else:
-                title = "No title (mp4)"
+    title = get_title_from_html(html)
+    if title == "No title":
+        title += " (mp4)"
 
     urls = []
     elements = re.findall(r'[\'"]?([^\'" >]+)', html)

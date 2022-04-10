@@ -1,11 +1,11 @@
+import requests
 from flask import Blueprint, current_app, request, abort, Response
 from flask_login import current_user, login_required
 from werkzeug.local import LocalProxy
-
 from authentication import require_appkey
 
 from .tasks import download_task, post_process_task
-from app.dl.youtube import valid_video_url, minimize_url
+from app.dl.youtube import valid_video_url, minimize_url, get_title_from_html
 from app.dl.helpers import unique_filename
 from app.dl.dl import parse_input_data, find_duplicate_video_by_url,\
     STATUS_DOWNLOADING, STATUS_PENDING, STATUS_FAILED, STATUS_COMPLETED, STATUS_PROCESSING
@@ -18,6 +18,35 @@ logger = LocalProxy(lambda: current_app.logger)
 @core.before_request
 def before_request_func():
     current_app.logger.name = 'core'
+
+
+@core.route("/title_suggestion", methods=["POST"])
+def title_suggestion():
+    logger.info("Requested a title suggestion.")
+    data = request.get_json()
+
+    headers = {'Accept-Encoding': 'identity'}
+
+    if "url" not in data:
+        return Response("You need to supply an URL, dummy.", 418)
+
+    url = minimize_url(data["url"])
+
+    if not valid_video_url(url):
+        return Response("Not a valid video url", status=406)
+
+    if find_duplicate_video_by_url(url):
+        return Response("Video with that URL exists", status=406)
+
+    try:
+        r = requests.get(url, headers=headers)
+    except:
+        logger.error("Unable to download page?!")
+        return Response("Wasn't able to download the page and get a title.", 404)
+
+    title = get_title_from_html(r.text)
+
+    return Response(title, 200)
 
 
 @core.route("/start_processing/<video_id>", methods=["POST"])
