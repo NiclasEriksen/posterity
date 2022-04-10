@@ -1,5 +1,9 @@
 {% extends "base.html" %}
 {% block page_title %}Video not public.{% endblock %}
+{% block metadata %}
+<meta property="og:title" content="Video is private" />
+<meta property="og:description" content="Uploader set this video to private." />
+{% endblock %}
 {% block content %}
 <div class="uk-container uk-height-1-1">
     <div class="uk-text-center uk-position-center uk-height-medium uk-width-1-1" style="width:100%;">
