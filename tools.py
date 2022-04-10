@@ -34,6 +34,10 @@ def clean_up_media_dir():
                 continue
             json_to_delete.append(jf)
 
+    if not any([len(video_to_delete), len(processed_to_delete), len(json_to_delete)]):
+        print("No files to delete.")
+        return
+
     while True:
         total = f"{len(video_to_delete)} originals, {len(processed_to_delete)} processed, {len(json_to_delete)} json to delete. Confirm?"
         confirm = input(f'{total}\n[y]Yes or [n]No or [l]List files: ')

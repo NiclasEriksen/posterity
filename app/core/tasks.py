@@ -117,7 +117,7 @@ def check_all_duplicates_task():
 @celery.task(name="core.tasks.gen_thumbnail", soft_time_limit=300, time_limit=360, priority=0)
 def gen_images_task(metadata: dict):
     from app.dl.metadata import generate_video_images
-    from app.dl.dl import media_path, thumbnail_path, preview_path
+    from app.dl.dl import original_path, thumbnail_path, preview_path
     dur = time.time()
     log.info("Generating thumbnail...")
 
@@ -129,7 +129,7 @@ def gen_images_task(metadata: dict):
         log.error("Missing data... cant do shit.")
         return
 
-    vid_save_path = os.path.join(media_path, video_id + ".mp4")
+    vid_save_path = os.path.join(original_path, video_id + ".mp4")
     if not os.path.isfile(vid_save_path):
         log.error("No video file to generate images for.")
         return
@@ -157,15 +157,15 @@ def post_process_task(data: dict, video_id: str):
         STATUS_COMPLETED,
         STATUS_FAILED,
         STATUS_PROCESSING,
-        media_path
+        original_path, processed_path
     )
     if "video_id" not in data:
         log.error("Bad metadata to process from, aborting task.")
         update_video(video_id, STATUS_COMPLETED)    # Completed == original file
         return
 
-    input_path = os.path.join(media_path, f"{video_id}.mp4")
-    output_path = os.path.join(media_path, f"processed/{video_id}.mp4")
+    input_path = os.path.join(original_path, f"{video_id}.mp4")
+    output_path = os.path.join(processed_path, f"{video_id}.mp4")
     if not os.path.isfile(input_path):
         log.error("Input file not found, aborting task.")
         update_video(video_id, STATUS_COMPLETED)    # Completed == original file

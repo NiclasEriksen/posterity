@@ -23,7 +23,7 @@ serve = Blueprint(
 )
 logger = LocalProxy(lambda: current_app.logger)
 
-from app.dl.dl import media_path, \
+from app.dl.dl import media_path, original_path, json_path, processed_path, \
     STATUS_COMPLETED, STATUS_COOKIES, STATUS_DOWNLOADING, STATUS_FAILED, STATUS_INVALID, \
     STATUS_PROCESSING, STATUS_PENDING, \
     get_celery_scheduled, get_celery_active, write_metadata_to_disk, \
@@ -571,8 +571,8 @@ def download_video(video_id=""):
             return "Missing permissions to download video."
 
     try:
-        if os.path.isfile(os.path.join(media_path, video_id + ".mp4")):
-            return send_from_directory(media_path, video_id + ".mp4", as_attachment=True, conditional=True)
+        if os.path.isfile(os.path.join(original_path, video_id + ".mp4")):
+            return send_from_directory(original_path, video_id + ".mp4", as_attachment=True, conditional=True)
     except OSError as e:
         logger.error(e)
         logger.error("Unable to serve video!")
@@ -583,11 +583,11 @@ def download_video(video_id=""):
 def view_video(video_id=""):
     original = request.args.get("orig", type=int, default=0)
     try:
-        proc_path = os.path.join(media_path, os.path.join("processed", f"{video_id}.mp4"))
+        proc_path = os.path.join(processed_path, f"{video_id}.mp4")
         if not original and os.path.isfile(proc_path):
-            return send_from_directory_partial(os.path.join(media_path, "processed"), f"{video_id}.mp4")
-        if os.path.isfile(os.path.join(media_path, f"{video_id}.mp4")):
-            return send_from_directory_partial(media_path, f"{video_id}.mp4")
+            return send_from_directory_partial(processed_path, f"{video_id}.mp4")
+        if os.path.isfile(os.path.join(original_path, f"{video_id}.mp4")):
+            return send_from_directory_partial(original_path, f"{video_id}.mp4")
     except OSError as e:
         logger.error(e)
         logger.error("Unable to serve video!")
@@ -744,15 +744,21 @@ def delete_video_by_id(video_id: str) -> bool:
         db_session.delete(v)
         db_session.commit()
 
-    if os.path.isfile(os.path.join(media_path, video_id + ".mp4")):
+    if os.path.isfile(os.path.join(original_path, video_id + ".mp4")):
         try:
-            os.remove(os.path.join(media_path, video_id + ".mp4"))
+            os.remove(os.path.join(original_path, video_id + ".mp4"))
             success += 1
         except OSError as e:
             flash(f"Failed to delete .mp4 file! {str(e)}", "error")
-    if os.path.isfile(os.path.join(media_path, video_id + ".json")):
+    if os.path.isfile(os.path.join(processed_path, video_id + ".mp4")):
         try:
-            os.remove(os.path.join(media_path, video_id + ".json"))
+            os.remove(os.path.join(processed_path, video_id + ".mp4"))
+            success += 1
+        except OSError as e:
+            flash(f"Failed to delete .mp4 file! {str(e)}", "error")
+    if os.path.isfile(os.path.join(json_path, video_id + ".json")):
+        try:
+            os.remove(os.path.join(json_path, video_id + ".json"))
             success += 1
         except OSError as e:
             flash(f"Failed to delete .json file! {str(e)}", "error")

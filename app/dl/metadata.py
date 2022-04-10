@@ -348,19 +348,19 @@ def technical_info(video_path: str) -> dict:
 
 
 def generate_all_images(
-    media_path: str, thumbnail_path: str, preview_path: str, only_new=True
+    orig_path: str, json_path: str, thumbnail_path: str, preview_path: str, only_new=True
 ):
     videos = []
-    for file_name in os.listdir(media_path):
+    for file_name in os.listdir(orig_path):
         if file_name.endswith(".mp4"):
-            videos.append((file_name.split(".mp4")[0], os.path.join(media_path, file_name)))
+            videos.append((file_name.split(".mp4")[0], os.path.join(orig_path, file_name)))
 
     for (video_id, video_path) in videos:
         info = technical_info(video_path)
 
-        json_path = os.path.join(media_path, video_id + ".json")
+        jp = os.path.join(json_path, video_id + ".json")
         try:
-            with open(json_path) as f:
+            with open(jp) as f:
                 d = json.load(f)
         except (FileNotFoundError, json.JSONDecodeError, OSError):
             continue
@@ -401,13 +401,4 @@ if __name__ == "__main__":
     #     blur_amount=0.75,
     #     desaturate=True
     # )
-    media_path = os.environ.get("MEDIA_FOLDER", "")
-    thumbnail_path = os.environ.get("THUMBNAIL_FOLDER", "")
-    preview_path = os.environ.get("PREVIEW_FOLDER", "")
-    if len(media_path) and len(thumbnail_path) and len(preview_path):
-        generate_all_images(
-            media_path,
-            thumbnail_path,
-            preview_path,
-            only_new=False
-        )
+    pass

@@ -3,13 +3,10 @@ import json
 import os
 import subprocess
 from datetime import datetime
-from typing import Union
 from .helpers import seconds_to_time, resource_path, unique_filename, reverse_readline
 from .youtube import valid_video_url, get_content_info, AgeRestrictedError
 from .metadata import generate_video_images, technical_info
 from app import celery
-from werkzeug.local import LocalProxy
-from flask import current_app
 
 
 # log = LocalProxy(lambda: current_app.logger)
