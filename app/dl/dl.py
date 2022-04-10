@@ -372,16 +372,17 @@ def get_ffmpeg_cmd(
     ]
 
     if len(aud_url):
+        cmd += ["-thread_queue_size", f"{queue_size}"]
         cmd += ["-i", aud_url]
         cmd += ["-map", "0:v", "-map", "1:a"]
-        cmd += ["-c:a", "aac"]
 
-    cmd += ["-vcodec", "libx264", "-crf", str(crf), "-f", "mp4"]
-
+    cmd += ["-acodec", "aac"]
     # Apply sound normalization
     if normalize:
         # dynamic norm
         cmd += ["-af", "dynaudnorm=p=0.85"]
+
+    cmd += ["-vcodec", "libx264", "-crf", str(crf), "-f", "mp4"]
 
     if http_persistent:
         cmd += ["-http_persistent", "1"]
