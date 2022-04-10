@@ -96,6 +96,19 @@
             </div>
             <button class="uk-button uk-button-primary" type="submit">Submit</button>
         </form>
+        {% if other_users|length %}
+        <div class="uk-grid-small" uk-grid>
+            <div class="uk-width-1-1">Other users:</div>
+            {% for u in other_users %}
+            <div class="uk-width-1-1 uk-margin-remove">
+                <span class="uk-text-meta">User:</span> {{ u.username }}
+                <span class="uk-text-meta">ID:</span> {{ u.id }}
+                <span class="uk-text-meta">Auth:</span> {{ u.auth_level }}
+                <span class="uk-text-meta">Videos:</span> {{ u.uploaded }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
 </div>
     </div>
 </section>

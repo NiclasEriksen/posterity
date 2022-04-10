@@ -470,7 +470,16 @@ def add_category_post():
 @login_required
 def dashboard_page():
     tokens = db_session.query(RegisterToken).filter(RegisterToken.auth_level <= current_user.auth_level).all()
-    return render_template("dashboard.html", user=current_user, tokens=tokens)
+    other_users = db_session.query(User).filter(
+        User.auth_level <= current_user.auth_level
+    ).filter(
+        User.id != current_user.id
+    ).order_by(User.id).all()
+
+    for u in other_users:
+        u.uploaded = db_session.query(Video).filter_by(source=u.username).count()
+
+    return render_template("dashboard.html", user=current_user, tokens=tokens, other_users=other_users)
 
 
 @serve.route("/about", methods=["GET"])
