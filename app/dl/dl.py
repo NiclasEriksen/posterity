@@ -378,38 +378,22 @@ def get_post_process_ffmpeg_cmd(
 
 
 def get_ffmpeg_cmd(
-    vid_url, aud_url, _sub_url, save_path, local_audio_channel=-1, normalize=True,
-    http_persistent=True, queue_size=512, crf=25, log_path="/dev/null"
+    vid_url, aud_url, _sub_url, save_path, normalize=True,
+    http_persistent=True, queue_size=512, crf=24, log_path="/dev/null"
 ) -> list:
 
-    cmd = ["ffmpeg", "-thread_queue_size", f"{queue_size}", "-y", "-i"]
+    cmd = [
+        "ffmpeg", "-thread_queue_size", f"{queue_size}", "-y",
+        "-i", vid_url
+    ]
 
-    if len(vid_url):
-        cmd.append(vid_url)
-        if len(aud_url):
-            cmd += ["-i", aud_url]
-        # if len(sub_url):
-        #     cmd += ["-i", sub_url]
-        if len(aud_url):    # Mapping WITH sound
-            cmd += ["-map", "0:v", "-map", "1:a"]
-            # if len(sub_url):    # Mapping WITH sound and WITH subtitles
-            #     cmd += ["-map", "2:s", "-c:s", "mov_text"]
-            cmd += ["-c:a", "aac"]
+    if len(aud_url):
+        cmd += ["-i", aud_url]
+        cmd += ["-map", "0:v", "-map", "1:a"]
+        cmd += ["-c:a", "aac"]
 
-        elif local_audio_channel >= 0:
-            c = local_audio_channel     # Mapping with built in audio
-            cmd += ["-map", "0:v", "-map", "0:a:" + str(c), "-c:a:" + str(c), "copy", "-strict",  "-2", "-c:a:" + str(c), "aac", "-ac", "2"]
-        # elif len(sub_url):  # No sound, only subitles
-        #     cmd += ["-map", "1:s", "-c:s", "mov_text"]
-
-        cmd += ["-vf", "yadif=parity=auto"]
-        cmd += ["-vcodec", "libx264", "-crf", str(crf), "-vb", "2500k", "-f", "mp4"]
+    cmd += ["-vcodec", "libx264", "-crf", str(crf), "-f", "mp4"]
         # cmd += ["-c:v", "h264", "-f", "mp4"]
-
-    # Only audio, export to ogg.
-    elif len(aud_url):
-        cmd += [aud_url]
-        cmd += ["-c:a", "libopus", "-f", "ogg"]
 
     # Apply sound normalization
     if normalize:
