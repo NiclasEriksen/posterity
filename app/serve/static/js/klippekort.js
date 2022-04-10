@@ -224,7 +224,11 @@ function redirectOnComplete(video_id) {
                 if (!prog) {
                     prog = 0.0;
                 }
-                progress_text.innerHTML = Math.floor(prog * 100.0).toString() + "%";
+                if (prog == 0.0) {
+                    progress_text.innerHTML = "Waiting";
+                } else {
+                    progress_text.innerHTML = Math.floor(prog * 100.0).toString() + "%";
+                }
 //                console.log(prog);
             }
             setTimeout(() => { redirectOnComplete(video_id); }, 1000);
