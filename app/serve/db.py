@@ -13,7 +13,8 @@ from werkzeug.local import LocalProxy
 from flask import current_app
 from app.dl.helpers import seconds_to_verbose_time, seconds_to_hhmmss, convert_file_size
 from app.dl.dl import STATUS_DOWNLOADING, STATUS_PROCESSING, STATUS_INVALID,\
-    STATUS_FAILED, STATUS_COMPLETED, STATUS_PENDING, MAX_BIT_RATE_PER_PIXEL, MIN_BIT_RATE_PER_PIXEL
+    STATUS_FAILED, STATUS_COMPLETED, STATUS_PENDING, STATUS_COOKIES, STATUS_STRINGS,\
+    MAX_BIT_RATE_PER_PIXEL, MIN_BIT_RATE_PER_PIXEL
 from app.dl.metadata import get_source_site
 
 
@@ -170,6 +171,12 @@ class Video(Base):
         br = min(1.0, max(0.0, self.bit_rate - min_bit_rate) / r)
 
         return br >= PROCESSING_RECOMMENDATION
+
+    @property
+    def status_str(self) -> str:
+        if self.status in STATUS_STRINGS:
+            return STATUS_STRINGS[self.status]
+        return str(f"Status {self.status}")
 
     @property
     def source_site_name(self) -> str:

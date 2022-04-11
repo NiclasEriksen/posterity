@@ -62,6 +62,10 @@ body, html {
     border-bottom: 1px dotted var(--dark-grey);
 }
 
+.uk-table-striped tbody tr:nth-of-type(odd), .uk-table-striped>tr:nth-of-type(odd) {
+    background: var(--charcoal);
+}
+
 .uk-h1, .uk-h2, .uk-h3, .uk-h4, .uk-h5, .uk-h6, .uk-heading-2xlarge, .uk-heading-large, .uk-heading-medium, .uk-heading-small, .uk-heading-xlarge, h1, h2, h3, h4, h5, h6 {
     color: var(--grey);
     font-family: "Times New Roman", Times, serif;

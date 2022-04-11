@@ -16,6 +16,22 @@
     <div class="uk-container uk-margin-bottom">
         <div class="uk-container uk-margin">
             <h2>Current tasks:</h2>
+            <table class="uk-table uk-table-small uk-table-striped">
+                <thead>
+                    <tr>
+                        <td>Title</td>
+                        <td>Uploader/Status</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for t in tasks %}
+                    <tr>
+                        <td><a href="/{{ t.video_id }}">{{ t.title }}</a></td>
+                        <td><span class="uk-text-meta">{{ t.source }}</span> {{ t.status_str.capitalize() }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
         <div class="uk-grid uk-grid-small">
             <h2>Tools:</h2>

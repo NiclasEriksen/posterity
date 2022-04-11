@@ -13,7 +13,7 @@ from flask_login import login_user, login_required, logout_user, current_user
 from redis.exceptions import ConnectionError
 from sqlalchemy.exc import OperationalError, IntegrityError
 from werkzeug.local import LocalProxy
-from sqlalchemy import or_
+from sqlalchemy import or_, and_
 
 serve = Blueprint(
     'serve', __name__,
@@ -494,7 +494,19 @@ def dashboard_page():
     for u in other_users:
         u.uploaded = db_session.query(Video).filter_by(source=u.username).count()
 
-    return render_template("dashboard.html", user=current_user, tokens=tokens, other_users=other_users)
+    current_tasks = []
+
+    q = db_session.query(Video).filter(
+        Video.status != STATUS_COMPLETED
+    )
+    if not current_user.check_auth(AUTH_LEVEL_EDITOR):
+        q = q.filter(or_(not Video.private, Video.source == current_user.username))
+
+    current_tasks = q.order_by(
+        Video.status
+    ).all()
+
+    return render_template("dashboard.html", user=current_user, tokens=tokens, other_users=other_users, tasks=current_tasks)
 
 
 @serve.route("/about", methods=["GET"])

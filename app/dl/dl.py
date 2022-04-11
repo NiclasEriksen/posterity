@@ -31,6 +31,17 @@ STATUS_INVALID = 3
 STATUS_COOKIES = 4
 STATUS_PENDING = 5
 STATUS_PROCESSING = 6
+
+STATUS_STRINGS = {
+    STATUS_DOWNLOADING: "downloading",
+    STATUS_COMPLETED: "completed",
+    STATUS_FAILED: "failed",
+    STATUS_INVALID: "invalid",
+    STATUS_COOKIES: "cookies",
+    STATUS_PENDING: "pending",
+    STATUS_PROCESSING: "processing"
+}
+
 CRF = 26
 CRF_LOW = 34
 MAX_DURATION_HD: float = 20 * 60.0
