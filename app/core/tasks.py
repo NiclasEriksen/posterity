@@ -150,7 +150,7 @@ def gen_images_task(metadata: dict):
     log.info(f"Images generated in {minutes} minutes, {seconds:.2f} seconds: {video_id}")
 
 
-@celery.task(name="core.tasks.post_process", soft_time_limit=7200, time_limit=7260, priority=5, queue="processing")
+@celery.task(name="core.tasks.post_process", soft_time_limit=10800, time_limit=10860, priority=5, queue="processing")
 def post_process_task(data: dict, video_id: str):
     from app.dl.dl import (
         process_from_json_data,
