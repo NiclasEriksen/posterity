@@ -8,7 +8,7 @@ from urllib.parse import urlparse
 
 from .tasks import download_task, post_process_task
 from app.dl.youtube import valid_video_url, minimize_url, get_title_from_html
-from app.dl.helpers import unique_filename
+from app.dl.helpers import unique_filename, remove_emoji
 from app.dl.dl import parse_input_data, find_duplicate_video_by_url,\
     STATUS_DOWNLOADING, STATUS_PENDING, STATUS_FAILED, STATUS_COMPLETED, STATUS_PROCESSING
 from app.serve.db import db_session, Video, AUTH_LEVEL_EDITOR
@@ -67,6 +67,7 @@ def title_suggestion():
             return Response("Unable to get tweet content...", status=406)
 
         title = tweet.split("\n")[0][:256].lstrip().rstrip().strip("\t")
+        title = remove_emoji(title)
 
     else:
         try:
