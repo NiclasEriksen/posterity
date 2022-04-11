@@ -114,6 +114,7 @@ function suggestTitle() {
                 title_field.value = this.response;
                 url_field.setCustomValidity("");
             } else if (title_field.value.length == 0) {
+                url_field.setCustomValidity("");
                 title_field.value = "No title found";
             }
         } else if (this.status == 418 || this.status == 406) {
@@ -122,9 +123,10 @@ function suggestTitle() {
             if (suggest_btn) {
                 suggest_btn.classList.add("uk-animation-shake");
             }
-            url_field.setCustomValidity("Unknown error when requesting that URL");
+            url_field.setCustomValidity("");
             console.log(this.response);
         } else {
+            url_field.setCustomValidity("");
             console.log("Unknown error from server when requesting title suggestion.");
         }
         url_field.reportValidity();
@@ -314,5 +316,15 @@ function redirectOnComplete(video_id) {
 
 const form = document.querySelector('#link-form');
 if (form) {
+    var url_field = document.getElementById("url");
+    if (url_field) {
+        const inputHandler = function(e) {
+            url_field.setCustomValidity("");
+        }
+
+        url_field.addEventListener("input", inputHandler);
+        url_field.addEventListener("propertychange", inputHandler);
+    }
+
     form.addEventListener('submit', handleFormSubmit);
 }
