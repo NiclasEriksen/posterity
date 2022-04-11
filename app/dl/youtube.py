@@ -302,7 +302,7 @@ def get_title_from_html(html: str) -> list:
             if len(titles) > 0:
                 title = titles[0]
 
-    return title
+    return title.lstrip().rstrip()
 
 
 def get_source_links(url: str) -> (str, list):

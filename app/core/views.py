@@ -27,7 +27,10 @@ def title_suggestion():
     logger.info("Requested a title suggestion.")
     data = request.get_json()
 
-    headers = {'Accept-Encoding': 'identity'}
+    headers = {
+        'Accept-Encoding': 'identity',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.75 Safari/537.36',
+    }
 
     if "url" not in data:
         return Response("You need to supply an URL, dummy.", 418)
@@ -67,9 +70,13 @@ def title_suggestion():
             return Response("Unable to get tweet content...", status=406)
 
         title = tweet.split("\n")[0][:256].lstrip().rstrip().strip("\t")
-        title = remove_emoji(title)
 
     else:
+        if u.netloc in ["reddit.com", "www.reddit.com"] and "old." not in u.netloc:
+            if "www." in u.netloc:
+                url = url.replace("www.", "old.")
+            else:
+                url = f'{url.split("reddit.com")[0]}old.{url.split("://")[-1]}'
         try:
             r = requests.get(url, headers=headers)
         except:
@@ -78,6 +85,7 @@ def title_suggestion():
 
         title = get_title_from_html(r.text)
 
+    title = remove_emoji(title)
     return Response(title, 200)
 
 
