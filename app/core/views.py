@@ -66,7 +66,7 @@ def title_suggestion():
         except KeyError:
             return Response("Unable to get tweet content...", status=406)
 
-        title = tweet.split("\n")[0][:256].lstrip().rstrip()
+        title = tweet.split("\n")[0][:256].lstrip().rstrip().strip("\t")
 
     else:
         try:
