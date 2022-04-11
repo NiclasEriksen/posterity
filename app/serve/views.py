@@ -497,7 +497,7 @@ def dashboard_page():
     current_tasks = []
 
     q = db_session.query(Video).filter(
-        Video.status != STATUS_COMPLETED
+        or_(Video.status != STATUS_COMPLETED, Video.user_reports.any())
     )
     if not current_user.check_auth(AUTH_LEVEL_EDITOR):
         q = q.filter(or_(not Video.private, Video.source == current_user.username))
