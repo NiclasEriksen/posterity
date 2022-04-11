@@ -11,7 +11,7 @@
 </head>
 <body style="background-color: ##2E353D; margin: 0;" dir="ltr">
     <div id="video-player-embed">
-        {% if video.status == 1 or video.status == 6 %}
+        {% if video.status == STATUS_COMPLETED or video.status == STATUS_PROCESSING %}
         <video
         id="video-player"
         class="video-js vjs-default-skin vjs-big-play-centered"
@@ -34,7 +34,7 @@
             });
         }
         </script>
-        {% elif video.status == 0 %}
+        {% elif video.status == STATUS_DOWNLOADING %}
         <p>
             <div class="video-spinner"></div>
         </p>

@@ -74,6 +74,18 @@ def after_request(response):
     return response
 
 
+@serve.context_processor
+def inject_status_codes_for_all_templates():
+    return dict(
+        STATUS_DOWNLOADING=STATUS_DOWNLOADING,
+        STATUS_COMPLETED=STATUS_COMPLETED,
+        STATUS_FAILED=STATUS_FAILED,
+        STATUS_INVALID=STATUS_INVALID,
+        STATUS_COOKIES=STATUS_COOKIES,
+        STATUS_PENDING=STATUS_PENDING,
+        STATUS_PROCESSING=STATUS_PROCESSING,
+    )
+
 @serve.route('/robots.txt')
 @serve.route('/sitemap.xml')
 def static_from_root():

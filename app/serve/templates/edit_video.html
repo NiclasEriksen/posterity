@@ -16,7 +16,7 @@
                             value="{{ video.title }}"
                             name="custom_title"
                             autofocus=""
-                            {% if video.status == 0 %}disabled{% endif %}
+                            {% if video.status == STATUS_DOWNLOADING %}disabled{% endif %}
                             >
                         </div>
                     </div>

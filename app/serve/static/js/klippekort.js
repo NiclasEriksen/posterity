@@ -1,3 +1,11 @@
+const STATUS_DOWNLOADING = 0;
+const STATUS_COMPLETED = 1;
+const STATUS_FAILED = 2;
+const STATUS_INVALID = 3;
+const STATUS_COOKIES = 4;
+const STATUS_PENDING = 5;
+const STATUS_PROCESSING = 6;
+
 function handleFormSubmit(event) {
     event.preventDefault();
     

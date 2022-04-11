@@ -3,31 +3,31 @@
                                 <span class="uk-text-danger" uk-icon="icon: ban; ratio: 0.9"></span>
                             </span>
                             {% endif %}
-                            {% if video.status == 0 %}
+                            {% if video.status == STATUS_DOWNLOADING %}
                             <span uk-tooltip="title: Video is downloading;pos: top-left;">
                                 <span class="uk-text-primary" uk-icon="icon: download; ratio: 0.9"></span>
                             </span>
-                            {% elif video.status == 1 %}
+                            {% elif video.status == STATUS_COMPLETED %}
                             <span uk-tooltip="title: Video is archived;pos: top-left;">
                                 <span class="uk-text-success" uk-icon="icon: check; ratio: 0.9"></span>
                             </span>
-                            {% elif video.status == 2 %}
+                            {% elif video.status == STATUS_FAILED %}
                             <span uk-tooltip="title: Video failed to download;pos: top-left;">
                                 <span class="uk-text-danger" uk-icon="icon: close; ratio: 0.9"></span>
                             </span>
-                            {% elif video.status == 3 %}
+                            {% elif video.status == STATUS_INVALID %}
                             <span uk-tooltip="title: Source is invalid;pos: top-left;">
                                 <span class="uk-text-danger" uk-icon="icon: ban; ratio: 0.9"></span>
                             </span>
-                            {% elif video.status == 4 %}
+                            {% elif video.status == STATUS_COOKIES %}
                             <span uk-tooltip="title: Server is lacking cookies;pos: top-left;">
                                 <span class="uk-text-danger" uk-icon="icon: file-text; ratio: 0.9"></span>
                             </span>
-                            {% elif video.status == 5 %}
+                            {% elif video.status == STATUS_PENDING %}
                             <span uk-tooltip="title: Video is pending approval;pos: top-left;">
                                 <span class="uk-text-warning" uk-icon="icon: clock; ratio: 0.9"></span>
                             </span>
-                            {% elif video.status == 6 %}
+                            {% elif video.status == STATUS_PROCESSING %}
                             <span uk-tooltip="title: Video is processing;pos: top-left;">
                                 <span class="uk-text-primary" uk-icon="icon: refresh; ratio: 0.9"></span>
                             </span>

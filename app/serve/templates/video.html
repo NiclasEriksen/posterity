@@ -114,7 +114,7 @@
                                     type="button"
                                     id="start-processing-button"
                                     onclick="startProcessing('{{ video.video_id }}');"
-                                    {% if video.status != 1 or video.post_processed %}disabled{% endif %}
+                                    {% if video.status != STATUS_COMPLETED or video.post_processed %}disabled{% endif %}
                                 >
                                         Post-process
                                 </button>
@@ -122,7 +122,7 @@
                             {% endif %}
                             {% else %}
                             <div class="uk-width-1-1 uk-width-1-2@s uk-text-center uk-padding-small">
-                                <button class="uk-input uk-button uk-button-primary" type="button" id="start-download-button" onclick="startDownload('{{ video.video_id }}');" {% if video.status == 1 %}disabled{% endif %}>Start download</button>
+                                <button class="uk-input uk-button uk-button-primary" type="button" id="start-download-button" onclick="startDownload('{{ video.video_id }}');" {% if video.status == STATUS_COMPLETED %}disabled{% endif %}>Start download</button>
                             </div>
                             {% endif %}
                             {% endif %}
@@ -133,14 +133,14 @@
                     </div>
                     {% endif %}
                     <div class="uk-width-1-1 uk-text-center uk-padding-small">
-                    {% if video.status == 0 %}
-                    {% elif video.status == 1 or video.status == 6 %}
+                    {% if video.status == STATUS_DOWNLOADING %}
+                    {% elif video.status == STATUS_COMPLETED or video.status == STATUS_PROCESSING %}
                         <a href="{{ dl_path }}"><h3 class="uk-text-primary uk-margin-remove-bottom ">Click here to download video in original quality</h3></a>
-                    {% elif video.status == 3 %}
+                    {% elif video.status == STATUS_INVALID %}
                         <h3 class="uk-text-danger">Invalid URL, no video to download.</h3>
-                    {% elif video.status == 4 %}
+                    {% elif video.status == STATUS_COOKIES %}
                         <h3 class="uk-text-danger">Video might be region/age restricted and requires cookies (not implemented).</h3>
-                    {% elif video.status == 5 %}
+                    {% elif video.status == STATUS_PENDING %}
                         <h3 class="uk-text-warning">Link is pending approval by an editor and has not started downloading yet.</h3>
                     {% else %}
                         <h3 class="uk-text-danger">Download failed.</h3>
@@ -279,7 +279,7 @@
             <div class="uk-height-small"></div>
         </div>
 
-        {% if video.status == 1 %}
+        {% if video.status == STATUS_COMPLETED %}
         <script src="https://vjs.zencdn.net/7.18.1/video.min.js"></script>
         <script>
         var vid_element = document.getElementById("video-player");
@@ -290,7 +290,7 @@
             });
         }
         </script>
-        {% elif video.status == 0 or video.status == 6 %}
+        {% elif video.status == STATUS_DOWNLOADING or video.status == STATUS_PROCESSING %}
         <script>
             redirectOnComplete('{{ video.video_id }}');
         </script>

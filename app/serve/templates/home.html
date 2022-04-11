@@ -193,7 +193,7 @@
                         </div>
 
                     </td>
-                    <td class="uk-text-muted uk-text-small"{% if video.status != 1 %} style="padding: 0!important;"{% endif %}>
+                    <td class="uk-text-muted uk-text-small"{% if video.status != STATUS_COMPLETED %} style="padding: 0!important;"{% endif %}>
                         <span uk-icon="icon: future; ratio: 0.6"></span><span> {{ video.duration_str }}</span>
                         <span class="uk-hidden@m"><span style="padding: 0 0.1rem 0 0.1rem;"> | </span>{% include "video_status_icons.html" %}</span>
                     </td>
