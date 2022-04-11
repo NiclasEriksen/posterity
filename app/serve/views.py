@@ -520,15 +520,21 @@ def about_us_page():
 @serve.route("/remove/<video_id>")
 @login_required
 def remove_video_route(video_id):
-    metadata = get_metadata_for_video(video_id)
+    video = db_session.query(Video).filter_by(video_id=video_id).first()
 
-    success = delete_video_by_id(video_id)
-    if not success and not len(metadata.keys()):
-        flash("No video by that id, nothing to remove.", "error")
-    elif not success:
-        flash("Error during removal of video, might be some residue.", "warning")
+    if video:
+        if not video.user_can_edit(current_user):
+            flash("You don't have permission to remove that video.", "error")
+        else:
+            success = delete_video_by_id(video_id)
+            if not success:
+                flash("Error during removal of video, might be some residue.", "warning")
+                return redirect(url_for("serve.edit_video_page", video_id=video_id))
+            else:
+                flash(f"Video \"{video_id}\" has been deleted successfully!", "success")
     else:
-        flash(f"Video \"{video_id}\" has been deleted successfully!", "success")
+        flash("No video by that id, nothing to remove.", "error")
+
     return redirect(url_for("serve.front_page"), code=302)
 
 
