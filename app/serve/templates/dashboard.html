@@ -14,14 +14,17 @@
 </section>
 <section class="uk-section uk-section-default uk-section-small uk-padding-remove-vertical">
     <div class="uk-container uk-margin-bottom">
+        <div class="uk-container uk-margin">
+            <h2>Current tasks:</h2>
+        </div>
         <div class="uk-grid uk-grid-small">
+            <h2>Tools:</h2>
             <div class="uk-width-1-1 uk-width-1-2@m uk-padding-small">
                 <a class="uk-input uk-button uk-button-warning" href="/check_all_duplicates">
                     <span uk-icon="icon: copy"></span> Full duplicate check
                 </a>
             </div>
         </div>
-        <div class="uk-container uk-width-1-1 uk-height-1-1">
         <h2>Add new tag:</h2>
         <form class="uk-form" method="POST" id="add_tag_form" action="/add_tag">
             <fieldset class="uk-fieldset">
@@ -50,7 +53,8 @@
                 <input type="hidden" id="return_url_category" name="return_url" value="/dashboard">
             </fieldset>
         </form>
-        <div class="container">
+        <div class="uk-container uk-margin">
+            <h2>Available tokens:</h2>
             <table class="uk-table">
                 <thead>
                     <tr>
@@ -79,26 +83,28 @@
                 </tbody>
             </table>
         </div>
-        <h2>Add new registration token:</h2>
-        <form class="uk-form" method="POST" id="add_token_form" action="/dashboard/create_token">
-            <div class="uk-margin">
-                <input type="text" class="uk-input" name="token_name" id="token_name" placeholder="Token name">
-            </div>
-            <div class="uk-grid-small" uk-grid>
-                <div class="uk-width-1-1 uk-width-1-2@s">
-                    <div class="uk-form-label">Authentication level</div>
-                    User (0) <input type="range" class="uk-range uk-width-auto" step="1" value="0" min="0" max="{{ current_user.auth_level }}" name="auth_level" id="auth_level" placeholder="Token name"> ({{ current_user.auth_level }}) your level
+        <div class="uk-container uk-margin">
+            <h2>Add new registration token:</h2>
+            <form class="uk-form" method="POST" id="add_token_form" action="/dashboard/create_token">
+                <div class="uk-margin">
+                    <input type="text" class="uk-input" name="token_name" id="token_name" placeholder="Token name">
                 </div>
-                <div class="uk-width-1-1 uk-width-1-2@s">
-                    <div class="uk-form-label">Uses</div>
-                    <input type="number" min="0" value="1" max="20" class="uk-input" name="token_uses" id="token_uses" placeholder="Token uses">
+                <div class="uk-grid-small" uk-grid>
+                    <div class="uk-width-1-1 uk-width-1-2@s">
+                        <div class="uk-form-label">Authentication level</div>
+                        User (0) <input type="range" class="uk-range uk-width-auto" step="1" value="0" min="0" max="{{ current_user.auth_level }}" name="auth_level" id="auth_level" placeholder="Token name"> ({{ current_user.auth_level }}) your level
+                    </div>
+                    <div class="uk-width-1-1 uk-width-1-2@s">
+                        <div class="uk-form-label">Uses</div>
+                        <input type="number" min="0" value="1" max="20" class="uk-input" name="token_uses" id="token_uses" placeholder="Token uses">
+                    </div>
                 </div>
-            </div>
-            <button class="uk-button uk-button-primary" type="submit">Submit</button>
-        </form>
+                <button class="uk-button uk-button-primary" type="submit">Submit</button>
+            </form>
+        </div>
         {% if other_users|length %}
         <div class="uk-grid-small" uk-grid>
-            <div class="uk-width-1-1">Other users:</div>
+            <h2 class="uk-width-1-1">Other users:</h2>
             {% for u in other_users %}
             <div class="uk-width-1-1 uk-margin-remove">
                 <span class="uk-text-meta">User:</span> {{ u.username }}
@@ -109,7 +115,6 @@
             {% endfor %}
         </div>
         {% endif %}
-</div>
     </div>
 </section>
 {% endblock %}
