@@ -12,8 +12,8 @@
         <h2>Welcome, {{ user.username }}</h2>
     </div>
 </section>
-<section class="uk-section uk-section-default uk-section-small uk-padding-remove-vertical">
-    <div class="uk-container uk-margin-bottom">
+<section class="uk-section uk-section-default uk-section-small">
+    <div class="uk-container uk-margin-small">
         <div class="uk-container uk-margin">
             <h2>Current tasks:</h2>
             <table class="uk-table uk-table-small uk-table-striped">
@@ -33,43 +33,58 @@
                 </tbody>
             </table>
         </div>
-        <div class="uk-grid uk-grid-small">
+    </div>
+</section>
+<section class="uk-section uk-section-default uk-section-small uk-container">
+    <div class="uk-grid uk-grid-small">
+        <div clasS="uk-width-1-1">
             <h2>Tools:</h2>
-            <div class="uk-width-1-1 uk-width-1-2@m uk-padding-small">
-                <a class="uk-input uk-button uk-button-warning" href="/check_all_duplicates">
-                    <span uk-icon="icon: copy"></span> Full duplicate check
-                </a>
-            </div>
         </div>
-        <h2>Add new tag:</h2>
-        <form class="uk-form" method="POST" id="add_tag_form" action="/add_tag">
-            <fieldset class="uk-fieldset">
-                <div class="uk-margin">
-                    <input type="text" class="uk-input" name="tag_name" id="tag_name" placeholder="Tag name">
-                </div>
-                <div class="uk-margin">
-                    <select class="uk-select" id="tag_category_select" name="tag_category_select">
-                        <option value="0" selected>Informative</option>
-                        <option value="1">Emotional</option>
-                        <option value="2">Graphic</option>
-                    </select>
-                </div>
-                <button class="uk-button uk-button-primary" type="submit">Submit</button>
-                <input type="hidden" id="return_url" name="return_url" value="/dashboard">
-            </fieldset>
-
-        </form>
-        <h2>Add new category:</h2>
-        <form class="uk-form" method="POST" id="add_category_form" action="/add_category">
-            <fieldset class="uk-fieldset">
-                <div class="uk-margin">
-                    <input type="text" class="uk-input" name="category_name" id="category_name" placeholder="Category name">
-                </div>
-                <button class="uk-button uk-button-primary" type="submit">Submit</button>
-                <input type="hidden" id="return_url_category" name="return_url" value="/dashboard">
-            </fieldset>
-        </form>
-        <div class="uk-container uk-margin">
+        <div class="uk-width-1-1 uk-width-1-2@m uk-padding-small">
+            <a class="uk-input uk-button uk-button-warning" href="/check_all_duplicates">
+                <span uk-icon="icon: copy"></span> Full duplicate check
+            </a>
+        </div>
+    </div>
+</section>
+<section class="uk-section uk-section-default uk-section-small uk-container">
+    <div class="uk-grid uk-grid-small">
+        <div class="uk-width-1-1 uk-width-1-2@m uk-margin">
+            <h2>Add new tag:</h2>
+            <form class="uk-form" method="POST" id="add_tag_form" action="/add_tag">
+                <fieldset class="uk-fieldset">
+                    <div class="uk-margin">
+                        <input type="text" class="uk-input" name="tag_name" id="tag_name" placeholder="Tag name">
+                    </div>
+                    <div class="uk-margin">
+                        <select class="uk-select" id="tag_category_select" name="tag_category_select">
+                            <option value="0" selected>Informative</option>
+                            <option value="1">Emotional</option>
+                            <option value="2">Graphic</option>
+                        </select>
+                    </div>
+                    <button class="uk-button uk-button-primary" type="submit">Submit</button>
+                    <input type="hidden" id="return_url" name="return_url" value="/dashboard">
+                </fieldset>
+            </form>
+        </div>
+        <div class="uk-width-1-1 uk-width-1-2@m uk-margin">
+            <h2>Add new category:</h2>
+            <form class="uk-form" method="POST" id="add_category_form" action="/add_category">
+                <fieldset class="uk-fieldset">
+                    <div class="uk-margin">
+                        <input type="text" class="uk-input" name="category_name" id="category_name" placeholder="Category name">
+                    </div>
+                    <button class="uk-button uk-button-primary" type="submit">Submit</button>
+                    <input type="hidden" id="return_url_category" name="return_url" value="/dashboard">
+                </fieldset>
+            </form>
+        </div>
+    </div>
+</section>
+<section class="uk-section uk-section-default uk-section-small uk-container">
+    <div class="uk-grid uk-grid-small">
+        <div class="uk-width-1-1 uk-width-1-2@m uk-margin">
             <h2>Available tokens:</h2>
             <table class="uk-table">
                 <thead>
@@ -99,7 +114,7 @@
                 </tbody>
             </table>
         </div>
-        <div class="uk-container uk-margin">
+        <div class="uk-width-1-1 uk-width-1-2@m uk-margin">
             <h2>Add new registration token:</h2>
             <form class="uk-form" method="POST" id="add_token_form" action="/dashboard/create_token">
                 <div class="uk-margin">
@@ -118,6 +133,10 @@
                 <button class="uk-button uk-button-primary" type="submit">Submit</button>
             </form>
         </div>
+    </div>
+</section>
+<section class="uk-section uk-section-default uk-section-small">
+    <div class="uk-container uk-margin-small">
         {% if other_users|length %}
         <div class="uk-grid-small" uk-grid>
             <h2 class="uk-width-1-1">Other users:</h2>
