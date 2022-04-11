@@ -152,7 +152,7 @@ function startDownload(video_id) {
     if (dl_btn) {
         dl_btn.disabled = true;
         dl_old_text = dl_btn.innerHTML
-        dl_btn.innerHTML = "<div uk-spinner></div> Starting task..."
+        dl_btn.innerHTML = "<div uk-spinner='ratio: 0.75'></div> Starting task..."
     }
     if (status_field) {
         status_field.textContent = "";
@@ -203,7 +203,7 @@ function startProcessing(video_id) {
     if (dl_btn) {
         dl_btn.disabled = true;
         dl_old_text = dl_btn.innerHTML
-        dl_btn.innerHTML = "<div uk-spinner></div> Starting task..."
+        dl_btn.innerHTML = "<div uk-spinner='ratio: 0.75'></div> Starting task..."
     }
     if (status_field) {
         status_field.textContent = "";
