@@ -107,17 +107,19 @@
                         <div class="uk-grid uk-width-1-1 uk-margin uk-margin-remove-left">
                             {% if video.can_be_changed %}
                             {% if video.ready_to_play %}
+                            {% if current_user.check_auth(1) or video.recommend_post_process %}
                             <div class="uk-width-1-1 uk-width-1-2@s uk-text-center uk-padding-small">
                                 <button
                                     class="uk-input uk-button {% if video.recommend_post_process %}uk-button-primary{% else %}uk-button-secondary{% endif %}"
                                     type="button"
                                     id="start-processing-button"
                                     onclick="startProcessing('{{ video.video_id }}');"
-                                    {% if video.status != 1 or video.post_processed %}disabled{% endif %}
+                                    {% if video.status != 1 or video.post_processed %}{% if not current_user.check_auth(1) and not video.recommend_post_process %}disabled{% endif %}{% endif %}
                                 >
                                         Post-process
                                 </button>
                             </div>
+                            {% endif %}
                             {% else %}
                             <div class="uk-width-1-1 uk-width-1-2@s uk-text-center uk-padding-small">
                                 <button class="uk-input uk-button uk-button-primary" type="button" id="start-download-button" onclick="startDownload('{{ video.video_id }}');" {% if video.status == 1 %}disabled{% endif %}>Start download</button>
