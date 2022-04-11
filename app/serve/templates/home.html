@@ -67,7 +67,7 @@
                         <span class="uk-text-category">Video type</span>
                     </span><br>
                     {% if current_user.is_authenticated %}
-                    {% if current_user.check_auth(1) %}
+                    {% if current_user.check_auth(AUTH_LEVEL_EDITOR) %}
                     <div class="uk-margin">
                         <label><input class="uk-checkbox" id="private-checkbox" name="private-checkbox" type="checkbox"> Mark as private</label>
                     </div>

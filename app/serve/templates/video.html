@@ -107,7 +107,7 @@
                         <div class="uk-grid uk-width-1-1 uk-margin uk-margin-remove-left">
                             {% if video.can_be_changed %}
                             {% if video.ready_to_play %}
-                            {% if current_user.check_auth(1) or video.recommend_post_process %}
+                            {% if current_user.check_auth(AUTH_LEVEL_EDITOR) or video.recommend_post_process %}
                             <div class="uk-width-1-1 uk-width-1-2@s uk-text-center uk-padding-small">
                                 <button
                                     class="uk-input uk-button {% if video.recommend_post_process %}uk-button-primary{% else %}uk-button-secondary{% endif %}"
@@ -147,7 +147,7 @@
                     {% endif %}
                     </div>
 
-                    {% if current_user.check_auth(1) and video.duplicates|length %}
+                    {% if current_user.check_auth(AUTH_LEVEL_EDITOR) and video.duplicates|length %}
                     <div class="uk-width-1-1 uk-margin uk-background-muted uk-padding-small">
                         <h3>Possible duplicates:</h3>
                         <table class="uk-width-1-1 uk-table uk-table-small uk-table-responsive uk-table-justify uk-table-middle">
@@ -185,7 +185,7 @@
                         </table>
                     </div>
                     {% endif %}
-                    {% if current_user.check_auth(1) and video.user_reports|length %}
+                    {% if current_user.check_auth(AUTH_LEVEL_EDITOR) and video.user_reports|length %}
                     <div class="uk-width-1-1 report-list-item">
                         <h3 class="uk-text-danger">User reports:</h3>
                     </div>

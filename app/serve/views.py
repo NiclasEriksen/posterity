@@ -84,6 +84,9 @@ def inject_status_codes_for_all_templates():
         STATUS_COOKIES=STATUS_COOKIES,
         STATUS_PENDING=STATUS_PENDING,
         STATUS_PROCESSING=STATUS_PROCESSING,
+        AUTH_LEVEL_USER=AUTH_LEVEL_USER,
+        AUTH_LEVEL_EDITOR=AUTH_LEVEL_EDITOR,
+        AUTH_LEVEL_ADMIN=AUTH_LEVEL_ADMIN
     )
 
 @serve.route('/robots.txt')

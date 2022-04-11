@@ -47,7 +47,7 @@
                     <span>
                         <a href="/download_archive" uk-icon="icon: cloud-download">Downloads </a>
                     </span>
-                    {% if current_user.check_auth(1) %}
+                    {% if current_user.check_auth(AUTH_LEVEL_EDITOR) %}
                     <span style="padding: 0 0.1rem 0 0.1rem;"> | </span>
                     <span>
                         <a href="/dashboard" uk-icon="icon: settings">Dashboard </a>
@@ -101,7 +101,7 @@
                             Downloads
                         </a>
                     </li>
-                    {% if current_user.check_auth(1) %}
+                    {% if current_user.check_auth(AUTH_LEVEL_EDITOR) %}
                     <li class="">
                         <a href="/dashboard">
                             <span class="uk-margin-small-right uk-icon" data-uk-icon="icon: settings"></span>
