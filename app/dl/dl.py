@@ -298,7 +298,7 @@ def get_ffmpeg_cmd(
         "-i", vid_url
     ]
 
-    if len(aud_url):
+    if len(aud_url) and not (vid_url == aud_url):
         cmd += ["-thread_queue_size", f"{queue_size}"]
         cmd += ["-i", aud_url]
         cmd += ["-map", "0:v", "-map", "1:a"]
