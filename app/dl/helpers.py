@@ -43,7 +43,11 @@ def unique_filename() -> str:
     return datetime.now().strftime("%y%m%d-%H%M%S") + "-" + shortuuid.uuid()[:5]
 
 
-def find_between( s, first, last ):
+def remove_links(s: str) -> str:
+    return re.sub(r'https?://\S+', "", s)
+
+
+def find_between(s, first, last):
     try:
         start = s.index( first ) + len( first )
         end = s.index( last, start )

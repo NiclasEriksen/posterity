@@ -10,7 +10,12 @@ from urllib.parse import urlparse
 from dotenv import load_dotenv
 from . import json_path, tmp_path, original_path,\
     STATUS_DOWNLOADING, STATUS_INVALID
-from .helpers import reverse_readline, get_og_tags, find_between
+from .helpers import reverse_readline, get_og_tags, find_between, remove_links
+
+API_SITES = [
+    "twitter.com", "www.twitter.com", "t.co", "www.t.co",
+    "reddit.com", "www.reddit.com", "old.reddit.com"
+]
 
 
 load_dotenv()
@@ -489,8 +494,49 @@ def add_technical_info_to_metadata(metadata: dict, video_path: str, post_process
 
 
 def get_title_from_api(url: str):
-    pass
+    from dotenv import load_dotenv
+    load_dotenv()
 
+    headers = {
+        'Accept-Encoding': 'identity',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.75 Safari/537.36',
+    }
+
+    u = urlparse(url)
+    if u.netloc in ["twitter.com", "www.twitter.com", "t.co", "www.t.co"]:
+        try:
+            tweet_id = int(u.path.split("/")[-1])
+        except (ValueError, IndexError, TypeError):
+            tweet_id = 0
+
+        token = os.environ.get("TWITTER_BEARER_TOKEN", "")
+        if not len(token) or not tweet_id:
+            return ""
+
+        headers["Authorization"] = f"Bearer {token}"
+        req_url = f"https://api.twitter.com/2/tweets/{tweet_id}?tweet.fields=text"
+        try:
+            r = requests.get(req_url, headers=headers)
+        except:
+            return ""
+            pass
+
+        data = r.json()
+        try:
+            tweet = data["data"]["text"]
+        except KeyError:
+            return ""
+
+        return remove_links(tweet.split("\n")[0])[:256].lstrip().rstrip().strip("\t")
+
+    else:
+        if u.netloc in ["reddit.com", "www.reddit.com"] and "old." not in u.netloc:
+            if "www." in u.netloc:
+                url = url.replace("www.", "old.")
+            else:
+                url = f'{url.split("reddit.com")[0]}old.{url.split("://")[-1]}'
+
+        return ""
 
 
 if __name__ == "__main__":

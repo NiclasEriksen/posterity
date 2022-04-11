@@ -9,7 +9,8 @@ from urllib.parse import urlparse
 from .tasks import download_task, post_process_task
 from app.dl import STATUS_DOWNLOADING, STATUS_PENDING, STATUS_FAILED, STATUS_COMPLETED, STATUS_PROCESSING
 from app.dl.helpers import unique_filename, remove_emoji, valid_video_url, minimize_url
-from app.dl.metadata import parse_input_data, find_duplicate_video_by_url, get_title_from_html
+from app.dl.metadata import parse_input_data, find_duplicate_video_by_url, get_title_from_html, API_SITES, \
+    get_title_from_api
 from app.serve.db import db_session, Video, AUTH_LEVEL_EDITOR
 
 core = Blueprint('core', __name__)
@@ -44,38 +45,9 @@ def title_suggestion():
 
     u = urlparse(url)
 
-    if u.netloc in ["twitter.com", "www.twitter.com", "t.co", "www.t.co"]:
-        try:
-            tweet_id = int(u.path.split("/")[-1])
-        except (ValueError, IndexError, TypeError):
-            tweet_id = 0
-
-        token = os.environ.get("TWITTER_BEARER_TOKEN", "")
-        if not len(token) or not tweet_id:
-            return Response("Unable to get tweet (sorry)", status=406)
-
-        headers["Authorization"] = f"Bearer {token}"
-        req_url = f"https://api.twitter.com/2/tweets/{tweet_id}?tweet.fields=text"
-        try:
-            r = requests.get(req_url, headers=headers)
-        except:
-            logger.error("Unable to download page?!")
-            return Response("Wasn't able to download the page and get a title.", 404)
-
-        data = r.json()
-        try:
-            tweet = data["data"]["text"]
-        except KeyError:
-            return Response("Unable to get tweet content...", status=406)
-
-        title = tweet.split("\n")[0][:256].lstrip().rstrip().strip("\t")
-
+    if u.netloc in API_SITES:
+        title = get_title_from_api(url)
     else:
-        if u.netloc in ["reddit.com", "www.reddit.com"] and "old." not in u.netloc:
-            if "www." in u.netloc:
-                url = url.replace("www.", "old.")
-            else:
-                url = f'{url.split("reddit.com")[0]}old.{url.split("://")[-1]}'
         try:
             r = requests.get(url, headers=headers)
         except:
@@ -85,6 +57,7 @@ def title_suggestion():
         title = get_title_from_html(r.text)
 
     title = remove_emoji(title)
+
     return Response(title, 200)
 
 
