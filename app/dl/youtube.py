@@ -292,7 +292,7 @@ def get_title_from_html(html: str) -> list:
     title = "No title"
     titles = re.findall(r"<title>(.*?)</title>", html)
     if len(titles) > 0:
-        title = titles[0].get_text()
+        title = titles[0]
     else:
         titles = get_og_tags(html, title_only=True)
         if len(titles) > 0:
