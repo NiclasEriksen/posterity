@@ -190,6 +190,7 @@ def get_content_info(url: str) -> dict:
             log.error("No format key in video.")
         else:
             for u in [f for f in video["formats"]]:
+                video_id_found = ""
                 if "url" in u:
                     if check_stream(u["url"]):
                         log.error("This link was a stream (?): " + u["url"])
@@ -206,26 +207,37 @@ def get_content_info(url: str) -> dict:
 
                 if "vcodec" in u.keys():
                     if u["format_id"] in vid_ids.keys():
-                        d["video_formats"][vid_ids[u["format_id"]]] = {"url": u["url"], "dimensions": (x, y)}
+                        video_id_found = u["format_id"]
+                        d["video_formats"][vid_ids[u["format_id"]]] = {"url": u["url"], "dimensions": (x, y), "audio": False}
                     elif not is_streaming_site(url):
                         if is_hls(u["format_id"]) or is_dash(u["format_id"]) or is_avc(u["format_id"]):
-                            d["video_formats"][u["format"]] = {"url": u["url"], "dimensions": (x, y)}
+                            video_id_found = u["format_id"]
+                            d["video_formats"][u["format"]] = {"url": u["url"], "dimensions": (x, y), "audio": False}
                         else:
                             try:
                                 int(u["format_id"])
                             except ValueError:
                                 pass
                             else:
-                                d["video_formats"][u["format"]] = {"url": u["url"], "dimensions": (x, y)}
+                                d["video_formats"][u["format"]] = {"url": u["url"], "dimensions": (x, y), "audio": False}
                     elif u["vcodec"] != "none":
                         log.error(f'Unhandled video codec: {u["format_id"]} {u["vcodec"]} {u["format"]}')
 
                 elif "ext" in u.keys() or "video_ext" in u.keys():
                     if u["video_ext"] in ["mp4", "ogv"] or u["ext"] in ["mp4", "ogv"]:
                         if u["format_id"] in vid_ids.keys():
-                            d["video_formats"][vid_ids[u["format_id"]]] = {"url": u["url"], "dimensions": (x, y)}
+                            video_id_found = u["format_id"]
+                            d["video_formats"][vid_ids[u["format_id"]]] = {"url": u["url"], "dimensions": (x, y), "audio": False}
                         elif is_hls(u["format_id"]) or is_dash(u["format_id"]) or is_avc(u["format_id"]):
-                            d["video_formats"][u["format"]] = {"url": u["url"], "dimensions": (x, y)}
+                            video_id_found = u["format_id"]
+                            d["video_formats"][u["format"]] = {"url": u["url"], "dimensions": (x, y), "audio": False}
+
+                if "acodec" in u.keys() and video_id_found:
+                    try:
+                        d["video_formats"][video_id_found]["audio"] = True
+                        continue
+                    except KeyError:
+                        pass
 
                 if "acodec" in u.keys():
                     if u["format_id"] in aud_ids.keys():
@@ -235,7 +247,7 @@ def get_content_info(url: str) -> dict:
                             d["audio_formats"][aud_ids[u["acodec"]]] = u["url"]
                         elif u["acodec"] != "none":
                             log.error(f'Unhandled audio codec: {u["format_id"]}')
-                elif "audio" in u["format"]:
+                elif "audio" in u["format"] and not video_id_found:
                     if u["format_id"] in aud_ids.keys():
                         d["audio_formats"][aud_ids[u["format_id"]]] = u["url"]
 
@@ -246,7 +258,7 @@ def get_content_info(url: str) -> dict:
             url = find_highest_quality_url(urls)
 
             return {
-                "video_formats": {"source": {"url": url, "dimensions": (0, 0)}},
+                "video_formats": {"source": {"url": url, "dimensions": (0, 0), "audio": True}},
                 "audio_formats": {},
                 "sub_formats": {},
                 "duration": 0.0,

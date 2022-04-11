@@ -384,21 +384,29 @@ def technical_info(video_path: str) -> dict:
     return info
 
 
-def find_best_format(formats_dict: dict, limit: int=2160):
+def find_best_format(formats_dict: dict, limit: int=2160) -> (str, bool):
     formats_dict = formats_dict.copy()
     invalid_ids = [f_id for f_id, i in formats_dict.items() if min(i["dimensions"]) > limit]
     for i in invalid_ids:
         formats_dict.pop(i, None)
 
     best = None
+    best_audio = None
     highest_res = 0
+    highest_audio = 0
     for f_id, info in formats_dict.items():
-        if min(info["dimensions"]) >= highest_res:
+        if min(info["dimensions"]) >= highest_audio and info["audio"]:
+            highest_audio = min(info["dimensions"])
+            best_audio = f_id
+        elif min(info["dimensions"]) >= highest_res:
             highest_res = min(info["dimensions"])
             best = f_id
 
+    if best_audio and highest_audio >= highest_res:
+        return best_audio, True
+
     if best and highest_res > 0:
-        return best
+        return best, False
 
     # If lacking dimensions and stuff
     formats = list(formats_dict.keys())
@@ -412,7 +420,7 @@ def find_best_format(formats_dict: dict, limit: int=2160):
         if "720p" in f:
             return f
     print(formats[-1])
-    return formats[-1]
+    return formats[-1], False
 
 
 def parse_input_data(data: dict) -> dict:

@@ -167,6 +167,7 @@ def download_from_json_data(metadata: dict, file_name: str):
         metadata["status"] = STATUS_COOKIES
         yield metadata
 
+    print("Whats up?")
     video_formats = list(d["video_formats"].keys())
     video_links = d["video_formats"]
     if not len(video_formats):
@@ -192,15 +193,16 @@ def download_from_json_data(metadata: dict, file_name: str):
     elif duration > MAX_DURATION_HD:
         limit = MAX_RESOLUTION_MD
 
-    f = find_best_format(d["video_formats"], limit=limit)
 
-    print("================")
+    f, audio_included = find_best_format(
+        d["video_formats"], limit=limit
+    )
+
     print(f)
-    print("================")
 
     video_url = video_links[f]["url"]
 
-    if len(audio_formats):
+    if len(audio_formats) and not audio_included:
         audio_url = audio_links[audio_formats[-1]]
     else:
         audio_url = ""
@@ -214,6 +216,13 @@ def download_from_json_data(metadata: dict, file_name: str):
         open(log_path, "w").close()
     except:
         log_path = "/dev/null"
+
+    print("===================")
+    print(f"Format: {f}, audio: {audio_included}")
+    print(f"Vid: {video_url}")
+    if not audio_included:
+        print(f"Aud: {audio_url}")
+    print("===================")
 
     cmd = get_ffmpeg_cmd(video_url, audio_url, sub_url, vid_save_path, log_path=log_path)
 
@@ -302,6 +311,8 @@ def get_ffmpeg_cmd(
         cmd += ["-thread_queue_size", f"{queue_size}"]
         cmd += ["-i", aud_url]
         cmd += ["-map", "0:v", "-map", "1:a"]
+    elif (vid_url == aud_url):
+        print("Trying to use same audio source as video.")
 
     cmd += ["-acodec", "aac"]
     # Apply sound normalization
