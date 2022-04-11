@@ -83,13 +83,16 @@ def title_suggestion():
 
 @core.route("/start_processing/<video_id>", methods=["POST"])
 def start_processing(video_id: str):
-    if not current_user.check_auth(1):
-        logger.error("Trying to start post-processing without the right permissions.")
+    if not current_user.is_authenticated:
+        logger.error("Trying to start post-processing without being logged.")
         return Response("Lacking permissions to initiate processing task.", status=401)
 
     video = db_session.query(Video).filter_by(video_id=video_id).first()
     if not video:
         return Response("No video found by that id.", status=404)
+    elif not current_user.check_auth(AUTH_LEVEL_EDITOR) and current_user.username is not video.source:
+        logger.error("Trying to start post-processing without the right permissions.")
+        return Response("Lacking permissions to initiate processing task.", status=401)
     if video.status == STATUS_DOWNLOADING:
         return Response("That video is currently downloading.", status=400)
     elif video.status == STATUS_PROCESSING:

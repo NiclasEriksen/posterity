@@ -105,7 +105,7 @@
                     {% if video.user_can_edit(current_user) %}
                     <div class="uk-width-1-1 uk-padding-small">
                         <div class="uk-grid uk-width-1-1 uk-margin uk-margin-remove-left">
-                            {% if current_user.check_auth(1) and video.can_be_changed %}
+                            {% if video.can_be_changed %}
                             {% if video.ready_to_play %}
                             <div class="uk-width-1-1 uk-width-1-2@s uk-text-center uk-padding-small">
                                 <button
