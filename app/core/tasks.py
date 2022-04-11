@@ -7,7 +7,9 @@ from imgcompare import is_equal
 from PIL import Image
 
 from app import celery
-from app.dl.dl import thumbnail_path
+from app.dl import STATUS_COMPLETED, STATUS_FAILED, STATUS_PROCESSING, STATUS_DOWNLOADING,\
+    STATUS_INVALID, STATUS_COOKIES,\
+    original_path, processed_path, thumbnail_path
 from app.dl.helpers import seconds_to_time
 import time
 
@@ -27,7 +29,7 @@ log = get_task_logger(__name__)
 
 
 def update_video(video_id: str, status: int, data: dict = {}) -> bool:
-    from app.dl.dl import write_metadata
+    from app.dl.metadata import write_metadata
 
     if len(data.keys()):
         data["status"] = status
@@ -83,7 +85,6 @@ def check_duplicate_video(v1, v2) -> bool:
 def check_all_duplicates_task():
     from app.serve.db import Video, session_scope
     from sqlalchemy import or_
-    from app.dl.dl import STATUS_COMPLETED, STATUS_PROCESSING
 
     total_duplicates = 0
     log.info("Checking all videos for duplicates...")
@@ -116,8 +117,8 @@ def check_all_duplicates_task():
 
 @celery.task(name="core.tasks.gen_thumbnail", soft_time_limit=300, time_limit=360, priority=0, queue="fast")
 def gen_images_task(metadata: dict):
-    from app.dl.metadata import generate_video_images
-    from app.dl.dl import original_path, thumbnail_path, preview_path
+    from app.dl import original_path, thumbnail_path, preview_path
+    from app.dl.dl import generate_video_images
     dur = time.time()
     log.info("Generating thumbnail...")
 
@@ -152,13 +153,7 @@ def gen_images_task(metadata: dict):
 
 @celery.task(name="core.tasks.post_process", soft_time_limit=10800, time_limit=10860, priority=5, queue="processing")
 def post_process_task(data: dict, video_id: str):
-    from app.dl.dl import (
-        process_from_json_data,
-        STATUS_COMPLETED,
-        STATUS_FAILED,
-        STATUS_PROCESSING,
-        original_path, processed_path
-    )
+    from app.dl.dl import process_from_json_data
     if "video_id" not in data:
         log.error("Bad metadata to process from, aborting task.")
         update_video(video_id, STATUS_COMPLETED)    # Completed == original file
@@ -236,17 +231,7 @@ def post_process_task(data: dict, video_id: str):
 @celery.task(name="core.tasks.download", soft_time_limit=14400, time_limit=14700, priority=1, queue="downloads")    #, base=SQLAlchemyTask)
 def download_task(data: dict, file_name: str):
     from app.serve.search import index_video_data
-    from app.dl.dl import (
-        download_from_json_data,
-        find_duplicate_video_by_url,
-        STATUS_DOWNLOADING,
-        STATUS_COMPLETED,
-        STATUS_FAILED,
-        STATUS_INVALID,
-        STATUS_COOKIES,
-        STATUS_PENDING,
-        STATUS_PROCESSING,
-    )
+    from app.dl.dl import download_from_json_data
 
     if "video_id" not in data:
         log.error("Bad metadata to download from, aborting task.")

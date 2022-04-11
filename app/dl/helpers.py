@@ -2,8 +2,41 @@ import os
 import sys
 import math
 import re
-from datetime import datetime
 import shortuuid
+from html import unescape
+from datetime import datetime
+from urllib.parse import urlencode, urlparse, urlunparse, parse_qs
+
+TIME_QUERIES = [
+    "s", "t", "time", "seek", "context", "feature"
+]
+
+STREAMING_PATTERNS = ["yt.com", "twitch.com", "youtube.com", "youtu.be"]
+DISPOSABLE_QUERIES = [
+    "ref", "ref_src", "ref_url", "taid",
+    "fbclid", "gclid", "gclsrc",
+    "utm_campaign", "utm_medium", "utm_source", "utm_content", "utm_term", "utm_id",
+    "_ga", "mc_cid", "mc_eid", "usg", "esrc", "ved",
+    "__cft__[0]", "__cft__", "__tn__",
+    "__mk_de_DE", "__mk_en_US", "__mk_en_GB", "__mk_nb_NO",
+    "rnid", "pf_rd_r", "pf_rd_p", "pd_rd_i", "pd_rd_r", "pd_rd_wg",
+    "_bta_tid", "_bta_c", "trk_contact", "trk_msg", "trk_module", "trk_sid",
+    "gdfms", "gdftrk", "gdffi", "_ke",
+    "redirect_log_mongo_id", "redirect_mongo_id", "sb_referer_host",
+    "mkwid", "pcrid", "ef_id", "s_kwcid", "msclkid", "dm_i", "epik",
+    "pk_campaign", "pk_kwd", "pk_keyword", "piwik_campaign", "piwik_kwd", "piwik_keyword",
+    "mtm_campaign", "mtm_keyword", "mtm_source", "mtm_medium", "mtm_content",
+    "mtm_cid", "mtm_group", "mtm_placement",
+    "matomo_campaign", "matomo_keyword", "matomo_source", "matomo_medium", "matomo_content",
+    "matomo_cid", "matomo_group", "matomo_placement", "_branch_match_id",
+    "hsa_cam", "hsa_grp", "hsa_mt", "hsa_src", "hsa_ad", "hsa_acc", "hsa_net", "hsa_kw", "hsa_tgt", "hsa_ver",
+    "ns_mchannel", "ns_source", "ns_campaign", "ns_linkname", "ns_fee",
+    "pinned_post_locator", "pinned_post_asset_id", "pinned_post_type",
+    "ab_channel"
+]
+TIME_LOCATIONS = [
+    "twitter.com", "youtube.com", "t.co", "youtu.be", "nrk.no", "reddit.com", "redd.it"
+]
 
 
 def unique_filename() -> str:
@@ -17,6 +50,22 @@ def find_between( s, first, last ):
         return s[start:end]
     except ValueError:
         return ""
+
+
+def height_to_width(h: int) -> int:
+    if h > 720 and h <= 1080:
+        return 1920
+    if h > 576 and h <= 720:
+        return 1280
+    if h > 480 and h <= 576:
+        return 720
+    if h > 360 and h <= 480:
+        return 640
+    if h > 240 and h <= 360:
+        return 480
+    if h <= 240:
+        return 360
+    return h
 
 
 def convert_file_size(size_bytes):
@@ -174,3 +223,120 @@ def reverse_readline(filename, buf_size=8192):
         # Don't yield None if the file was empty
         if segment is not None:
             yield segment
+
+
+
+
+
+def check_stream(url: str) -> bool:
+    if ".m3u8" in url.lower():
+        return is_streaming_site(url)
+    return False
+
+
+def is_streaming_site(url: str) -> bool:
+    for p in STREAMING_PATTERNS:
+        if p in url.lower():
+            return True
+    return False
+
+
+def is_hls(f: str) -> bool:
+    if len(f.split("hls-")) == 2:
+        try:
+            int(f.split("hls-")[1])
+        except ValueError:
+            try:
+                int(f.split("-")[1])
+            except ValueError:
+                return False
+        return True
+    if len(f.split("hls_1080p-")) == 2 or len(f.split("hls_720p-")) == 2:
+        if "1080p" in f:
+            try:
+                int(f.split("hls_1080p-")[1])
+            except ValueError:
+                return False
+        elif "720p" in f:
+            try:
+                int(f.split("hls_720p-")[1])
+            except ValueError:
+                return False
+        return True
+    return False
+
+
+def is_dash(format: str) -> bool:
+    if not isinstance(format, str) and not len(format):
+        return False
+    if len(format.split("v")) == 2:
+        try:
+            int(len(format.split("v")[0]))
+        except (ValueError, TypeError):
+            pass
+        else:
+            return True
+    return False
+
+
+def is_avc(format: str) -> bool:
+    if not isinstance(format, str) and not len(format):
+        return False
+    if len(format.split("avc1.")) == 2:
+        try:
+            assert len(format.split("avc1.")[1]) == 6
+        except AssertionError:
+            return False
+        else:
+            return True
+    return False
+
+
+def valid_video_url(url: str) -> bool:
+    if not url or not isinstance(url, str):
+        return False
+
+    u = urlparse(url)
+
+    if u.scheme not in ["http", "https", "ftp"]:
+        return False
+
+    return True
+
+
+def fix_youtube_shorts(url: str) -> str:
+    if "youtube.com/shorts/" in url:
+        return url.replace("/shorts/", "/embed/")
+    return url
+
+
+def fix_reddit_old(url: str) -> str:
+    if "old.reddit.com" in url:
+        return url.replace("old.", "")
+    return url
+
+
+def minimize_url(url: str) -> str:
+    u = urlparse(url)
+    if len(u.query):
+        query = parse_qs(u.query, keep_blank_values=True)
+        for dq in DISPOSABLE_QUERIES:
+            query.pop(dq, None)
+        if u.netloc.replace("www.", "") in TIME_LOCATIONS:
+            for dq in TIME_QUERIES:
+                query.pop(dq, None)
+
+        u = u._replace(query=urlencode(query, True))
+
+    return urlunparse(u)
+
+
+def get_og_tags(html: str, title_only=False):
+    titles = re.findall(r"<meta [^>]*property=[\"']og:title[\"'] [^>]*content=[\"']([^'^\"]+?)[\"'][^>]*>", html)
+    if title_only:
+        return [unescape(t) for t in titles]
+    descs = re.findall(r"<meta [^>]*property=[\"']og:description[\"'] [^>]*content=[\"']([^'^\"]+?)[\"'][^>]*>", html)
+    names = re.findall(r"<meta [^>]*property=[\"']og:site_name[\"'] [^>]*content=[\"']([^'^\"]+?)[\"'][^>]*>", html)
+    return [unescape(t) for t in titles] + [unescape(t) for t in descs] + [unescape(t) for t in names]
+
+

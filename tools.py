@@ -1,7 +1,7 @@
 
 def clean_up_media_dir():
     from app.serve.db import Video, session_scope
-    from app.dl.dl import media_path
+    from app.dl import media_path
 
     from os import listdir, remove
     from os.path import isfile, join, exists

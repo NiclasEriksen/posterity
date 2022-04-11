@@ -7,10 +7,9 @@ from authentication import require_appkey
 from urllib.parse import urlparse
 
 from .tasks import download_task, post_process_task
-from app.dl.youtube import valid_video_url, minimize_url, get_title_from_html
-from app.dl.helpers import unique_filename, remove_emoji
-from app.dl.dl import parse_input_data, find_duplicate_video_by_url,\
-    STATUS_DOWNLOADING, STATUS_PENDING, STATUS_FAILED, STATUS_COMPLETED, STATUS_PROCESSING
+from app.dl import STATUS_DOWNLOADING, STATUS_PENDING, STATUS_FAILED, STATUS_COMPLETED, STATUS_PROCESSING
+from app.dl.helpers import unique_filename, remove_emoji, valid_video_url, minimize_url
+from app.dl.metadata import parse_input_data, find_duplicate_video_by_url, get_title_from_html
 from app.serve.db import db_session, Video, AUTH_LEVEL_EDITOR
 
 core = Blueprint('core', __name__)

@@ -23,16 +23,16 @@ serve = Blueprint(
 )
 logger = LocalProxy(lambda: current_app.logger)
 
-from app.dl.dl import media_path, original_path, json_path, processed_path, \
+from app.dl import media_path, original_path, json_path, processed_path, \
     STATUS_COMPLETED, STATUS_COOKIES, STATUS_DOWNLOADING, STATUS_FAILED, STATUS_INVALID, \
-    STATUS_PROCESSING, STATUS_PENDING, \
-    get_celery_scheduled, get_celery_active, write_metadata_to_disk, \
-    get_progress_for_video
+    STATUS_PROCESSING, STATUS_PENDING
+from app.dl.dl import get_celery_scheduled, get_celery_active
+from app.dl.metadata import write_metadata_to_disk, get_progress_for_video
 from app.dl.helpers import seconds_to_verbose_time
 from app.serve.db import db_session, Video, User, ContentTag, UserReport, Category,\
     init_db, AUTH_LEVEL_ADMIN, AUTH_LEVEL_EDITOR, AUTH_LEVEL_USER, REASON_TEXTS,\
     RegisterToken, MAX_TOKEN_USES
-from app import get_environment, app_config
+from app import get_environment
 from app.serve.search import search_videos, index_video_data, remove_video_data, remove_video_data_by_id
 from app.extensions import cache
 from app.core.tasks import gen_images_task, check_all_duplicates_task, \

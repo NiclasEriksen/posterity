@@ -1,18 +1,17 @@
-from sqlalchemy import create_engine, Column, Integer, String, DateTime, ForeignKey, Float, Boolean, Table
-from sqlalchemy.orm import relationship, sessionmaker, scoped_session
-from sqlalchemy.ext.declarative import declarative_base
-from flask_login import UserMixin
 import os
 import json
 from datetime import datetime, timedelta
 import time
-# import logging
 import shortuuid
+from sqlalchemy import create_engine, Column, Integer, String, DateTime, ForeignKey, Float, Boolean, Table
+from sqlalchemy.orm import relationship, sessionmaker, scoped_session
+from sqlalchemy.ext.declarative import declarative_base
+from flask_login import UserMixin
 from contextlib import contextmanager
 from werkzeug.local import LocalProxy
 from flask import current_app
 from app.dl.helpers import seconds_to_verbose_time, seconds_to_hhmmss, convert_file_size
-from app.dl.dl import STATUS_DOWNLOADING, STATUS_PROCESSING, STATUS_INVALID,\
+from app.dl import STATUS_DOWNLOADING, STATUS_PROCESSING, STATUS_INVALID,\
     STATUS_FAILED, STATUS_COMPLETED, STATUS_PENDING, STATUS_COOKIES, STATUS_STRINGS,\
     MAX_BIT_RATE_PER_PIXEL, MIN_BIT_RATE_PER_PIXEL
 from app.dl.metadata import get_source_site

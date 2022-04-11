@@ -2,12 +2,29 @@ import logging
 import json
 import os
 import subprocess
-from datetime import datetime
-from .helpers import seconds_to_time, resource_path, unique_filename, reverse_readline
-from .youtube import valid_video_url, get_content_info, AgeRestrictedError
-from .metadata import generate_video_images, technical_info
+import ffmpeg
 from app import celery
+from tempfile import NamedTemporaryFile
+from PIL import Image, ImageFilter, ImageOps, UnidentifiedImageError, \
+    ImageDraw, ImageFont
+try:
+    from PIL.Image import Palette
+    palette = Palette.ADAPTIVE
+except ImportError:
+    palette = Image.ADAPTIVE
 
+from .youtube import get_content_info, AgeRestrictedError
+from .helpers import valid_video_url
+from .metadata import technical_info, add_technical_info_to_metadata, find_best_format
+from . import FONT_SIZE_SMALL, FONT_SIZE_MEDIUM, FONT_SIZE_LARGE, CRF, CRF_LOW,\
+    preview_path, thumbnail_path, tmp_path, original_path,\
+    STATUS_DOWNLOADING, STATUS_COMPLETED, STATUS_FAILED, STATUS_INVALID, STATUS_COOKIES, STATUS_PROCESSING,\
+    MAX_DURATION_HD, MAX_DURATION_MD, MAX_AUD_BIT_RATE, MAX_RESOLUTION_MD, MAX_RESOLUTION_SD, MAX_DURATION_SD,\
+    MAX_FPS, SPLIT_FPS_THRESHOLD, MAX_BIT_RATE_PER_PIXEL, MIN_BIT_RATE_PER_PIXEL,\
+    GRAPHIC_COLOR, GRAPHIC_GS, GRAPHIC_STROKE_COLOR, GRAPHIC_STROKE_GS,\
+    EMOTIONAL_COLOR, EMOTIONAL_GS, EMOTIONAL_STROKE_COLOR, EMOTIONAL_STROKE_GS,\
+    FONT_COLOR, FONT_GS, FONT_STROKE_COLOR, FONT_STROKE_GS,\
+    STROKE_SMALL, STROKE_MEDIUM, STROKE_LARGE, TEXT_PADDING, TEXT_MARGIN
 
 # log = LocalProxy(lambda: current_app.logger)
 log = logging.getLogger("posterity_dl.dl")
@@ -15,121 +32,24 @@ log = logging.getLogger("posterity_dl.dl")
 if celery:
     inspector = celery.control.inspect()
 
-media_path = os.environ.get("MEDIA_FOLDER", "")
-original_path = os.path.join(media_path, "original")
-processed_path = os.path.join(media_path, "processed")
-tmp_path = os.path.join(media_path, "tmp")
-json_path = media_path
-
-thumbnail_path = os.environ.get("THUMBNAIL_FOLDER", "")
-preview_path = os.environ.get("PREVIEW_FOLDER", "")
-
-STATUS_DOWNLOADING = 0
-STATUS_COMPLETED = 1
-STATUS_FAILED = 2
-STATUS_INVALID = 3
-STATUS_COOKIES = 4
-STATUS_PENDING = 5
-STATUS_PROCESSING = 6
-
-STATUS_STRINGS = {
-    STATUS_DOWNLOADING: "downloading",
-    STATUS_COMPLETED: "completed",
-    STATUS_FAILED: "failed",
-    STATUS_INVALID: "invalid",
-    STATUS_COOKIES: "cookies",
-    STATUS_PENDING: "pending",
-    STATUS_PROCESSING: "processing"
-}
-
-CRF = 26
-CRF_LOW = 34
-MAX_DURATION_HD: float = 20 * 60.0
-MAX_RESOLUTION_MD: int = 720
-MAX_DURATION_MD: float = 45 * 60.0
-MAX_RESOLUTION_SD: int = 480
-MAX_DURATION_SD: float = 480 * 60.0     # 8 hours maximum.
-MIN_BIT_RATE_PER_PIXEL = 0.75
-MAX_BIT_RATE_PER_PIXEL = 2.7
-MAX_AUD_BIT_RATE = 128
-MAX_FPS = 60
-SPLIT_FPS_THRESHOLD = 40.0
-
-
-def get_progress_for_video(video) -> float:
-    log_path = os.path.join(tmp_path, f"{video.video_id}_progress.log")
-    if not os.path.isfile(log_path) or not video.duration:
-        return 0.0
-    progress_time = get_last_time_from_log(log_path)
-    if progress_time <= 0:
-        return 0.0
-    elif progress_time >= video.duration:
-        return 1.0
-
-    return progress_time / video.duration
-
-
-def get_last_time_from_log(log_path, max_search=100) -> float:
-    try:
-        i = 0
-        for l in reverse_readline(log_path):
-            if l.startswith("out_time="):
-                ts = l.split("out_time=")[1].strip()
-                try:
-                    hrs, mins, sec = ts.split(":")
-                except ValueError:  # not enough/too many
-                    hrs, mins, sec = "00", "00", "00.00"
-                try:
-                    hrs, mins, sec = int(hrs), int(mins), float(sec)
-                except (TypeError, ValueError):
-                    hrs, mins, sec = 0, 0, 0.0
-
-                time = (hrs * 3600) + (mins * 60) + sec
-                return time
-
-            i += 1
-            if i >= max_search:
-                return 0
-    except OSError:
-        pass
-
-    return 0
-
-
-def write_metadata_to_db(video_id: str, md: dict):
-    try:
-        from app.serve.db import session_scope, Video
-        with session_scope() as db_session:
-            existing = db_session.query(Video).filter_by(video_id=video_id).first()
-
-            if existing:
-                video = existing
-            else:
-                video = Video()
-
-            video.from_json(md)
-
-            db_session.add(video)
-            db_session.commit()
-
-    except Exception as e:
-        log.error(e)
-        log.error(f"Unable to write video {video_id} to database.")
-
-
-def write_metadata_to_disk(video_id: str, md: dict):
-    json_save_path = os.path.join(json_path, video_id + ".json")
-    try:
-        with open(json_save_path, "w") as json_file:
-            json.dump(md, json_file)
-    except OSError as e:
-        log.error(e)
-        log.error(f"JSON for {video_id} was not written to disk.")
-
-
-def write_metadata(video_id: str, md: dict):
-    write_metadata_to_disk(video_id, md)
-    write_metadata_to_db(video_id, md)
+overlay_font_small = ImageFont.truetype(
+    os.path.join(
+        os.path.dirname(os.path.realpath(__file__)),
+        "Faustina-SemiBold.ttf"
+    ), FONT_SIZE_SMALL
+)
+overlay_font_medium = ImageFont.truetype(
+    os.path.join(
+        os.path.dirname(os.path.realpath(__file__)),
+        "Faustina-SemiBold.ttf"
+    ), FONT_SIZE_MEDIUM
+)
+overlay_font_large = ImageFont.truetype(
+    os.path.join(
+        os.path.dirname(os.path.realpath(__file__)),
+        "Faustina-SemiBold.ttf"
+    ), FONT_SIZE_LARGE
+)
 
 
 def process_from_json_data(metadata: dict, input_file: str, output_file: str) -> dict:
@@ -401,29 +321,6 @@ def get_ffmpeg_cmd(
     return cmd
 
 
-def find_existing_video_by_url(url: str):
-    from app.serve.db import Video
-    try:
-        return Video.query.filter_by(url=url).first()
-    except Exception as e:
-        log.error(e)
-        log.error(f"Unable to get video from database.")
-        return None
-
-
-def find_duplicate_video_by_url(url: str):
-    from app.serve.db import Video, db_session
-
-    try:
-        video = db_session.query(Video).filter(Video.url.contains(url)).first()
-        if video:
-            return video
-
-    except Exception as e:
-        log.error(e)
-    return None
-
-
 def get_celery_scheduled():
     if not inspector:
         return []
@@ -457,135 +354,174 @@ def get_celery_active():
     return a
 
 
-def find_best_format(formats_dict: dict, limit: int=2160):
-    formats_dict = formats_dict.copy()
-    invalid_ids = [f_id for f_id, i in formats_dict.items() if min(i["dimensions"]) > limit]
-    for i in invalid_ids:
-        formats_dict.pop(i, None)
-
-    best = None
-    highest_res = 0
-    for f_id, info in formats_dict.items():
-        if min(info["dimensions"]) >= highest_res:
-            highest_res = min(info["dimensions"])
-            best = f_id
-
-    if best and highest_res > 0:
-        return best
-
-    # If lacking dimensions and stuff
-    formats = list(formats_dict.keys())
-    for f in reversed(formats):
-        if "1920x1080" in f:
-            return f
-    for f in reversed(formats):
-        if "1080p" in f:
-            return f
-    for f in reversed(formats):
-        if "720p" in f:
-            return f
-    print(formats[-1])
-    return formats[-1]
-
-
-def parse_input_data(data: dict) -> dict:
-    metadata = {
-        "url": "",
-        "source": "Unknown",
-        "title": "",
-        "video_title": "",
-        "content_warning": "",
-        "category": "",
-        "file_size": 0,
-        "bit_rate": 0,
-        "frame_rate": 0.0,
-        "width": 0,
-        "height": 0,
-        "format": "",
-        "duration": 0,
-        "private": False,
-        "upload_time": datetime.now().timestamp(),
-        "status": STATUS_DOWNLOADING,
-        "video_id": "",
-        "verified": False,
-    }
-    try:
-        metadata["url"] = data["url"]
-        metadata["title"] = data["title"]
-    except KeyError:
-        log.error("Corrupted data?!")
-        metadata["status"] = STATUS_INVALID
-        return metadata
-
-    try:
-        metadata["content_warning"] = data["content_warning"]
-    except KeyError:
-        pass
-
-    if "source_user" in data and len(data["source_user"]):
-        metadata["source"] = data["source_user"]
+def get_color_for_tag(tag: str, gs: bool = False) -> tuple:
+    if tag.lower() in [
+        "death", "graphic", "violence", "gore", "nudity", "corpses", "blood"
+    ]:
+        c = tuple([GRAPHIC_GS]) if gs else GRAPHIC_COLOR
+    elif tag.lower() in [
+        "distress", "animals", "children", "sexual", "shock", "emotional"
+    ]:
+        c = tuple([EMOTIONAL_GS]) if gs else EMOTIONAL_COLOR
     else:
-        try:
-            metadata["source"] = data["source"]
-        except KeyError:
-            pass
-    try:
-        metadata["category"] = data["category"]
-    except KeyError:
-        pass
-    try:
-        if data["private-checkbox"] == "on":
-            metadata["private"] = True
-    except KeyError:
-        pass
-    metadata["content_warning"] = metadata["content_warning"].replace("default", "")
-    metadata["category"] = metadata["category"].replace("default", "")
-
-    return metadata
+        c = tuple([FONT_GS]) if gs else FONT_COLOR
+    return c
 
 
-def add_technical_info_to_metadata(metadata: dict, video_path: str, post_process=False) -> dict:
-    info = technical_info(video_path)
+def get_stroke_for_tag(tag: str, gs: bool = False) -> tuple:
+    if tag.lower() in [
+        "death", "graphic", "violence", "gore", "nudity", "corpses", "blood"
+    ]:
+        c = tuple([GRAPHIC_STROKE_GS]) if gs else GRAPHIC_STROKE_COLOR
+    elif tag.lower() in [
+        "distress", "animals", "children", "sexual", "shock", "emotional"
+    ]:
+        c = tuple([EMOTIONAL_STROKE_GS]) if gs else EMOTIONAL_STROKE_COLOR
+    else:
+        c = tuple([FONT_STROKE_GS]) if gs else FONT_STROKE_COLOR
+    return c
+
+
+def generate_video_images(
+    video_path: str, thumbnail_path: str, preview_path: str,
+    blurred_thumb_path: str, blurred_preview_path: str,
+    preview_size: tuple = (640, 360), thumbnail_size: tuple = (64, 64),
+    blur_amount: float = 0.66, desaturate: bool = False, start: float = 0.0,
+    content_text: str = ""
+):
+
+    raw_frame = NamedTemporaryFile(suffix=".jpg")
+
     try:
-        if post_process:
-            metadata["processed_file_size"] = info["file_size"]
-            metadata["processed_bit_rate"] = info["bit_rate"]
-            metadata["processed_frame_rate"] = info["fps"]
-            metadata["processed_format"] = f'{info["video_codec"]} / {info["audio_codec"]}'
+        _d = (
+            ffmpeg
+            .input(video_path, ss=start)
+            .filter('scale', preview_size[0], -1)
+            .output(raw_frame.name, vframes=1)
+            .overwrite_output()
+            .run(quiet=True)
+        )
+    except ffmpeg.Error as e:
+        print(e)
+        return
+
+    try:
+        img = Image.open(raw_frame.name)
+    except (PermissionError, FileNotFoundError, UnidentifiedImageError) as e:
+        print(e)
+        return
+
+    thumb = img.copy()
+
+    img.thumbnail(preview_size)
+    thumb.thumbnail(thumbnail_size)
+    preview_blurred = img.copy()
+    thumb_blurred = thumb.copy()
+
+    preview_blurred = preview_blurred.filter(
+        ImageFilter.GaussianBlur(preview_size[0] / 32 * blur_amount)
+    )
+    thumb_blurred = thumb_blurred.filter(
+        ImageFilter.GaussianBlur(thumbnail_size[0] / 16 * blur_amount)
+    )
+
+    if desaturate:
+        preview_blurred_desat = ImageOps.grayscale(preview_blurred)
+        preview_blurred.paste(preview_blurred_desat)
+        thumb_blurred = ImageOps.grayscale(thumb_blurred)
+
+    if len(content_text):
+        preview_draw = ImageDraw.Draw(img)
+        preview_blurred_draw = ImageDraw.Draw(preview_blurred)
+
+        ratio = min([
+            min(1.0, max(0.0, img.size[0] / preview_size[0])),
+            min(1.0, max(0.0, img.size[1] / preview_size[1]))
+        ])
+        padding = int(TEXT_PADDING * ratio)
+        if ratio > 0.75:
+            size = FONT_SIZE_LARGE
+            stroke = STROKE_LARGE
+            font = overlay_font_large
+        elif ratio > 0.5:
+            size = FONT_SIZE_MEDIUM
+            stroke = STROKE_MEDIUM
+            font = overlay_font_medium
         else:
-            metadata["file_size"] = info["file_size"]
-            metadata["bit_rate"] = info["bit_rate"]
-            metadata["frame_rate"] = info["fps"]
-            metadata["duration"] = info["duration"]
-            metadata["width"] = info["dimensions"][0]
-            metadata["height"] = info["dimensions"][1]
-            metadata["format"] = f'{info["video_codec"]} / {info["audio_codec"]}'
-    except KeyError:
-        log.error(e)
+            size = FONT_SIZE_SMALL
+            stroke = STROKE_SMALL
+            font = overlay_font_small
 
-    return metadata
+        if "/" in content_text:
+            lines = content_text.split("/")
+        else:
+            lines = [content_text]
+
+        lines = [l for l in lines if l.strip().lower() != "none"]
+
+        for i, line in enumerate(lines):
+            preview_draw.text(
+                (TEXT_MARGIN, i * (size + padding) + TEXT_MARGIN),
+                line, font=font,
+                fill=get_color_for_tag(line), stroke_width=stroke, stroke_fill=get_stroke_for_tag(line)
+            )
+            preview_blurred_draw.text(
+                (TEXT_MARGIN, i * (size + padding) + TEXT_MARGIN),
+                line, font=font,
+                fill=get_color_for_tag(line), stroke_width=stroke, stroke_fill=get_stroke_for_tag(line)
+            )
+
+    preview = img
+    # preview = img.convert("P", palette=palette, colors=256)
+    # preview_blurred = preview_blurred.convert("P", palette=palette, colors=256)
+    # thumb = thumb.convert("P", palette=palette, colors=64)
+    # thumb_blurred = thumb_blurred.convert("P", palette=palette, colors=64)
+
+    try:
+        preview.save(preview_path, optimize=True, quality=75)
+        preview_blurred.save(blurred_preview_path, optimize=True, quality=75)
+        thumb.save(thumbnail_path, optimize=True, quality=60)
+        thumb_blurred.save(blurred_thumb_path, optimize=True, quality=60)
+    except (PermissionError, IOError, FileExistsError) as e:
+        print(e)
 
 
-def add_technical_info_to_all():
-    from app.serve.db import session_scope, Video
-    with session_scope() as db_session:
-        videos = db_session.query(Video).all()
-        for v in videos:
-            p = os.path.join(original_path, v.video_id + ".mp4")
-            if os.path.exists(p):
-                metadata = v.to_json()
-                metadata = add_technical_info_to_metadata(metadata, p)
-                v.from_json(metadata)
-                db_session.add(v)
-                db_session.commit()
 
+def generate_all_images(
+    orig_path: str, json_path: str, thumbnail_path: str, preview_path: str, only_new=True
+):
+    videos = []
+    for file_name in os.listdir(orig_path):
+        if file_name.endswith(".mp4"):
+            videos.append((file_name.split(".mp4")[0], os.path.join(orig_path, file_name)))
 
-def refresh_json_on_all():
-    from app.serve.db import session_scope, Video
-    with session_scope() as db_session:
-        videos = db_session.query(Video).all()
-        for v in videos:
-            write_metadata_to_disk(v.video_id, v.to_json())
+    for (video_id, video_path) in videos:
+        info = technical_info(video_path)
+
+        jp = os.path.join(json_path, video_id + ".json")
+        try:
+            with open(jp) as f:
+                d = json.load(f)
+        except (FileNotFoundError, json.JSONDecodeError, OSError):
+            continue
+
+        if "content_warning" in d.keys():
+            content_text = d["content_warning"] if d["content_warning"].lower().strip() != "none" else ""
+        else:
+            content_text = ""
+
+        generate_video_images(
+            video_path,
+            os.path.join(thumbnail_path, video_id + "_thumb.jpg"),
+            os.path.join(preview_path, video_id + "_preview.jpg"),
+            os.path.join(thumbnail_path, video_id + "_thumb_blurred.jpg"),
+            os.path.join(preview_path, video_id + "_preview_blurred.jpg"),
+            start=5 if info["duration"] > 10.0 else 0,
+            blur_amount=0.75,
+            desaturate=False,
+            content_text=content_text
+        )
+
 
 
 if __name__ == "__main__":
