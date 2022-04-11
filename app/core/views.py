@@ -42,7 +42,7 @@ def title_suggestion():
 
     u = urlparse(url)
 
-    if "twitter.com" in u.netloc or "t.co" in u.netloc:
+    if u.netloc in ["twitter.com", "www.twitter.com", "t.co", "www.t.co"]:
         try:
             tweet_id = int(u.path.split("/")[-1])
         except (ValueError, IndexError, TypeError):
