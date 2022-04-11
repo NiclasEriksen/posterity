@@ -1,8 +1,10 @@
+import os
 import requests
 from flask import Blueprint, current_app, request, abort, Response
 from flask_login import current_user, login_required
 from werkzeug.local import LocalProxy
 from authentication import require_appkey
+from urllib.parse import urlparse
 
 from .tasks import download_task, post_process_task
 from app.dl.youtube import valid_video_url, minimize_url, get_title_from_html
@@ -38,13 +40,42 @@ def title_suggestion():
     if find_duplicate_video_by_url(url):
         return Response("Video with that URL exists", status=406)
 
-    try:
-        r = requests.get(url, headers=headers)
-    except:
-        logger.error("Unable to download page?!")
-        return Response("Wasn't able to download the page and get a title.", 404)
+    u = urlparse(url)
 
-    title = get_title_from_html(r.text)
+    if "twitter.com" in u.netloc or "t.co" in u.netloc:
+        try:
+            tweet_id = int(u.path.split("/")[-1])
+        except (ValueError, IndexError, TypeError):
+            tweet_id = 0
+
+        token = os.environ.get("TWITTER_BEARER_TOKEN", "")
+        if not len(token) or not tweet_id:
+            return Response("Unable to get tweet (sorry)", status=406)
+
+        headers["Authorization"] = f"Bearer {token}"
+        req_url = f"https://api.twitter.com/2/tweets/{tweet_id}?tweet.fields=text"
+        try:
+            r = requests.get(req_url, headers=headers)
+        except:
+            logger.error("Unable to download page?!")
+            return Response("Wasn't able to download the page and get a title.", 404)
+
+        data = r.json()
+        try:
+            tweet = data["data"]["text"]
+        except KeyError:
+            return Response("Unable to get tweet content...", status=406)
+
+        title = tweet.split("\n")[0][:256]
+
+    else:
+        try:
+            r = requests.get(url, headers=headers)
+        except:
+            logger.error("Unable to download page?!")
+            return Response("Wasn't able to download the page and get a title.", 404)
+
+        title = get_title_from_html(r.text)
 
     return Response(title, 200)
 
