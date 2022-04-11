@@ -114,7 +114,7 @@
                                     type="button"
                                     id="start-processing-button"
                                     onclick="startProcessing('{{ video.video_id }}');"
-                                    {% if video.status != 1 or video.post_processed %}{% if not current_user.check_auth(1) and not video.recommend_post_process %}disabled{% endif %}{% endif %}
+                                    {% if video.status != 1 or video.post_processed %}disabled{% endif %}
                                 >
                                         Post-process
                                 </button>
