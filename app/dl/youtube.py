@@ -6,8 +6,6 @@ from html import unescape
 import logging
 import re
 import requests
-from bs4 import BeautifulSoup
-import lxml
 import codecs
 from urllib.parse import urlencode, urlparse, urlunparse, parse_qs
 from .helpers import program_path, find_between
@@ -292,11 +290,7 @@ def get_og_tags(html: str, title_only=False):
 
 def get_title_from_html(html: str) -> list:
     title = "No title"
-    data = lxml.html.fromstring
-    soup = BeautifulSoup(html, "html.parser")
-    titles = soup.find_all("i")
-    print(soup)
-    # titles = re.findall(r"<title>(.*?)</title>", html)
+    titles = re.findall(r"<title>(.*?)</title>", html)
     if len(titles) > 0:
         title = titles[0].get_text()
     else:
