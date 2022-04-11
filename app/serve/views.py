@@ -603,10 +603,19 @@ def download_video(video_id=""):
 @serve.route("/view/<video_id>.mp4")
 def view_video(video_id=""):
     original = request.args.get("orig", type=int, default=0)
+    processed = False
     try:
-        proc_path = os.path.join(processed_path, f"{video_id}.mp4")
-        if not original and os.path.isfile(proc_path):
-            return send_from_directory_partial(processed_path, f"{video_id}.mp4")
+        video = db_session.query(Video).filter_by(video_id=video_id).first()
+    except Exception as e:
+        logger.error(e)
+    else:
+        processed = video.post_processed
+
+    try:
+        if processed and not original:
+            proc_path = os.path.join(processed_path, f"{video_id}.mp4")
+            if os.path.isfile(proc_path):
+                return send_from_directory_partial(processed_path, f"{video_id}.mp4")
         if os.path.isfile(os.path.join(original_path, f"{video_id}.mp4")):
             return send_from_directory_partial(original_path, f"{video_id}.mp4")
     except OSError as e:
