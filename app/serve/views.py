@@ -506,6 +506,9 @@ def dashboard_page():
         Video.status
     ).all()
 
+    for ct in current_tasks:
+        ct.progress = "{0:.0f}%".format(get_progress_for_video(ct) * 100.0)
+
     return render_template("dashboard.html", user=current_user, tokens=tokens, other_users=other_users, tasks=current_tasks)
 
 

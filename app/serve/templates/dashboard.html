@@ -27,7 +27,11 @@
                     {% for t in tasks %}
                     <tr>
                         <td><a href="/{{ t.video_id }}">{{ t.title }}</a></td>
-                        <td><span class="uk-text-meta">{{ t.source }}</span> {{ t.status_str.capitalize() }}</td>
+                        <td>
+                            <span class="uk-text-meta">{{ t.source }}</span><br>
+                            {{ t.status_str.capitalize() }}
+                            {% if not t.can_be_changed %}{{ t.progress }}{% endif %}
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>
