@@ -76,20 +76,20 @@ def recommend_videos(video, size=10) -> list:
                             "boost": 3
                         }
                     },
-                    {
-                        "more_like_this": {
-                            "fields": fields,
-                            "like": [
-                                {
-                                    "_index": "videos",
-                                    "_id": video.video_id
-                                },
-                            ],
-                            "min_term_freq": 1,
-                            "max_query_terms": 24,
-                            "boost": 5
-                        }
-                    },
+                    # {
+                    #     "more_like_this": {
+                    #         "fields": fields,
+                    #         "like": [
+                    #             {
+                    #                 "_index": "videos",
+                    #                 "_id": video.video_id
+                    #             },
+                    #         ],
+                    #         "min_term_freq": 1,
+                    #         "max_query_terms": 24,
+                    #         "boost": 5
+                    #     }
+                    # },
                 ]
             }
         }
