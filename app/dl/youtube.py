@@ -356,7 +356,7 @@ def get_description_from_source(url: str) -> str:
             for ds in desc_segs:
                 if any(x in ds.lower() for x in AD_DESCRIPTIONS):
                     continue
-                elif ds.endswith(":\n"):
+                elif ds.endswith(":"):
                     continue
                 ok.append(ds)
 
