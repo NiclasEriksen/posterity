@@ -544,7 +544,7 @@ def report_video_post(video_id):
     video = db_session.query(Video).filter_by(video_id=video_id).first()
     if not video:
         return render_template("not_found.html")
-    if video.private:
+    if video.private and not video.user_can_edit(current_user):
         return render_template("private.html")
 
     text = request.form.get("report_text", "")
