@@ -83,7 +83,8 @@ AD_DESCRIPTIONS = [
     "in-depth channel:", "auto-generated", "breaking news videos", "read the sun", "____", "to read this story",
     "facebook:", "twitter:", "instagram:", "tumblr:", "news for more", "news here:", "more videos from",
     "with the latest news", "my instagram", "my facebook", "my twitter", "my youtube", "contact me",
-    "thank you for your", "paypal", "with latest headlines", "sports and entertainment", "also watch"
+    "thank you for your", "paypal", "with latest headlines", "sports and entertainment", "also watch",
+    "most watched"
 ]
 
 
