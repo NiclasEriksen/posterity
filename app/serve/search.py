@@ -13,7 +13,7 @@ es = Elasticsearch(os.environ.get("ES_SERVER_ADDRESS", "http://0.0.0.0:9200"))
 log = LocalProxy(lambda: current_app.logger)
 
 COMMON = [
-    "talking", "about", "subtitles", "with", "without", "longer", "quality"
+    "talking", "about", "subtitles", "with", "without", "longer", "quality", "cnn"
 ]
 
 
