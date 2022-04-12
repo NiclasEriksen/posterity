@@ -177,29 +177,30 @@ def get_content_info(url: str) -> dict:
         log.debug(f"YoutubeDL found a video.")
         if "thumbnail" in video:
             d["thumbnail"] = video["thumbnail"]
-        if "description" in video:
-            desc = video["description"]
-            desc = remove_links(desc)
-            desc_segs = desc.split("\n")
-            ok = []
-            for ds in desc_segs:
-                if any(x in ds.lower() for x in AD_DESCRIPTIONS):
-                    continue
-                elif ds.count("#") > 4:
-                    continue
-
-                ok.append(ds)
-
-
-            desc = "\n".join(ok)
-            desc = strip_useless(desc)
-
-            d["title"] = desc
-            if "title" in video:
-                d["title"] = video["title"] + "\n" + d["title"]
-            d["title"] = d["title"][:512]
-
-        elif "title" in video:
+        # if "description" in video:
+        #     desc = video["description"]
+        #     desc = remove_links(desc)
+        #     desc_segs = desc.split("\n")
+        #     ok = []
+        #     for ds in desc_segs:
+        #         if any(x in ds.lower() for x in AD_DESCRIPTIONS):
+        #             continue
+        #         elif ds.count("#") > 4:
+        #             continue
+        #
+        #         ok.append(ds)
+        #
+        #
+        #     desc = "\n".join(ok)
+        #     desc = strip_useless(desc)
+        #
+        #     d["title"] = desc
+        #     if "title" in video:
+        #         d["title"] = video["title"] + "\n" + d["title"]
+        #     d["title"] = d["title"][:512]
+        #
+        # el
+        if "title" in video:
             d["title"] = video["title"]
 
         if "requested_subtitles" in video:
