@@ -356,6 +356,8 @@ def get_description_from_source(url: str) -> str:
             for ds in desc_segs:
                 if any(x in ds.lower() for x in AD_DESCRIPTIONS):
                     continue
+                elif ds.count("#") > 3:
+                    continue
                 ok.append(ds)
 
             desc = "\n".join(ok)
