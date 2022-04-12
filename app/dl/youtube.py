@@ -187,7 +187,7 @@ def get_content_info(url: str) -> dict:
             d["title"] = desc
             if "title" in video:
                 d["title"] = video["title"] + "\n" + d["title"]
-            d["title"] = d["title"][:1024]
+            d["title"] = d["title"][:512]
 
         elif "title" in video:
             d["title"] = video["title"]
