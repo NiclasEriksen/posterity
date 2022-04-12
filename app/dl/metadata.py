@@ -617,7 +617,9 @@ def strip_useless(s: str):
     s = s.replace("#", "")
     s = s.replace("  ", " ")
     s = s.replace("  ", " ")
-    return s
+    s = s.replace("\t", " ")
+    s = s.replace("Facebook", "", "Twitter", "", "Instagram", "")
+    return s.lstrip().rstrip()
 
 
 if __name__ == "__main__":
