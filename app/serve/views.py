@@ -192,7 +192,10 @@ def serve_video(video_id):
             logger.error("Video is set to private.")
             return render_template("private.html")
 
-    results = search_videos(f"{video.title} {' '.join([t.name for t in video.tags + video.categories])}")
+    q = f"""
+{video.title} {' '.join([t.name for t in video.tags + video.categories])} {video.orig_title}
+"""
+    results = search_videos(q)
     results = sorted(results, key=lambda x: x["_score"], reverse=True)
 
     recommended = []
