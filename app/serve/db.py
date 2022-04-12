@@ -96,6 +96,10 @@ class User(UserMixin, Base):
     def check_auth(self, level: int) -> bool:
         return self.auth_level >= level
 
+    @property
+    def is_editor(self) -> bool:
+        return self.check_auth(AUTH_LEVEL_EDITOR)
+
 
 class Video(Base):
     __tablename__ = "videos"

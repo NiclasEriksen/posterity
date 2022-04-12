@@ -2,6 +2,8 @@ import os
 import requests
 from flask import Blueprint, current_app, request, abort, Response
 from flask_login import current_user, login_required
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 from werkzeug.local import LocalProxy
 from authentication import require_appkey
 from urllib.parse import urlparse
@@ -17,6 +19,11 @@ from ..serve.search import index_video_data
 
 core = Blueprint('core', __name__)
 logger = LocalProxy(lambda: current_app.logger)
+limiter = Limiter(
+    current_app,
+    key_func=get_remote_address,
+    default_limits=["1000 per day", "100 per hour"]
+)
 
 
 @core.before_request
@@ -47,6 +54,7 @@ def test_desc(video_id: str):
 
 
 @core.route("/title_suggestion", methods=["POST"])
+@limiter.limit("1/second", override_defaults=False, exempt_when=lambda: current_user.is_editor)
 def title_suggestion():
     logger.info("Requested a title suggestion.")
     data = request.get_json()
@@ -155,6 +163,7 @@ def start_download(video_id: str):
 
 
 @core.route("/post_link", methods=["POST"])
+@limiter.limit("1/second", override_defaults=False)
 def post_link():
     download_now = False
 
