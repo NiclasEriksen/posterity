@@ -14,9 +14,9 @@ from app.dl.helpers import seconds_to_time
 import time
 
 
-COMPARE_DURATION_THRESHOLD = 0.10
+COMPARE_DURATION_THRESHOLD = 0.15
 COMPARE_RATIO_THRESHOLD = 0.25
-COMPARE_IMAGE_DATA_THRESHOLD = 8.0
+COMPARE_IMAGE_DATA_THRESHOLD = 8.5
 
 log = get_task_logger(__name__)
 
