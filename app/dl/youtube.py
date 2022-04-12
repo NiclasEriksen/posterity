@@ -78,7 +78,8 @@ DEFAULT_VIDEO = "MP4 720p"
 DEFAULT_LANG  = "en"
 AD_DESCRIPTIONS = [
     "subscribe", "premium", "% off", "discount", "sign up for", "patreon", "kickstarter",
-    "this channel", "check out my", "my channel", "promotion"
+    "this channel", "check out my", "my channel", "promotion", "click here:", "on instagram", "on twitter",
+    "on facebook", "ad-free", "watch more"
 ]
 
 
