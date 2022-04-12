@@ -278,44 +278,47 @@
             </div>
             {% if recommended|length and current_user.check_auth(AUTH_LEVEL_EDITOR) %}
             <div class="uk-container">
-                <div class="uk-width-1-1 uk-padding">
+                <div class="uk-width-1-1">
                     <h2>Related videos:</h2>
                 </div>
-                <table class="uk-table uk-table-small uk-table-striped uk-table-responsive uk-padding">
-                    <thead>
-                        <tr>
-                            <td>Video</td>
-                            <td>Content tags</td>
-                            <td>Video type</td>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for v in recommended %}
-                        <tr>
-                            <td>
-                                <div class="list-thumbnail uk-position-relative" style="display: table-cell;">
-                                    <a href="/{{ v.video_id }}">
-                                        <img src="/thumbnail/{{ v.video_id }}.jpg" loading="lazy" class="thumbnail-rounded uk-position-absolute uk-position-center">
-                                    </a>
-                                </div>
-                                <div style="display: table-cell;">
-                                    <a href="/{{ v.video_id }}">{{ v.title }}</a>
-                                </div>
-                            </td>
-                            <td>
-                                {% for tag in v.tags_by_category %}
-                                <span class="uk-label label-small {% if tag.category > 1 %}uk-label-danger{% elif tag.category == 1 %}uk-label-warning{% endif %}">{{ tag.name }}</span>
-                                {% endfor %}
-                            </td>
-                            <td>
-                                {% for category in v.categories %}
-                                <span class="uk-label label-small uk-label-category">{{ category.name }}</span>
-                                {% endfor %}
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+                <div class="uk-width-1-1">
+
+                    <table class="uk-table uk-table-small uk-table-striped uk-table-responsive uk-padding">
+                        <thead>
+                            <tr>
+                                <td>Video</td>
+                                <td>Content tags</td>
+                                <td>Video type</td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for v in recommended %}
+                            <tr>
+                                <td>
+                                    <div class="list-thumbnail uk-position-relative" style="display: table-cell;">
+                                        <a href="/{{ v.video_id }}">
+                                            <img src="/thumbnail/{{ v.video_id }}.jpg" loading="lazy" class="thumbnail-rounded uk-position-absolute uk-position-center">
+                                        </a>
+                                    </div>
+                                    <div style="display: table-cell;">
+                                        <a href="/{{ v.video_id }}">{{ v.title }}</a>
+                                    </div>
+                                </td>
+                                <td>
+                                    {% for tag in v.tags_by_category %}
+                                    <span class="uk-label label-small {% if tag.category > 1 %}uk-label-danger{% elif tag.category == 1 %}uk-label-warning{% endif %}">{{ tag.name }}</span>
+                                    {% endfor %}
+                                </td>
+                                <td>
+                                    {% for category in v.categories %}
+                                    <span class="uk-label label-small uk-label-category">{{ category.name }}</span>
+                                    {% endfor %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
             </div>
             {% endif %}
             <div class="uk-height-small"></div>
