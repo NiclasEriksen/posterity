@@ -529,6 +529,8 @@ def dashboard_page():
             paired[v.video_id].append(d.video_id)
             paired[d.video_id].append(v.video_id)
 
+    pairs = pairs[:50]
+
     for ct in current_tasks:
         ct.progress = "{0:.0f}%".format(get_progress_for_video(ct) * 100.0)
 
