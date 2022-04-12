@@ -54,7 +54,7 @@ def test_desc(video_id: str):
 
 
 @core.route("/title_suggestion", methods=["POST"])
-@limiter.limit("1/second", override_defaults=False, exempt_when=lambda: current_user.is_editor)
+@limiter.limit("10/minute", override_defaults=False, exempt_when=lambda: current_user.is_editor)
 def title_suggestion():
     logger.info("Requested a title suggestion.")
     data = request.get_json()
