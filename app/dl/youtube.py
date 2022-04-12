@@ -93,7 +93,9 @@ AD_DESCRIPTIONS = [
     "feedly:", "flipboard:", "youtube:", "iphone:", "razor:", "for more:", "on social:", "brings you the latest",
     "biggest stories of", "listen now -", "telegram:", "website :", "for more news ", "social media:",
     "discord:", "independent journalism", "made possible by supporters", "by patreon", "latest updates", "snapchat:",
-    "street journal:", "google+:", ".com:", "more video:", "video center:"
+    "street journal:", "google+:", ".com:", "more video:", "video center:", "and check out the", "all rights reserved",
+    "©", "youtube.com/", "share this video", "accept bitcoin", "our merchandise", "merch store", "demonetize",
+    "we need your support",
 ]
 
 
