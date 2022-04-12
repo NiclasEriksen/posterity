@@ -58,9 +58,9 @@ def index_video_data(video: Video):
 @catch_es_errors
 @cache.memoize(1)
 def recommend_videos(video, size=10) -> list:
-    fields = ["title", "orig_title", "content_warning"]
+    fields = ["title", "orig_title"]
     q = f"""
-    {video.title} {' '.join([t.name for t in video.tags])} {video.orig_title}
+    {video.title} {video.orig_title}
     """
     body = {
         "size": size,
