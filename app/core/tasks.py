@@ -3,7 +3,7 @@ import itertools
 
 from celery.utils.log import get_task_logger
 from datetime import datetime
-from imgcompare import is_equal
+from imgcompare import is_equal, image_diff_percent
 from PIL import Image
 
 from app import celery
@@ -70,7 +70,10 @@ def check_duplicate_video(v1, v2) -> bool:
                 img2 = Image.open(v2_thumb_path)
                 img1 = img1.resize((64, 64))
                 img2 = img2.resize((64, 64))
-                return is_equal(img1, img2, tolerance=COMPARE_IMAGE_DATA_THRESHOLD)
+                perc = image_diff_percent(img1, img2)
+                return perc < COMPARE_IMAGE_DATA_THRESHOLD
+                # print(perc)
+                # return is_equal(img1, img2, tolerance=COMPARE_IMAGE_DATA_THRESHOLD)
 
             except Exception as e:
                 log.error(e)
