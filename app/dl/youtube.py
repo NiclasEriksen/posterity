@@ -182,6 +182,7 @@ def get_content_info(url: str) -> dict:
             for ds in desc_segs:
                 if any(x in ds.lower() for x in AD_DESCRIPTIONS):
                     continue
+
                 ok.append(ds)
 
 
@@ -354,6 +355,8 @@ def get_description_from_source(url: str) -> str:
             ok = []
             for ds in desc_segs:
                 if any(x in ds.lower() for x in AD_DESCRIPTIONS):
+                    continue
+                elif ds.endswith(":\n"):
                     continue
                 ok.append(ds)
 
