@@ -91,7 +91,8 @@ AD_DESCRIPTIONS = [
     "join us from any", "more videos:", "travel vlogs", "find us online", "is your source for", "get the latest news",
     "watch us on ", "get our app:", "apple tv:", "android:", "roku:", "fire tv:", "our shows", "podcasts:",
     "feedly:", "flipboard:", "youtube:", "iphone:", "razor:", "for more:", "on social:", "brings you the latest",
-    "biggest stories of", "listen now -", "telegram:", "website :", "for more news ", "social media:"
+    "biggest stories of", "listen now -", "telegram:", "website :", "for more news ", "social media:",
+    "discord:"
 ]
 
 
