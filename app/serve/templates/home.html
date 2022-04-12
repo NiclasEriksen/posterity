@@ -10,7 +10,7 @@
         class="uk-width-1-1 uk-width-1-4@l uk-dark uk-background-secondary uk-height-1-1 uk-margin uk-padding-remove"
         style="border: 1px dashed #CCC;border-top: 0;"
     >
-        {% if keyword|length or current_page > 1 %}{% set hide_first = True %}{% else %}{% set hide_first = False %}{% endif %}
+        {% if keyword|length or current_page > 1 or search_tag or search_category %}{% set hide_first = True %}{% else %}{% set hide_first = False %}{% endif %}
         <form action="" id="link-form" class="uk-form uk-padding-small uk-width-1-1 uk-height-1-1 link-form-toggle"{% if hide_first %} hidden{% endif %}>
             <input type="hidden" id="source_user" name="source_user" value="{{ current_user.username }}">
             <fieldset class="uk-fieldset uk-grid">

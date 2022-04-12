@@ -101,6 +101,15 @@ def front_page():
     page = request.args.get("p", type=int, default=1)
     pp = request.args.get("pp", type=int, default=MAX_RESULT_PER_PAGE)
     kw = request.args.get("q", type=str, default="")
+    t = request.args.get("t", type=str, default="")
+    c = request.args.get("c", type=str, default="")
+
+    tag = None
+    if len(t):
+        tag = db_session.query(ContentTag).filter_by(name=t).first()
+    category = None
+    if len(c):
+        category = db_session.query(Category).filter_by(name=c).first()
 
     offset = max(0, page - 1) * pp
 
@@ -114,9 +123,12 @@ def front_page():
         videos = []
         removed = 0
         for result in results[offset:offset + MAX_RESULT_PER_PAGE]:
-            v = Video.query.filter_by(video_id=result["_id"]).first()
+            vq = Video.query.filter_by(video_id=result["_id"])
+            v = vq.first()
             if v:
-                if v.private and (not v.source == current_user.username or not current_user.check_auth(AUTH_LEVEL_EDITOR)):
+                if (tag and not tag in v.tags) or (category and not category in v.categories):
+                    removed += 1
+                elif v.private and (not v.source == current_user.username or not current_user.check_auth(AUTH_LEVEL_EDITOR)):
                     removed += 1
                 else:
                     videos.append(v)
@@ -141,6 +153,11 @@ def front_page():
                 Video.status != STATUS_PENDING
             ).filter(or_(Video.source == current_user.username, Video.private == False))
 
+        if category:
+            vq = vq.filter(Video.categories.any(id=category.id))
+        if tag:
+            vq = vq.filter(Video.tags.any(id=tag.id))
+
         total = vq.count()
         videos = vq.order_by(
             Video.upload_time.desc()
@@ -160,6 +177,8 @@ def front_page():
         total=total,
         total_results=len(videos),
         keyword=kw,
+        search_tag=tag,
+        search_category=category,
         tags=available_tags,
         categories=available_categories
     )

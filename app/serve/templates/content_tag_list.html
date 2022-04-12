@@ -1,3 +1,3 @@
 {% for tag in v.tags_by_category %}
-<span class="uk-label label-small {% if tag.category > 1 %}uk-label-danger{% elif tag.category == 1 %}uk-label-warning{% endif %}">{{ tag.name }}</span>
+<a href="/?t={{ tag.name }}"><span class="uk-label label-small {% if tag.category > 1 %}uk-label-danger{% elif tag.category == 1 %}uk-label-warning{% endif %}">{{ tag.name }}</span></a>
 {% endfor %}

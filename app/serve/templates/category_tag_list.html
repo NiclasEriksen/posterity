@@ -1,3 +1,3 @@
 {% for category in v.categories %}
-<span class="uk-label label-small uk-label-category">{{ category.name }}</span>
+<a href="/?c={{ category.name }}"><span class="uk-label label-small uk-label-category">{{ category.name }}</span></a>
 {% endfor %}
