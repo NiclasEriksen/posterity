@@ -341,10 +341,11 @@ def edit_video_post(video_id: str):
 
 @serve.route("/register", methods=["GET"])
 def register_user_page():
+    token = request.args.get("token", default="")
     if current_user.is_authenticated:
         flash(f"You already have an account. Log out in order to register a new one.")
         return redirect(url_for("serve.front_page"))
-    return render_template("register.html")
+    return render_template("register.html", token=token)
 
 
 @serve.route("/register", methods=["POST"])
@@ -358,24 +359,24 @@ def register_user_post():
     if not existing_token:
         flash(f"Invalid token for user registration.", "error")
         logger.error(f"Invalid token for user registration.")
-        return redirect(url_for("serve.register_user_page"))
+        return redirect(url_for("serve.register_user_page", token=token))
 
     if not len(password) >= 6:
         flash("Password needs to be 6 characters or longer.", "error")
-        return redirect(url_for("serve.register_user_page"))
+        return redirect(url_for("serve.register_user_page", token=token))
     
     if not len(username) >= 3:
         flash("Username needs to be 3 characters or longer.", "error")
-        return redirect(url_for("serve.register_user_page"))
+        return redirect(url_for("serve.register_user_page", token=token))
 
     existing_user = User.query.filter_by(username=username).first()
     if existing_user or username == "Anonymous":
         flash("Username already taken, please choose another one.", "error")
-        return redirect(url_for("serve.register_user_page"))
+        return redirect(url_for("serve.register_user_page", token=token))
 
     if not existing_token.is_valid():
         flash("That token is expired or spent and can no longer be used.", "error")
-        return redirect(url_for("serve.register_user_page"))
+        return redirect(url_for("serve.register_user_page", token=token))
 
     existing_token.spend_token()
 
