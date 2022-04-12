@@ -522,9 +522,9 @@ def dashboard_page():
                 if v.video_id in paired[d.video_id]:
                     continue
             pairs.append((v, d))
-            if not v.video_id in paired:
+            if v.video_id not in paired:
                 paired[v.video_id] = []
-            if not d.video_id in paired:
+            if d.video_id not in paired:
                 paired[d.video_id] = []
             paired[v.video_id].append(d.video_id)
             paired[d.video_id].append(v.video_id)
@@ -985,7 +985,9 @@ def get_metadata_for_video(video_id: str) -> dict:
 
 def list_all_duplicates() -> list:
     try:
-        return db_session.query(Video).filter(Video.duplicates.any()).all()
+        return db_session.query(Video).filter(Video.duplicates.any()).order_by(
+            Video.upload_time.desc()
+        ).all()
     except Exception as e:
         logger.error(e)
         return []
