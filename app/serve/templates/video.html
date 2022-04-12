@@ -276,6 +276,20 @@
                     </div>
                 </div>
             </div>
+            {% if recommended|length and current_user.check_auth(AUTH_LEVEL_EDITOR) %}
+            <div class="uk-container">
+                <table class="uk-table uk-table-small uk-table-striped">
+                    <thead></thead>
+                    <tbody>
+                        {% for v in recommended %}
+                        <tr>
+                            <td>{{ v.title }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% endif %}
             <div class="uk-height-small"></div>
         </div>
 

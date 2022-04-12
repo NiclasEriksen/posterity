@@ -44,6 +44,7 @@ init_db()
 load_dotenv()
 APPLICATION_ENV = get_environment()
 MAX_RESULT_PER_PAGE = 30
+MAX_RELATED_VIDEOS = 5
 TORRENT_NAME = "Posterity.Ukraine.archive.torrent"
 
 
@@ -115,7 +116,7 @@ def front_page():
         for result in results[offset:offset + MAX_RESULT_PER_PAGE]:
             v = Video.query.filter_by(video_id=result["_id"]).first()
             if v:
-                if v.private:
+                if v.private and (not v.source == current_user.username or not current_user.check_auth(AUTH_LEVEL_EDITOR)):
                     removed += 1
                 else:
                     videos.append(v)
@@ -191,6 +192,18 @@ def serve_video(video_id):
             logger.error("Video is set to private.")
             return render_template("private.html")
 
+    results = search_videos(f"{video.title} {' '.join([t.name for t in video.tags + video.categories])}")
+    results = sorted(results, key=lambda x: x["_score"], reverse=True)
+
+    recommended = []
+    for result in results:
+        v = Video.query.filter_by(video_id=result["_id"]).first()
+        if v:
+            if v.private and (not v.source == current_user.username or not current_user.check_auth(AUTH_LEVEL_EDITOR)):
+                continue
+            else:
+                recommended.append(v)
+
     if "embed" in request.args:
         return render_template(
             "embed_video.html",
@@ -202,6 +215,7 @@ def serve_video(video_id):
         "video.html",
         video=video,
         dl_path="/download/" + video_id,
+        recommended=recommended,
         stream_path=f"/view/{video_id}.mp4" + ("?orig=0" if video.post_processed else ""),
     )
 
