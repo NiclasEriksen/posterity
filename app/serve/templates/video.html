@@ -90,12 +90,9 @@
                 </div>
                 <div class="uk-width-1-1 uk-padding-small">
                     <h2 class="uk-padding-small uk-margin-remove-bottom">{{ video.title }}</h2>
-                    {% for tag in video.tags_by_category %}
-                    <span class="uk-label label-small {% if tag.category > 1 %}uk-label-danger{% elif tag.category == 1 %}uk-label-warning{% endif %}">{{ tag.name }}</span>
-                    {% endfor %}
-                    {% for category in video.categories %}
-                    <span class="uk-label label-small uk-label-category">{{ category.name }}</span>
-                    {% endfor %}
+                    {% set v = video %}
+                    {% include "content_tag_list.html" %}
+                    {% include "category_tag_list.html" %}
                 </div>
             </div>
             <div class="uk-container">
@@ -246,14 +243,10 @@
                                     </div>
                                 </td>
                                 <td>
-                                    {% for tag in v.tags_by_category %}
-                                    <span class="uk-label label-small {% if tag.category > 1 %}uk-label-danger{% elif tag.category == 1 %}uk-label-warning{% endif %}">{{ tag.name }}</span>
-                                    {% endfor %}
+                                    {% include "content_tag_list.html" %}
                                 </td>
                                 <td class="uk-visible@m">
-                                    {% for category in v.categories %}
-                                    <span class="uk-label label-small uk-label-category">{{ category.name }}</span>
-                                    {% endfor %}
+                                    {% include "category_tag_list.html" %}
                                 </td>
                             </tr>
                             {% endfor %}
