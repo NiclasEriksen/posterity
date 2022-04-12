@@ -192,7 +192,6 @@ def download_from_json_data(metadata: dict, file_name: str):
     elif duration > MAX_DURATION_HD:
         limit = MAX_RESOLUTION_MD
 
-
     f, audio_included = find_best_format(
         d["video_formats"], limit=limit
     )

@@ -558,6 +558,51 @@ def get_title_from_api(url: str):
         return ""
 
 
+def get_description_from_api(url: str) -> str:
+    u = urlparse(url)
+    desc = ""
+    headers = {
+        'Accept-Encoding': 'identity',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.75 Safari/537.36',
+    }
+    if u.netloc in API_SITES:
+
+        if API_SITES[u.netloc] == "twitter":
+            try:
+                tweet_id = int(u.path.split("/")[-1])
+            except (ValueError, IndexError, TypeError):
+                tweet_id = 0
+
+            token = os.environ.get("TWITTER_BEARER_TOKEN", "")
+            if not len(token) or not tweet_id:
+                return ""
+
+            headers["Authorization"] = f"Bearer {token}"
+            req_url = f"https://api.twitter.com/2/tweets/{tweet_id}?tweet.fields=text"
+            try:
+                r = requests.get(req_url, headers=headers)
+            except:
+                pass
+
+            data = r.json()
+            try:
+                tweet = data["data"]["text"]
+            except KeyError as e:
+                tweet = ""
+
+            desc = remove_links(tweet).lstrip().rstrip().strip("\t")[:1024]
+
+        elif API_SITES[u.netloc] == "reddit":
+            try:
+                page = reddit.submission(url=url)
+                if page:
+                    desc = page.title
+            except Exception as e:
+                log.error(e)
+
+    return desc
+
+
 if __name__ == "__main__":
     # from pprint import pprint
     # pprint(technical_info("/home/fredspipa/Videos/bagdad.mp4"))

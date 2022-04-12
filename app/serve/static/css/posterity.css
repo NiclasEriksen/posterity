@@ -225,6 +225,10 @@ body, html {
     color: var(--light-grey)!important;
 }
 
+.uk-text-muted-dense {
+    color: var(--light-grey)!important;
+}
+
 .label-small {
     font-size: .70rem;
     padding: 0 4px;

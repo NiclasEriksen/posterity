@@ -10,7 +10,7 @@ from .tasks import download_task, post_process_task
 from app.dl import STATUS_DOWNLOADING, STATUS_PENDING, STATUS_FAILED, STATUS_COMPLETED, STATUS_PROCESSING
 from app.dl.helpers import unique_filename, remove_emoji, valid_video_url, minimize_url
 from app.dl.metadata import parse_input_data, find_duplicate_video_by_url, get_title_from_html, API_SITES, \
-    get_title_from_api
+    get_title_from_api, get_description_from_api
 from app.serve.db import db_session, Video, AUTH_LEVEL_EDITOR
 
 core = Blueprint('core', __name__)
@@ -20,6 +20,15 @@ logger = LocalProxy(lambda: current_app.logger)
 @core.before_request
 def before_request_func():
     current_app.logger.name = 'core'
+
+
+@core.route("/test/<video_id>")
+def test_desc(video_id: str):
+    video = db_session.query(Video).filter_by(video_id=video_id).first()
+    if not video:
+        return "Video not found"
+    title = get_description_from_api(video.url)
+    return title
 
 
 @core.route("/title_suggestion", methods=["POST"])

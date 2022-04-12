@@ -155,7 +155,7 @@
                                 <span uk-icon="icon: quote-right; ratio: 2;"></span>
                             </div>
                             <div class="uk-width-5-6">
-                                <p><i>{{ video.orig_title }}</i></p>
+                                <p class="uk-text-small uk-text-muted-dense"><i>{{ video.orig_title }}</i></p>
                                 <p class="uk-text-small">
                                     <a href="{{ video.url }}" target="_blank" class="uk-icon-link" uk-icon="link">Source link</a><br>
                                     <span class="uk-text-meta">Submitted {% if current_user.is_authenticated %}by <i>"{{ video.source }}"</i> {% endif %}{{ video.upload_time_verbose }}</span>

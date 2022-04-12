@@ -1,8 +1,8 @@
 from yt_dlp import YoutubeDL
 from yt_dlp.utils import DownloadError
 import logging
-from .helpers import program_path, height_to_width, fix_youtube_shorts, fix_reddit_old, check_stream,\
-    is_dash, is_hls, is_avc, is_streaming_site
+from .helpers import program_path, height_to_width, fix_youtube_shorts, fix_reddit_old, check_stream, \
+    is_dash, is_hls, is_avc, is_streaming_site, remove_links
 
 from .metadata import get_source_links, find_highest_quality_url
 
@@ -76,6 +76,10 @@ SUB_LANGS   = ["en", "no"]
 DEFAULT_AUDIO = "Opus VBR 70kbps"
 DEFAULT_VIDEO = "MP4 720p"
 DEFAULT_LANG  = "en"
+AD_DESCRIPTIONS = [
+    "subscribe", "premium", "% off", "discount", "sign up for", "patreon", "kickstarter",
+    "this channel", "check out my", "my channel", "promotion"
+]
 
 
 class AgeRestrictedError(Exception):
@@ -164,7 +168,25 @@ def get_content_info(url: str) -> dict:
         log.debug(f"YoutubeDL found a video.")
         if "thumbnail" in video:
             d["thumbnail"] = video["thumbnail"]
-        if "title" in video:
+        if "description" in video:
+            desc = video["description"]
+            desc = remove_links(desc)
+            desc_segs = desc.split("\n")
+            ok = []
+            for ds in desc_segs:
+                if any(x in ds.lower() for x in AD_DESCRIPTIONS):
+                    print(ds)
+                    continue
+                ok.append(ds)
+
+            desc = "\n".join(ok)
+
+            d["title"] = desc
+            if "title" in video:
+                d["title"] = video["title"] + "\n" + d["title"]
+            d["title"] = d["title"][:1024]
+
+        elif "title" in video:
             d["title"] = video["title"]
 
         if "requested_subtitles" in video:
