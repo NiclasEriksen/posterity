@@ -12,6 +12,7 @@ from app.dl.helpers import unique_filename, remove_emoji, valid_video_url, minim
 from app.dl.metadata import parse_input_data, find_duplicate_video_by_url, get_title_from_html, API_SITES, \
     get_title_from_api, get_description_from_api
 from app.serve.db import db_session, Video, AUTH_LEVEL_EDITOR
+from ..dl.youtube import get_description_from_source
 
 core = Blueprint('core', __name__)
 logger = LocalProxy(lambda: current_app.logger)
@@ -22,13 +23,25 @@ def before_request_func():
     current_app.logger.name = 'core'
 
 
-@core.route("/test/<video_id>")
+@core.route("/desc_from_source/<video_id>")
+@login_required
 def test_desc(video_id: str):
     video = db_session.query(Video).filter_by(video_id=video_id).first()
     if not video:
         return "Video not found"
-    title = get_description_from_api(video.url)
-    return title
+    if not video.user_can_edit(current_user):
+        return "No permissions, you douche"
+    desc = get_description_from_source(video.url)
+    if not len(desc):
+        desc = get_description_from_api(video.url)
+    if not len(desc):
+        return "No description found"
+
+    video.orig_title = desc
+    db_session.add(video)
+    db_session.commit()
+
+    return desc
 
 
 @core.route("/title_suggestion", methods=["POST"])

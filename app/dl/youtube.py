@@ -117,7 +117,6 @@ def get_content_info(url: str) -> dict:
         "subtitleslang": SUB_LANGS,
         "writesubtitles": True,
         "writeautomaticsub": True,
-        "write_all_thumbnails": True,
         "noplaylist": True
     })
 
@@ -300,6 +299,66 @@ def get_content_info(url: str) -> dict:
         log.info(f"Found {len(d['audio_formats'])} separate audio streams.")
 
     return d
+
+
+def get_description_from_source(url: str) -> str:
+    desc = ""
+    url = fix_youtube_shorts(url)
+    url = fix_reddit_old(url)
+
+    log.info("Fetching data from YouTube link...")
+    ydl = YoutubeDL({
+        "cookiefile": program_path("cookies.txt"),
+        "noplaylist": True
+    })
+
+    video = None
+
+    with ydl:
+        try:
+            result = ydl.extract_info(
+                url,
+                download=False
+            )
+        except DownloadError as e:
+            log.error("Error during fetching of video info, doing manual")
+            video = None
+        except Exception as e:
+            log.error(e)
+            log.error("Unhandled error during YoutubeDL extraction.")
+        else:
+            if "entries" in result:
+                try:
+                    video = result["entries"][0]
+                except (IndexError, ValueError, AttributeError):
+                    video = None
+            else:
+                video = result
+
+    if not video:
+        log.error("Was not able to find a video on the url given.")
+        return desc
+    else:
+        if "description" in video:
+            desc = video["description"]
+            desc = remove_links(desc)
+            desc_segs = desc.split("\n")
+            ok = []
+            for ds in desc_segs:
+                if any(x in ds.lower() for x in AD_DESCRIPTIONS):
+                    continue
+                ok.append(ds)
+
+            desc = "\n".join(ok)
+
+            if "title" in video:
+                desc = video["title"] + "\n" + desc
+            desc = desc[:1024]
+
+        elif "title" in video:
+            desc = video["title"]
+
+    return desc
 
 
 if __name__ == "__main__":
