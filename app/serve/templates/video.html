@@ -279,11 +279,27 @@
             {% if recommended|length and current_user.check_auth(AUTH_LEVEL_EDITOR) %}
             <div class="uk-container">
                 <table class="uk-table uk-table-small uk-table-striped">
-                    <thead></thead>
+                    <thead>
+                        <tr>
+                            <td>Video</td>
+                            <td>Content tags</td>
+                            <td>Video type</td>
+                        </tr>
+                    </thead>
                     <tbody>
                         {% for v in recommended %}
                         <tr>
-                            <td>{{ v.title }}</td>
+                            <td><a href="/{{ v.video_id }}">{{ v.title }}</a></td>
+                            <td>
+                                {% for tag in v.tags_by_category %}
+                                <span class="uk-label label-small {% if tag.category > 1 %}uk-label-danger{% elif tag.category == 1 %}uk-label-warning{% endif %}">{{ tag.name }}</span>
+                                {% endfor %}
+                            </td>
+                            <td>
+                                {% for category in v.categories %}
+                                <span class="uk-label label-small uk-label-category">{{ category.name }}</span>
+                                {% endfor %}
+                            </td>
                         </tr>
                         {% endfor %}
                     </tbody>
