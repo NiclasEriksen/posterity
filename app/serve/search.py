@@ -99,8 +99,6 @@ def search_videos(keyword: str, size=100) -> list:
                             "query": keyword,
                             "fields": fields,
                             "type": "phrase",
-                            "fuzziness": "AUTO",
-                            "prefix_length": 5,
                             "boost": 5
                         }
                     },
@@ -109,6 +107,8 @@ def search_videos(keyword: str, size=100) -> list:
                             "query": keyword,
                             "fields": fields,
                             "operator": "and",
+                            "fuzziness": "AUTO",
+                            "prefix_length": 4,
                             "boost": 4
                         }
                     }
