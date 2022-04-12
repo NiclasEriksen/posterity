@@ -79,7 +79,8 @@ DEFAULT_LANG  = "en"
 AD_DESCRIPTIONS = [
     "subscribe", "premium", "% off", "discount", "sign up for", "patreon", "kickstarter",
     "this channel", "check out my", "my channel", "promotion", "click here:", "on instagram", "on twitter",
-    "on facebook", "ad-free", "watch more", "around the clock coverage", "trusted news"
+    "on facebook", "ad-free", "watch more", "around the clock coverage", "trusted news",
+    "in-depth channel:"
 ]
 
 
