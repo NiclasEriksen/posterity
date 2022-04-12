@@ -608,8 +608,10 @@ def strip_useless(s: str):
     s = s.replace("#News", "").replace("#NEWS", "").replace("#news", "")
     s = s.replace("#GetCloserToTheNews", "")
     out = re.findall(r"[0-9]{1,2}:[0-9]{2}", s)
-    out += re.findall(r"#(\w+)", s)
+    out_2 = re.findall(r"#(\w+)", s)
     for o in out:
+        s = s.replace(o, "")
+    for o in out_2:
         if o.lower() in IGNORED:
             s = s.replace(o, "")
     s = s.replace("#", "")
