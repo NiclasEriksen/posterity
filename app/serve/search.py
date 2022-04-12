@@ -56,19 +56,33 @@ def index_video_data(video: Video):
 
 
 @catch_es_errors
-@cache.memoize(30)
-def search_videos(keyword: str, size=100) -> list:
+@cache.memoize(1)
+def recommend_videos(video, size=10) -> list:
+    fields = ["title", "orig_title", "content_warning"]
     body = {
         "size": size,
         "query": {
-            "multi_match": {
-                "query": keyword,
-                "fields": ["title", "orig_title", "content_warning", "url", "source", "location"],
-                "fuzziness": "AUTO",
-                "prefix_length": 3
+            "more_like_this": {
+                "fields": fields,
+                "like": [
+                    {
+                        "_index": "videos",
+                        "_id": video.video_id
+                    },
+                ],
+                "min_term_freq": 1,
+                "max_query_terms": 24
             }
         }
     }
+
+    res = es.search(index="videos", body=body)
+    return res["hits"]["hits"]
+
+
+@catch_es_errors
+@cache.memoize(30)
+def search_videos(keyword: str, size=100) -> list:
 
     fields = ["title", "orig_title", "content_warning"]
     body = {

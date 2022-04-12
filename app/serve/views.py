@@ -33,7 +33,8 @@ from app.serve.db import db_session, Video, User, ContentTag, UserReport, Catego
     init_db, AUTH_LEVEL_ADMIN, AUTH_LEVEL_EDITOR, AUTH_LEVEL_USER, REASON_TEXTS,\
     RegisterToken, MAX_TOKEN_USES
 from app import get_environment
-from app.serve.search import search_videos, index_video_data, remove_video_data, remove_video_data_by_id
+from app.serve.search import search_videos, index_video_data, remove_video_data, remove_video_data_by_id, \
+    recommend_videos
 from app.extensions import cache
 from app.core.tasks import gen_images_task, check_all_duplicates_task, \
     COMPARE_DURATION_THRESHOLD, COMPARE_RATIO_THRESHOLD, COMPARE_IMAGE_DATA_THRESHOLD
@@ -215,7 +216,7 @@ def serve_video(video_id):
     q = f"""
 {video.title} {' '.join([t.name for t in video.tags])} {video.orig_title}
 """
-    results = search_videos(q, size=MAX_RELATED_VIDEOS * 2)
+    results = recommend_videos(video, size=MAX_RELATED_VIDEOS * 2)
     results = sorted(results, key=lambda x: x["_score"], reverse=True)
 
     recommended = []
