@@ -131,6 +131,7 @@ def start_processing(video_id: str):
 
 
 @core.route("/start_download/<video_id>", methods=["POST"])
+@limiter.limit("1/second", override_defaults=False)
 def start_download(video_id: str):
     if not current_user.is_authenticated:
         logger.error("Trying to start download without being logged in.")
