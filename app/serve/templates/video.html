@@ -288,7 +288,7 @@
                             <tr>
                                 <td>Video</td>
                                 <td>Content tags</td>
-                                <td class="uk-visible@s">Video type</td>
+                                <td class="uk-visible@m">Video type</td>
                             </tr>
                         </thead>
                         <tbody>
@@ -309,7 +309,7 @@
                                     <span class="uk-label label-small {% if tag.category > 1 %}uk-label-danger{% elif tag.category == 1 %}uk-label-warning{% endif %}">{{ tag.name }}</span>
                                     {% endfor %}
                                 </td>
-                                <td class="uk-visible@s">
+                                <td class="uk-visible@m">
                                     {% for category in v.categories %}
                                     <span class="uk-label label-small uk-label-category">{{ category.name }}</span>
                                     {% endfor %}
