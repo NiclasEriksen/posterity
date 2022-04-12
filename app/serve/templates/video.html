@@ -289,7 +289,16 @@
                     <tbody>
                         {% for v in recommended %}
                         <tr>
-                            <td><a href="/{{ v.video_id }}">{{ v.title }}</a></td>
+                            <td>
+                                <div class="list-thumbnail uk-position-relative" style="display: table-cell;">
+                                    <a href="/{{ video.video_id }}">
+                                        <img src="/thumbnail/{{ video.video_id }}.jpg" loading="lazy" class="thumbnail-rounded uk-position-absolute uk-position-center">
+                                    </a>
+                                </div>
+                                <div style="display: table-cell;">
+                                    <a href="/{{ v.video_id }}">{{ v.title }}</a>
+                                </div>
+                            </td>
                             <td>
                                 {% for tag in v.tags_by_category %}
                                 <span class="uk-label label-small {% if tag.category > 1 %}uk-label-danger{% elif tag.category == 1 %}uk-label-warning{% endif %}">{{ tag.name }}</span>
