@@ -84,7 +84,7 @@ AD_DESCRIPTIONS = [
     "facebook:", "twitter:", "instagram:", "tumblr:", "news for more", "news here:", "more videos from",
     "with the latest news", "my instagram", "my facebook", "my twitter", "my youtube", "contact me",
     "thank you for your", "paypal", "with latest headlines", "sports and entertainment", "also watch",
-    "most watched", "contacts:"
+    "most watched", "contacts:", "----"
 ]
 
 
