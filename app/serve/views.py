@@ -127,35 +127,23 @@ def front_page():
 
     else:
         vq = Video.query
-        total = vq.count()
-
-        if current_user.check_auth(AUTH_LEVEL_ADMIN):
-            videos = vq.order_by(
-                Video.upload_time.desc()
-            ).offset(offset).limit(pp).all()
-        elif current_user.check_auth(AUTH_LEVEL_EDITOR):
-            videos = vq.filter(
-                or_(Video.private == False, Video.source == current_user.username)
-            ).order_by(
-                Video.upload_time.desc()
-            ).offset(offset).limit(pp).all()
-        elif current_user.is_authenticated:
-            videos = vq.filter(
+        if not current_user.check_auth(AUTH_LEVEL_USER):
+            vq = vq.filter(
                 or_(
                     Video.status == STATUS_DOWNLOADING,
                     Video.status == STATUS_COMPLETED,
-                    Video.status == STATUS_PENDING,
                     Video.status == STATUS_PROCESSING
-            )
-            ).filter(Video.private == False).order_by(
-                Video.upload_time.desc()
-            ).offset(offset).limit(pp).all()
-        else:
-            videos = vq.filter_by(
-                status=STATUS_COMPLETED
-            ).filter(Video.private == False).order_by(
-                Video.upload_time.desc()
-            ).offset(offset).limit(pp).all()
+                )
+            ).filter(Video.private == False)
+        elif not current_user.check_auth(AUTH_LEVEL_EDITOR):
+            vq = vq.filter(
+                Video.status != STATUS_PENDING
+            ).filter(or_(Video.source == current_user.username, Video.private == False))
+
+        total = vq.count()
+        videos = vq.order_by(
+            Video.upload_time.desc()
+        ).offset(offset).limit(pp).all()
 
     total_pages = total // pp + (1 if total % pp else 0)
 
@@ -500,7 +488,7 @@ def dashboard_page():
         or_(Video.status != STATUS_COMPLETED, Video.user_reports.any())
     )
     if not current_user.check_auth(AUTH_LEVEL_EDITOR):
-        q = q.filter(or_(not Video.private, Video.source == current_user.username))
+        q = q.filter(or_(Video.private == False, Video.source == current_user.username))
 
     current_tasks = q.order_by(
         Video.status
