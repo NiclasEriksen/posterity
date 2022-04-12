@@ -65,7 +65,7 @@ def recommend_videos(video, size=10) -> list:
     fields = ["title", "orig_title", "content_warning"]
     t = video.title.lower()
     for c in COMMON:
-        t.replace(c, "")
+        t = t.replace(c, "")
     q = f"""
     {t} {' '.join([t.name for t in video.tags])} {video.orig_title}
     """
