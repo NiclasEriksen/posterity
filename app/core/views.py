@@ -13,6 +13,7 @@ from app.dl.metadata import parse_input_data, find_duplicate_video_by_url, get_t
     get_title_from_api, get_description_from_api
 from app.serve.db import db_session, Video, AUTH_LEVEL_EDITOR
 from ..dl.youtube import get_description_from_source
+from ..serve.search import index_video_data
 
 core = Blueprint('core', __name__)
 logger = LocalProxy(lambda: current_app.logger)
@@ -40,6 +41,7 @@ def test_desc(video_id: str):
     video.orig_title = desc
     db_session.add(video)
     db_session.commit()
+    index_video_data(video)
 
     return desc
 
