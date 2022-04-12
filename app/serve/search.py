@@ -56,7 +56,7 @@ def index_video_data(video: Video):
 
 
 @catch_es_errors
-@cache.memoize(1)
+@cache.memoize(360)
 def recommend_videos(video, size=10) -> list:
     fields = ["title", "orig_title", "content_warning"]
     q = f"""
@@ -100,7 +100,7 @@ def recommend_videos(video, size=10) -> list:
 
 
 @catch_es_errors
-@cache.memoize(30)
+@cache.memoize(10)
 def search_videos(keyword: str, size=100) -> list:
 
     fields = ["title", "orig_title", "content_warning"]
@@ -142,7 +142,7 @@ def search_videos(keyword: str, size=100) -> list:
                             "operator": "and",
                             "fuzziness": "AUTO",
                             "prefix_length": 4,
-                            "boost": 4
+                            "boost": 3
                         }
                     }
                 ]
