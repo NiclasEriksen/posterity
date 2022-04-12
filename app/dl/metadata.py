@@ -605,6 +605,11 @@ def get_description_from_api(url: str) -> str:
 
 def strip_useless(s: str):
     s = s.replace("#News", "").replace("#NEWS", "")
+    s = s.replace("#GetCloserToTheNews", "")
+    out = re.findall(r"^([0-1][0-9]|[2][0-3]):([0-5][0-9])$", s)
+    for o in out:
+        s = s.replace(o, "")
+    s = s.replace("  ", " ")
     s = s.replace("  ", " ")
     return s
 
