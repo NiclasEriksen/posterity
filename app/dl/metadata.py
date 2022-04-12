@@ -618,7 +618,7 @@ def strip_useless(s: str):
     s = s.replace("  ", " ")
     s = s.replace("  ", " ")
     s = s.replace("\t", " ")
-    s = s.replace("Facebook", "", "Twitter", "", "Instagram", "")
+    s = s.replace("Facebook", "", "Twitter").replace("", "Instagram", "")
     return s.lstrip().rstrip()
 
 
