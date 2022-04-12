@@ -101,8 +101,8 @@
                 <div class=" uk-position-relative uk-container uk-height-1-1">
                     <div class="uk-text-center uk-position-center uk-position-relative">
                         {% if keyword|length %}Search results for <b>"{{ keyword }}"</b><br>{% endif %}
-                        {% if search_tag %}<p class="uk-margin-small">Filtered by: <span class="uk-label label-small {% if search_tag.category > 1 %}uk-label-danger{% elif search_tag.category == 1 %}uk-label-warning{% endif %}">{{ search_tag.name.upper() }}</span></p><br>{% endif %}
-                        {% if search_category %}<p class="uk-margin-small">Filtered by: <span class="uk-label label-small uk-label-category">{{ search_category.name.upper() }}</span></p><br>{% endif %}
+                        {% if search_tag %}<p class="uk-margin-small">Filtered by: <span class="uk-label label-small {% if search_tag.category > 1 %}uk-label-danger{% elif search_tag.category == 1 %}uk-label-warning{% endif %}">{{ search_tag.name.upper() }}</span></p>{% endif %}
+                        {% if search_category %}<p class="uk-margin-small">Filtered by: <span class="uk-label label-small uk-label-category">{{ search_category.name.upper() }}</span></p>{% endif %}
                         {% if keyword|length or search_tag or search_category %}<p class="uk-margin-small"><a href="/">Clear filter</a></p>{% endif %}
                         {% if total_results > 0 %}
                             Showing {{ result_offset + 1 }} to {{ result_offset + total_results }} of {{ total }} (page {{ current_page }} of {{ max_page }})
