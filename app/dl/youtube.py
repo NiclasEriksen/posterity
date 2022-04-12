@@ -95,7 +95,7 @@ AD_DESCRIPTIONS = [
     "discord:", "independent journalism", "made possible by supporters", "by patreon", "latest updates", "snapchat:",
     "street journal:", "google+:", ".com:", "more video:", "video center:", "and check out the", "all rights reserved",
     "©", "youtube.com/", "share this video", "accept bitcoin", "our merchandise", "merch store", "demonetize",
-    "we need your support",
+    "we need your support", "channel page:", "follow me..", "more videos here:", "(merch)", "available here:"
 ]
 
 
