@@ -784,7 +784,7 @@ def check_duplicates_route(video_id: str):
 @login_required
 @cache.cached(timeout=30)
 def check_all_duplicates_route():
-    if not current_user.check_auth(AUTH_LEVEL_ADMIN):
+    if not current_user.check_auth(AUTH_LEVEL_EDITOR):
         flash("You're lacking permissions to do that.", "error")
         return redirect(url_for("serve.dashboard_page"))
 
