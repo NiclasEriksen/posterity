@@ -98,6 +98,16 @@ def search_videos(keyword: str, size=100) -> list:
                         "multi_match": {
                             "query": keyword,
                             "fields": fields,
+                            "type": "phrase",
+                            "fuzziness": "AUTO",
+                            "prefix_length": 5,
+                            "boost": 5
+                        }
+                    },
+                    {
+                        "multi_match": {
+                            "query": keyword,
+                            "fields": fields,
                             "operator": "and",
                             "boost": 4
                         }
