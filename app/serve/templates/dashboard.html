@@ -29,8 +29,21 @@
                         <td><a href="/{{ t.video_id }}">{{ t.title }}</a></td>
                         <td>
                             <span class="uk-text-meta">{{ t.source }}</span><br>
+                            {% if t.status != STATUS_COMPLETED and not t.user_reports|length %}
                             {{ t.status_str.capitalize() }}
                             {% if not t.can_be_changed %}{{ t.progress }}{% endif %}
+                            {% else %}
+                            Reports pending
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    {% for t in duplicates %}
+                    <tr>
+                        <td><a href="/{{ t.video_id }}">{{ t.title }}</a></td>
+                        <td>
+                            <span class="uk-text-meta">{{ t.source }}</span><br>
+                            Possible duplicates: {{ t.duplicates|length }}
                         </td>
                     </tr>
                     {% endfor %}

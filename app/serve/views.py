@@ -513,10 +513,16 @@ def dashboard_page():
         Video.status
     ).all()
 
+    possible_duplicates = list_all_duplicates()
+
     for ct in current_tasks:
         ct.progress = "{0:.0f}%".format(get_progress_for_video(ct) * 100.0)
 
-    return render_template("dashboard.html", user=current_user, tokens=tokens, other_users=other_users, tasks=current_tasks)
+    return render_template(
+        "dashboard.html",
+        user=current_user, tokens=tokens, other_users=other_users,
+        tasks=current_tasks, duplicates=possible_duplicates
+    )
 
 
 @serve.route("/about", methods=["GET"])
@@ -961,6 +967,14 @@ def get_metadata_for_video(video_id: str) -> dict:
         index_video_data(video)
         return video.to_json()
     return {}
+
+
+def list_all_duplicates() -> list:
+    try:
+        return db_session.query(Video).filter(Video.duplicates.any()).all()
+    except Exception as e:
+        logger.error(e)
+        return []
 
 
 @cache.memoize(timeout=60)
