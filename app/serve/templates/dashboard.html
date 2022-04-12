@@ -38,11 +38,24 @@
                         </td>
                     </tr>
                     {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% if duplicates|length %}
+        <div class="uk-container uk-margin expandable-duplicates" hidden>
+            <h2>Possible duplicates:</h2>
+            <table class="uk-table uk-table-small uk-table-striped">
+                <thead>
+                    <tr>
+                        <td>Title</td>
+                        <td>Duplicates</td>
+                    </tr>
+                </thead>
+                <tbody>
                     {% for t in duplicates %}
                     <tr>
                         <td><a href="/{{ t.video_id }}">{{ t.title }}</a></td>
-                        <td>
-                            <span class="uk-text-meta">{{ t.source }}</span><br>
+                        <td class="uk-text-meta">
                             Possible duplicates: {{ t.duplicates|length }}
                         </td>
                     </tr>
@@ -50,6 +63,16 @@
                 </tbody>
             </table>
         </div>
+        <div class="uk-width-1-1 uk-position-relative" style="height: 48px;">
+            <a
+                class="uk-button uk-button-secondary uk-position-center"
+                uk-toggle="target: .expandable-duplicates; animation: uk-animation-fade"
+            >
+                <span class="expandable-duplicates">Show duplicates ({{ duplicates|length }})</span>
+                <span class="expandable-duplicates" hidden>Hide duplicates</span>
+            </a>
+        </div>
+        {% endif %}
     </div>
 </section>
 <section class="uk-section uk-section-default uk-section-small uk-container">
