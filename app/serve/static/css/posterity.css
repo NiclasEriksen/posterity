@@ -71,6 +71,10 @@ body, html {
     font-family: "Times New Roman", Times, serif;
 }
 
+.uk-light .uk-iconnav>.uk-active>a {
+    color: var(--grey);
+}
+
 .uk-input, .uk-select, .uk-textarea {
     background: var(--bg)!important;
     border-color: var(--light-grey);
