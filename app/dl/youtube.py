@@ -86,7 +86,7 @@ AD_DESCRIPTIONS = [
     "thank you for your", "paypal", "with latest headlines", "sports and entertainment", "also watch",
     "most watched", "contacts:", "----", "read more :", "read more:", "watch our live", "available on youtube",
     "nocomment:", "follow us on", "for more content", "download our", "available in ", "find more information here",
-    "watch the latest", "website:", "connect with today"
+    "watch the latest", "website:", "connect with today", "for the latest developments in", "apple:", "android "
 ]
 
 
