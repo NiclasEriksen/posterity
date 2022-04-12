@@ -160,12 +160,9 @@
                             <a href="/{{ video['video_id'] }}" class="uk-text-bold video-link{% if not video.ready_to_play %} video-link-not-ready{% endif %}">{{ video.title }}</a>
                             {% if video.tags|length or video.categories|length %}
                                 <br>
-                                {% for tag in video.tags_by_category %}
-                                <span class="uk-label label-small {% if tag.category > 1 %}uk-label-danger{% elif tag.category == 1 %}uk-label-warning{% endif %}">{{ tag.name }}</span>
-                                {% endfor %}
-                                {% for category in video.categories %}
-                                <span class="uk-label label-small uk-label-category">{{ category.name }}</span>
-                                {% endfor %}
+                                {% set v = video %}
+                                {% include "content_tag_list.html" %}
+                                {% include "category_tag_list.html" %}
                             {% endif %}
                             {% if video.can_be_changed and video.user_can_edit(current_user) %}
                             <a href="/edit_video/{{ video.video_id }}" class="uk-icon-link" uk-icon="icon: pencil; ratio: 0.85"></a>
