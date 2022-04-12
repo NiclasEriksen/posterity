@@ -289,6 +289,7 @@ def edit_video_post(video_id: str):
         return serve_video(video.video_id)
 
     title = request.form.get("custom_title")
+    description = request.form.get("description")
     private = request.form.get("private-checkbox")
     tl = request.form.getlist("tags_select")
     cl = request.form.getlist("categories_select")
@@ -319,6 +320,7 @@ def edit_video_post(video_id: str):
 
     if video.status != STATUS_DOWNLOADING:
         video.title = title
+        video.orig_title = description
 
     video.private = True if private == "on" else False
 

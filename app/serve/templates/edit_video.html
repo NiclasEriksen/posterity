@@ -20,6 +20,19 @@
                             >
                         </div>
                     </div>
+                    <div class="uk-width-1-1 uk-margin">
+                        <label class="uk-form-label">Description:</label>
+                        <div class="uk-inline uk-form-controls uk-margin-small uk-width-1-1">
+                            <span class="uk-form-icon" uk-icon="icon: quote-right"></span>
+                            <textarea
+                            class="uk-input uk-width-1-1 uk-form-width-medium uk-height-small"
+                            placeholder="Description"
+                            name="description"
+                            autofocus=""
+                            {% if video.status == STATUS_DOWNLOADING %}disabled{% endif %}
+                            >{{ video.orig_title }}</textarea>
+                        </div>
+                    </div>
 
                     <div class="uk-margin">
                         <div class="uk-text-meta">Content tags</div>
