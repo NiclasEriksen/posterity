@@ -96,7 +96,7 @@ AD_DESCRIPTIONS = [
     "street journal:", "google+:", ".com:", "more video:", "video center:", "and check out the", "all rights reserved",
     "©", "youtube.com/", "share this video", "accept bitcoin", "our merchandise", "merch store", "demonetize",
     "we need your support", "channel page:", "follow me..", "more videos here:", "(merch)", "available here:",
-    "watch and listen to"
+    "watch and listen to", "read the latest ", "top stories:", "24/7 here:", "24/7:"
 ]
 
 
