@@ -4,7 +4,7 @@ import logging
 from .helpers import program_path, height_to_width, fix_youtube_shorts, fix_reddit_old, check_stream, \
     is_dash, is_hls, is_avc, is_streaming_site, remove_links
 
-from .metadata import get_source_links, find_highest_quality_url
+from .metadata import get_source_links, find_highest_quality_url, strip_useless
 
 log = logging.getLogger("posterity_dl.yt")
 
@@ -182,7 +182,9 @@ def get_content_info(url: str) -> dict:
                     continue
                 ok.append(ds)
 
+
             desc = "\n".join(ok)
+            desc = strip_useless(desc)
 
             d["title"] = desc
             if "title" in video:
@@ -362,6 +364,7 @@ def get_description_from_source(url: str) -> str:
         elif "title" in video:
             desc = video["title"]
 
+    desc = strip_useless(desc)
     return desc
 
 

@@ -603,6 +603,12 @@ def get_description_from_api(url: str) -> str:
     return desc
 
 
+def strip_useless(s: str):
+    s = s.replace("#News", "").replace("#NEWS", "")
+    s = s.replace("  ", " ")
+    return s
+
+
 if __name__ == "__main__":
     # from pprint import pprint
     # pprint(technical_info("/home/fredspipa/Videos/bagdad.mp4"))
