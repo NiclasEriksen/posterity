@@ -198,11 +198,13 @@ def serve_video(video_id):
     recommended = []
     for result in results:
         v = Video.query.filter_by(video_id=result["_id"]).first()
-        if v:
+        if v and not v == video:
             if v.private and (not v.source == current_user.username or not current_user.check_auth(AUTH_LEVEL_EDITOR)):
                 continue
             else:
                 recommended.append(v)
+
+    recommended = recommended[:MAX_RELATED_VIDEOS]
 
     if "embed" in request.args:
         return render_template(
