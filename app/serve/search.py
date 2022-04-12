@@ -12,6 +12,10 @@ from app.extensions import cache
 es = Elasticsearch(os.environ.get("ES_SERVER_ADDRESS", "http://0.0.0.0:9200"))
 log = LocalProxy(lambda: current_app.logger)
 
+COMMON = [
+    "talking", "about", "subtitles", "with", "without", "longer", "quality"
+]
+
 
 def catch_es_errors(f) -> []:
     @functools.wraps(f)
@@ -59,8 +63,11 @@ def index_video_data(video: Video):
 @cache.memoize(60)
 def recommend_videos(video, size=10) -> list:
     fields = ["title", "orig_title", "content_warning"]
+    t = video.title.lower()
+    for c in COMMON:
+        t.replace(c, "")
     q = f"""
-    {video.title} {' '.join([t.name for t in video.tags])} {video.orig_title}
+    {t} {' '.join([t.name for t in video.tags])} {video.orig_title}
     """
     body = {
         "size": size,
