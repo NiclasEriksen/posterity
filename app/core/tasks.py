@@ -16,7 +16,7 @@ import time
 
 COMPARE_DURATION_THRESHOLD = 0.15
 COMPARE_RATIO_THRESHOLD = 0.25
-COMPARE_IMAGE_DATA_THRESHOLD = 8.5
+COMPARE_IMAGE_DATA_THRESHOLD = 7.5
 
 log = get_task_logger(__name__)
 
@@ -61,8 +61,8 @@ def check_duplicate_video(v1, v2) -> bool:
         elif abs(v1.aspect_ratio - v2.aspect_ratio) > COMPARE_RATIO_THRESHOLD:
             return False
 
-        v1_thumb_path = os.path.join(thumbnail_path, v1.video_id + "_thumb.jpg")
-        v2_thumb_path = os.path.join(thumbnail_path, v2.video_id + "_thumb.jpg")
+        v1_thumb_path = os.path.join(thumbnail_path, v1.video_id + "_thumb_blurred.jpg")
+        v2_thumb_path = os.path.join(thumbnail_path, v2.video_id + "_thumb_blurred.jpg")
 
         if os.path.isfile(v1_thumb_path) and os.path.isfile(v2_thumb_path):
             try:
