@@ -81,7 +81,8 @@ AD_DESCRIPTIONS = [
     "this channel", "check out my", "my channel", "promotion", "click here:", "on instagram", "on twitter",
     "on facebook", "ad-free", "watch more", "around the clock coverage", "trusted news",
     "in-depth channel:", "auto-generated", "breaking news videos", "read the sun", "____", "to read this story",
-    "facebook:", "twitter:", "instagram:", "tumblr:", "news for more", "news here:", "more videos from"
+    "facebook:", "twitter:", "instagram:", "tumblr:", "news for more", "news here:", "more videos from",
+    "with the latest news"
 ]
 
 
