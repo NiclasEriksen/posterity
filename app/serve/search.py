@@ -56,7 +56,7 @@ def index_video_data(video: Video):
 
 
 @catch_es_errors
-@cache.memoize(360)
+@cache.memoize(60)
 def recommend_videos(video, size=10) -> list:
     fields = ["title", "orig_title", "content_warning"]
     q = f"""
