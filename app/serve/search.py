@@ -64,10 +64,13 @@ def index_video_data(video: Video):
 def recommend_videos(video, size=10) -> list:
     fields = ["title", "orig_title", "content_warning"]
     title = video.title.lower()
+    orig_title = video.orig_title.lower()
     for c in COMMON:
         title = title.replace(c, "")
+    for c in COMMON:
+        orig_title = orig_title.replace(c, "")
     q = f"""
-    {title} {' '.join([t.name for t in video.tags])} {video.orig_title}
+    {title} {' '.join([t.name for t in video.tags])} {orig_title}
     """
     body = {
         "size": size,
