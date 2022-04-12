@@ -182,6 +182,8 @@ def get_content_info(url: str) -> dict:
             for ds in desc_segs:
                 if any(x in ds.lower() for x in AD_DESCRIPTIONS):
                     continue
+                elif ds.count("#") > 4:
+                    continue
 
                 ok.append(ds)
 
