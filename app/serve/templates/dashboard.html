@@ -24,14 +24,23 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for t in tasks %}
+                    {% for v in tasks %}
                     <tr>
-                        <td><a href="/{{ t.video_id }}">{{ t.title }}</a></td>
                         <td>
-                            <span class="uk-text-meta">{{ t.source }}</span><br>
-                            {% if t.status != STATUS_COMPLETED and not t.user_reports|length %}
-                            {{ t.status_str.capitalize() }}
-                            {% if not t.can_be_changed %}{{ t.progress }}{% endif %}
+                            <div class="list-thumbnail uk-position-relative" style="display: table-cell;">
+                                <a href="/{{ v.video_id }}">
+                                    <img src="/thumbnail/{{ v.video_id }}.jpg" loading="lazy" class="thumbnail-rounded uk-position-absolute uk-position-center">
+                                </a>
+                            </div>
+                            <div style="display: table-cell;">
+                                <a href="/{{ v.video_id }}">{{ v.title }}</a>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="uk-text-meta">{{ v.source }}</span><br>
+                            {% if v.status != STATUS_COMPLETED and not v.user_reports|length %}
+                            {{ v.status_str.capitalize() }}
+                            {% if not v.can_be_changed %}{{ v.progress }}{% endif %}
                             {% else %}
                             Reports pending
                             {% endif %}
@@ -52,11 +61,20 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for t in duplicates %}
+                    {% for v in duplicates %}
                     <tr>
-                        <td><a href="/{{ t.video_id }}">{{ t.title }}</a></td>
+                        <td>
+                            <div class="list-thumbnail uk-position-relative" style="display: table-cell;">
+                                <a href="/{{ v.video_id }}">
+                                    <img src="/thumbnail/{{ v.video_id }}.jpg" loading="lazy" class="thumbnail-rounded uk-position-absolute uk-position-center">
+                                </a>
+                            </div>
+                            <div style="display: table-cell;">
+                                <a href="/{{ v.video_id }}">{{ v.title }}</a>
+                            </div>
+                        </td>
                         <td class="uk-text-meta">
-                            Possible duplicates: {{ t.duplicates|length }}
+                            Possible duplicates: {{ v.duplicates|length }}
                         </td>
                     </tr>
                     {% endfor %}
