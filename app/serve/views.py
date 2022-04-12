@@ -514,6 +514,20 @@ def dashboard_page():
     ).all()
 
     possible_duplicates = list_all_duplicates()
+    pairs = []
+    paired = {}
+    for v in possible_duplicates:
+        for d in v.duplicates:
+            if d.video_id in paired:
+                if v.video_id in paired[d.video_id]:
+                    continue
+            pairs.append((v, d))
+            if not v.video_id in paired:
+                paired[v.video_id] = []
+            if not d.video_id in paired:
+                paired[d.video_id] = []
+            paired[v.video_id].append(d.video_id)
+            paired[d.video_id].append(v.video_id)
 
     for ct in current_tasks:
         ct.progress = "{0:.0f}%".format(get_progress_for_video(ct) * 100.0)
@@ -521,7 +535,7 @@ def dashboard_page():
     return render_template(
         "dashboard.html",
         user=current_user, tokens=tokens, other_users=other_users,
-        tasks=current_tasks, duplicates=possible_duplicates
+        tasks=current_tasks, duplicates=pairs
     )
 
 

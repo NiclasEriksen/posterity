@@ -56,25 +56,32 @@
             <table class="uk-table uk-table-small uk-table-striped">
                 <thead>
                     <tr>
-                        <td>Title</td>
-                        <td>Duplicates</td>
+                        <td>Video 1</td>
+                        <td>Video 2</td>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for v in duplicates %}
+                    {% for v1, v2 in duplicates %}
                     <tr>
                         <td>
                             <div class="list-thumbnail uk-position-relative" style="display: table-cell;">
-                                <a href="/{{ v.video_id }}">
-                                    <img src="/thumbnail/{{ v.video_id }}.jpg" loading="lazy" class="thumbnail-rounded uk-position-absolute uk-position-center">
+                                <a href="/{{ v1.video_id }}">
+                                    <img src="/thumbnail/{{ v1.video_id }}.jpg" loading="lazy" class="thumbnail-rounded uk-position-absolute uk-position-center">
                                 </a>
                             </div>
                             <div style="display: table-cell;">
-                                <a href="/{{ v.video_id }}">{{ v.title }}</a>
+                                <a href="/{{ v1.video_id }}">{{ v1.title }}</a>
                             </div>
                         </td>
-                        <td class="uk-text-meta">
-                            Possible duplicates: {{ v.duplicates|length }}
+                        <td>
+                            <div class="list-thumbnail uk-position-relative" style="display: table-cell;">
+                                <a href="/{{ v2.video_id }}">
+                                    <img src="/thumbnail/{{ v2.video_id }}.jpg" loading="lazy" class="thumbnail-rounded uk-position-absolute uk-position-center">
+                                </a>
+                            </div>
+                            <div style="display: table-cell;">
+                                <a href="/{{ v2.video_id }}">{{ v2.title }}</a>
+                            </div>
                         </td>
                     </tr>
                     {% endfor %}
