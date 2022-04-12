@@ -59,19 +59,55 @@ def index_video_data(video: Video):
 @cache.memoize(1)
 def recommend_videos(video, size=10) -> list:
     fields = ["title", "orig_title", "content_warning"]
+    q = f"""
+    {video.title} {' '.join([t.name for t in video.tags])} {video.orig_title}
+    """
     body = {
         "size": size,
         "query": {
-            "more_like_this": {
-                "fields": fields,
-                "like": [
+            "bool": {
+                "should": [
                     {
-                        "_index": "videos",
-                        "_id": video.video_id
+                        "multi_match": {
+                            "query": q,
+                            "fields": fields,
+                            "type": "phrase",
+                            "boost": 10
+                        }
                     },
-                ],
-                "min_term_freq": 1,
-                "max_query_terms": 12
+                    {
+                        "multi_match": {
+                            "query": q,
+                            "fields": fields,
+                            "type": "phrase",
+                            "boost": 5
+                        }
+                    },
+                    {
+                        "multi_match": {
+                            "query": q,
+                            "fields": fields,
+                            "operator": "and",
+                            "fuzziness": "AUTO",
+                            "prefix_length": 4,
+                            "boost": 3
+                        }
+                    },
+                    {
+                        "more_like_this": {
+                            "fields": fields,
+                            "like": [
+                                {
+                                    "_index": "videos",
+                                    "_id": video.video_id
+                                },
+                            ],
+                            "min_term_freq": 1,
+                            "max_query_terms": 24,
+                            "boost": 5
+                        }
+                    },
+                ]
             }
         }
     }
