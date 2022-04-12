@@ -71,7 +71,7 @@ def recommend_videos(video, size=10) -> list:
                     },
                 ],
                 "min_term_freq": 1,
-                "max_query_terms": 24
+                "max_query_terms": 12
             }
         }
     }
