@@ -80,7 +80,7 @@ AD_DESCRIPTIONS = [
     "subscribe", "premium", "% off", "discount", "sign up for", "patreon", "kickstarter",
     "this channel", "check out my", "my channel", "promotion", "click here:", "on instagram", "on twitter",
     "on facebook", "ad-free", "watch more", "around the clock coverage", "trusted news",
-    "in-depth channel:", "auto-generated", "breaking news videos", "read the sun",
+    "in-depth channel:", "auto-generated", "breaking news videos", "read the sun", "____", "To read this story",
 ]
 
 
