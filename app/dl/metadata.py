@@ -18,6 +18,7 @@ API_SITES = {
     "twitter.com": "twitter", "www.twitter.com": "twitter", "t.co": "twitter", "www.t.co": "twitter",
     "reddit.com": "reddit", "www.reddit.com": "reddit", "old.reddit.com": "reddit"
 }
+IGNORED = ["usa", "invasion", "ukrainewar", "ukrainerussia", "russianinvasion", "europe"]
 reddit = praw.Reddit(
     client_id=os.environ.get("REDDIT_CLIENT_ID", ""),
     client_secret=os.environ.get("REDDIT_CLIENT_SECRET", ""),
@@ -609,7 +610,8 @@ def strip_useless(s: str):
     out = re.findall(r"[0-9]{1,2}:[0-9]{2}", s)
     out += re.findall(r"#(\w+)", s)
     for o in out:
-        s = s.replace(o, "")
+        if o.lower() in IGNORED:
+            s = s.replace(o, "")
     s = s.replace("#", "")
     s = s.replace("  ", " ")
     s = s.replace("  ", " ")
