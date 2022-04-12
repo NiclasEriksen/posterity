@@ -57,15 +57,52 @@ def index_video_data(video: Video):
 
 @catch_es_errors
 @cache.memoize(30)
-def search_videos(keyword: str) -> list:
+def search_videos(keyword: str, size=100) -> list:
     body = {
-        "size": 100,
+        "size": size,
         "query": {
             "multi_match": {
                 "query": keyword,
                 "fields": ["title", "orig_title", "content_warning", "url", "source", "location"],
                 "fuzziness": "AUTO",
-                "prefix_length": 2
+                "prefix_length": 3
+            }
+        }
+    }
+
+    fields = ["title", "orig_title", "content_warning"]
+    body = {
+        "size": size,
+        "query": {
+            "bool": {
+                "must": [
+                    {
+                        "multi_match": {
+                            "query": keyword,
+                            "fields": fields,
+                            "fuzziness": "AUTO",
+                            "prefix_length": 4
+                        }
+                    }
+                ],
+                "should": [
+                    {
+                        "multi_match": {
+                            "query": keyword,
+                            "fields": fields,
+                            "type": "phrase",
+                            "boost": 10
+                        }
+                    },
+                    {
+                        "multi_match": {
+                            "query": keyword,
+                            "fields": fields,
+                            "operator": "and",
+                            "boost": 4
+                        }
+                    }
+                ]
             }
         }
     }

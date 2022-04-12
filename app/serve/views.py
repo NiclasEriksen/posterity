@@ -214,7 +214,7 @@ def serve_video(video_id):
     q = f"""
 {video.title} {' '.join([t.name for t in video.tags])} {video.orig_title}
 """
-    results = search_videos(q)
+    results = search_videos(q, size=MAX_RELATED_VIDEOS * 2)
     results = sorted(results, key=lambda x: x["_score"], reverse=True)
 
     recommended = []
