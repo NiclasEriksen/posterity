@@ -68,8 +68,8 @@ def check_duplicate_video(v1, v2) -> bool:
             try:
                 img1 = Image.open(v1_thumb_path)
                 img2 = Image.open(v2_thumb_path)
-                img1 = img1.resize((64, 64))
-                img2 = img2.resize((64, 64))
+                img1 = img1.resize((32, 32))
+                img2 = img2.resize((32, 32))
                 perc = image_diff_percent(img1, img2)
                 return perc < COMPARE_IMAGE_DATA_THRESHOLD
                 # print(perc)
