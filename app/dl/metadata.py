@@ -18,7 +18,7 @@ API_SITES = {
     "twitter.com": "twitter", "www.twitter.com": "twitter", "t.co": "twitter", "www.t.co": "twitter",
     "reddit.com": "reddit", "www.reddit.com": "reddit", "old.reddit.com": "reddit"
 }
-IGNORED = ["usa", "invasion", "ukrainewar", "ukrainerussia", "russianinvasion", "europe"]
+IGNORED = ["usa", "invasion", "ukrainewar", "ukrainerussia", "russianinvasion", "europe", "warinukraine"]
 reddit = praw.Reddit(
     client_id=os.environ.get("REDDIT_CLIENT_ID", ""),
     client_secret=os.environ.get("REDDIT_CLIENT_SECRET", ""),
