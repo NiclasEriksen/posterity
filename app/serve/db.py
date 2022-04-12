@@ -106,7 +106,6 @@ class Video(Base):
     orig_title = Column(String)
     url = Column(String)
     status = Column(Integer)
-    content_warning = Column(String)
     upload_time = Column(DateTime)
     video_format = Column(String)
     audio_format = Column(String)
@@ -145,6 +144,10 @@ class Video(Base):
         elif user.is_authenticated and user.username == self.source:
             return True
         return False
+
+    @property
+    def content_warning(self):
+        return " ".join(t.name for t in self.tags_by_category)
 
     @property
     def ready_to_play(self) -> bool:
@@ -378,10 +381,6 @@ class Video(Base):
             self.source = d["source"]
         except KeyError:
             self.source = ""
-        try:
-            self.content_warning = d["content_warning"]
-        except KeyError:
-            self.content_warning = "Unknown"
         try:
             formats = d["format"].split(" / ")
             self.video_format = formats[0]
