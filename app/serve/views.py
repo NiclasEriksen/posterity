@@ -122,7 +122,7 @@ def front_page():
         total = len(results)
         videos = []
         removed = 0
-        for result in results[offset:offset + MAX_RESULT_PER_PAGE]:
+        for result in results:
             vq = Video.query.filter_by(video_id=result["_id"])
             v = vq.first()
             if v:
@@ -135,6 +135,7 @@ def front_page():
             else:
                 removed += 1
                 remove_video_data_by_id(result["_id"])
+        videos = videos[offset: offset + MAX_RESULT_PER_PAGE]
 
         total -= removed
 
