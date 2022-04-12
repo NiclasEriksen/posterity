@@ -71,22 +71,6 @@ def recommend_videos(video, size=10) -> list:
                         "multi_match": {
                             "query": q,
                             "fields": fields,
-                            "type": "phrase",
-                            "boost": 10
-                        }
-                    },
-                    {
-                        "multi_match": {
-                            "query": q,
-                            "fields": fields,
-                            "type": "phrase",
-                            "boost": 5
-                        }
-                    },
-                    {
-                        "multi_match": {
-                            "query": q,
-                            "fields": fields,
                             "operator": "or",
                             "fuzziness": "AUTO",
                             "prefix_length": 4,
