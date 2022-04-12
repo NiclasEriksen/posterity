@@ -88,7 +88,8 @@ AD_DESCRIPTIONS = [
     "nocomment:", "follow us on", "for more content", "download our", "available in ", "find more information here",
     "watch the latest", "website:", "connect with today", "for the latest developments in", "apple:", "android ",
     "original article:", "original video:", "homepage:", "ig:", "snap:", "pinterest:", "get the free",
-    "join us from any", "more videos:", "travel vlogs", "find us online", "is your source for", "get the latest news"
+    "join us from any", "more videos:", "travel vlogs", "find us online", "is your source for", "get the latest news",
+    "watch us on"
 ]
 
 
