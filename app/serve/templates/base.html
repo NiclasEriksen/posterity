@@ -40,19 +40,19 @@
             </div>
             <div class="uk-width-expand uk-padding-remove uk-text-center uk-height-1-1 uk-position-relative uk-visible@s">
                 <div class="uk-position-center uk-text-small uk-text-muted">
-                    <span class="uk-visible@s">
-                        <a href="/about" uk-icon="icon: info">About </a>
-                    </span>
-                    <span style="padding: 0 0.1rem 0 0.1rem;"> | </span>
-                    <span>
-                        <a href="/download_archive" uk-icon="icon: cloud-download">Downloads </a>
-                    </span>
-                    {% if current_user.check_auth(AUTH_LEVEL_EDITOR) %}
-                    <span style="padding: 0 0.1rem 0 0.1rem;"> | </span>
-                    <span>
-                        <a href="/dashboard" uk-icon="icon: settings">Dashboard </a>
-                    </span>
-                    {% endif %}
+                    <ul class="uk-iconnav">
+                        <li{% if request.path == "/about" %} class="uk-active"{% endif %}>
+                            <a href="/about" uk-icon="icon: info">About </a>
+                        </li>
+                        <li{% if request.path == "/download_archive" %} class="uk-active"{% endif %}>
+                            <a href="/download_archive" uk-icon="icon: cloud-download">Downloads </a>
+                        </li>
+                        {% if current_user.check_auth(AUTH_LEVEL_EDITOR) %}
+                        <li{% if request.path == "/dashboard" %} class="uk-active"{% endif %}>
+                            <a href="/dashboard" uk-icon="icon: settings">Dashboard </a>
+                        </li>
+                        {% endif %}
+                    </ul>
                 </div>
             </div>
             <div class="uk-width-1-3 uk-width-1-5@s uk-padding-remove uk-height-1-1 uk-position-relative">
