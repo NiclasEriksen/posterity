@@ -212,7 +212,7 @@ def serve_video(video_id):
             return render_template("private.html")
 
     q = f"""
-{video.title} {' '.join([t.name for t in video.tags + video.categories])} {video.orig_title}
+{video.title} {' '.join([t.name for t in video.categories])} {video.orig_title}
 """
     results = search_videos(q)
     results = sorted(results, key=lambda x: x["_score"], reverse=True)
