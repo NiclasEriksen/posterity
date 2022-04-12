@@ -90,8 +90,7 @@ AD_DESCRIPTIONS = [
     "original article:", "original video:", "homepage:", "ig:", "snap:", "pinterest:", "get the free",
     "join us from any", "more videos:", "travel vlogs", "find us online", "is your source for", "get the latest news",
     "watch us on ", "get our app:", "apple tv:", "android:", "roku:", "fire tv:", "our shows", "podcasts:",
-    "feedly:", "flipboard:", "youtube:",
-    "for more:"
+    "feedly:", "flipboard:", "youtube:", "iphone:", "razor:", "for more:"
 ]
 
 
