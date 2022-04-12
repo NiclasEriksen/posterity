@@ -167,7 +167,6 @@ def download_from_json_data(metadata: dict, file_name: str):
         metadata["status"] = STATUS_COOKIES
         yield metadata
 
-    print("Whats up?")
     video_formats = list(d["video_formats"].keys())
     video_links = d["video_formats"]
     if not len(video_formats):
