@@ -101,15 +101,15 @@ def front_page():
     page = request.args.get("p", type=int, default=1)
     pp = request.args.get("pp", type=int, default=MAX_RESULT_PER_PAGE)
     kw = request.args.get("q", type=str, default="")
-    t = request.args.get("t", type=str, default="")
-    c = request.args.get("c", type=str, default="")
+    t = request.args.get("t", type=int, default=-1)
+    c = request.args.get("c", type=int, default=-1)
 
     tag = None
-    if len(t):
-        tag = db_session.query(ContentTag).filter_by(name=t).first()
+    if t >= 0:
+        tag = db_session.query(ContentTag).filter_by(id=t).first()
     category = None
-    if len(c):
-        category = db_session.query(Category).filter_by(name=c).first()
+    if c >= 0:
+        category = db_session.query(Category).filter_by(id=c).first()
 
     offset = max(0, page - 1) * pp
 
