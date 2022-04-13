@@ -42,7 +42,7 @@ AD_DESCRIPTIONS = [
     "©", "youtube.com/", "share this video", "accept bitcoin", "our merchandise", "merch store", "demonetize",
     "we need your support", "channel page:", "follow me..", "more videos here:", "(merch)", "available here:",
     "watch and listen to", "read the latest ", "top stories:", "24/7 here:", "24/7:", "support the channel",
-    "thanks to our co-producers"
+    "thanks to our co-producers", "get breaking news"
 ]
 IGNORED = ["usa", "invasion", "ukrainewar", "ukrainerussia", "russianinvasion", "europe", "warinukraine"]
 reddit = praw.Reddit(
