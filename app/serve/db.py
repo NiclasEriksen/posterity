@@ -366,6 +366,7 @@ class Video(Base):
             "processed_file_size": self.processed_file_size if self.processed_file_size else 0,
             "duration": self.duration,
             "location": self.location,
+            "private": self.private,
             "video_id": self.video_id,
             "verified": self.verified,
             "upload_time": time.mktime(self.upload_time.timetuple()) if self.upload_time else 0,
