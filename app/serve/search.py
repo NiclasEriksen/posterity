@@ -50,11 +50,9 @@ def index_video_data(video: Video):
     body = {
         "title": video.title,
         "orig_title": video.orig_title,
-        "url": video.url,
         "content_warning": video.content_warning,
         "upload_date": datetime.timestamp(video.upload_time),
         "source": video.source,
-        "location": video.location
     }
 
     _result = es.index(index="videos", id=video.video_id, body=body)
@@ -158,9 +156,22 @@ def search_videos(keyword: str, size=100) -> list:
                     }
                 ]
             }
+        },
+        "aggregations": {
+            "rare_sample": {
+                "sampler": {
+                    "shard_size": 100,
+                },
+                "aggregations": {
+                    "keywords": {
+                        "significant_text": {
+                            "field": "title"
+                        }
+                    }
+                }
+            }
         }
     }
 
     res = es.search(index="videos", body=body)
-
     return res["hits"]["hits"]
