@@ -80,6 +80,9 @@ body, html {
     border-color: var(--light-grey);
     color: var(--light-grey);
 }
+.uk-textarea {
+    line-height: 24px!important;
+}
 .uk-input:focus, .uk-select:focus, .uk-textarea:focus {
     background: var(--black)!important;
     color: var(--grey);
