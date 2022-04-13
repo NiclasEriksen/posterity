@@ -105,7 +105,7 @@ def recommend_videos(video, size=10) -> list:
         "aggregations": {
             "rare_sample": {
                 "sampler": {
-                    "shard_size": 100,
+                    "shard_size": 10,
                 },
                 "aggregations": {
                     "keywords": {
