@@ -704,8 +704,10 @@ def strip_useless(s: str):
         if o.lower() in IGNORED:
             s = s.replace(o, "")
     s = s.replace("#", "")
+    s = s.replace("    ", " ")
+    s = s.replace("   ", " ")
     s = s.replace("  ", " ")
-    s = s.replace("  ", " ")
+    s = s.replace("&amp;", "&")
     s = s.replace("\t", " ")
     s = s.replace("Facebook", "").replace("Twitter", "").replace("Instagram", "")
     return s.lstrip().rstrip()
