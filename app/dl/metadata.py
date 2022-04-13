@@ -9,15 +9,41 @@ import praw
 from prawcore.exceptions import NotFound
 from datetime import datetime
 from urllib.parse import urlparse
+from yt_dlp import YoutubeDL
+from yt_dlp.utils import DownloadError
 from dotenv import load_dotenv
 from . import json_path, tmp_path, original_path,\
     STATUS_DOWNLOADING, STATUS_INVALID
-from .helpers import reverse_readline, get_og_tags, find_between, remove_links
+from .helpers import reverse_readline, get_og_tags, find_between, remove_links, fix_reddit_old, fix_youtube_shorts,\
+    program_path
 
 API_SITES = {
     "twitter.com": "twitter", "www.twitter.com": "twitter", "t.co": "twitter", "www.t.co": "twitter",
     "reddit.com": "reddit", "www.reddit.com": "reddit", "old.reddit.com": "reddit"
 }
+AD_DESCRIPTIONS = [
+    "subscribe", "premium", "% off", "discount", "sign up for", "patreon", "kickstarter",
+    "this channel", "check out my", "my channel", "promotion", "click here:", "on instagram", "on twitter",
+    "on facebook", "ad-free", "watch more", "around the clock coverage", "trusted news",
+    "in-depth channel:", "auto-generated", "breaking news videos", "read the sun", "____", "to read this story",
+    "facebook:", "twitter:", "instagram:", "tumblr:", "news for more", "news here:", "more videos from",
+    "with the latest news", "my instagram", "my facebook", "my twitter", "my youtube", "contact me",
+    "thank you for your", "paypal", "with latest headlines", "sports and entertainment", "also watch",
+    "most watched", "contacts:", "----", "read more :", "read more:", "watch our live", "available on youtube",
+    "nocomment:", "follow us on", "for more content", "download our", "available in ", "find more information here",
+    "watch the latest", "website:", "connect with today", "for the latest developments in", "apple:", "android ",
+    "original article:", "original video:", "homepage:", "ig:", "snap:", "pinterest:", "get the free",
+    "join us from any", "more videos:", "travel vlogs", "find us online", "is your source for", "get the latest news",
+    "watch us on ", "get our app:", "apple tv:", "android:", "roku:", "fire tv:", "our shows", "podcasts:",
+    "feedly:", "flipboard:", "youtube:", "iphone:", "razor:", "for more:", "on social:", "brings you the latest",
+    "biggest stories of", "listen now -", "telegram:", "website :", "for more news ", "social media:",
+    "discord:", "independent journalism", "made possible by supporters", "by patreon", "latest updates", "snapchat:",
+    "street journal:", "google+:", ".com:", "more video:", "video center:", "and check out the", "all rights reserved",
+    "©", "youtube.com/", "share this video", "accept bitcoin", "our merchandise", "merch store", "demonetize",
+    "we need your support", "channel page:", "follow me..", "more videos here:", "(merch)", "available here:",
+    "watch and listen to", "read the latest ", "top stories:", "24/7 here:", "24/7:", "support the channel",
+    "thanks to our co-producers"
+]
 IGNORED = ["usa", "invasion", "ukrainewar", "ukrainerussia", "russianinvasion", "europe", "warinukraine"]
 reddit = praw.Reddit(
     client_id=os.environ.get("REDDIT_CLIENT_ID", ""),
@@ -602,6 +628,69 @@ def get_description_from_api(url: str) -> str:
                 log.error(e)
 
     return desc
+
+
+def get_description_from_source(url: str) -> str:
+    desc = ""
+    url = fix_youtube_shorts(url)
+    url = fix_reddit_old(url)
+
+    log.info("Fetching data from YouTube link...")
+    ydl = YoutubeDL({
+        "cookiefile": program_path("cookies.txt"),
+        "noplaylist": True
+    })
+
+    video = None
+
+    with ydl:
+        try:
+            result = ydl.extract_info(
+                url,
+                download=False
+            )
+        except DownloadError as e:
+            log.error("Error during fetching of video info, doing manual")
+            video = None
+        except Exception as e:
+            log.error(e)
+            log.error("Unhandled error during YoutubeDL extraction.")
+        else:
+            if "entries" in result:
+                try:
+                    video = result["entries"][0]
+                except (IndexError, ValueError, AttributeError):
+                    video = None
+            else:
+                video = result
+
+    if not video:
+        log.error("Was not able to find a video on the url given.")
+        return desc
+    else:
+        if "description" in video:
+            desc = video["description"]
+
+        elif "title" in video:
+            desc = video["title"]
+
+    return clean_description(desc)
+
+
+def clean_description(desc: str):
+    desc = remove_links(desc)
+    desc_segs = desc.split("\n")
+    ok = []
+    for ds in desc_segs:
+        if any(x in ds.lower() for x in AD_DESCRIPTIONS):
+            continue
+        elif ds.count("#") > 4:
+            continue
+        ok.append(ds)
+
+    desc = "\n".join(ok)
+    desc = strip_useless(desc)
+    return desc[:1024]
 
 
 def strip_useless(s: str):

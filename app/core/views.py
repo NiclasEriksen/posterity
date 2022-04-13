@@ -12,10 +12,8 @@ from .tasks import download_task, post_process_task
 from app.dl import STATUS_DOWNLOADING, STATUS_PENDING, STATUS_FAILED, STATUS_COMPLETED, STATUS_PROCESSING
 from app.dl.helpers import unique_filename, remove_emoji, valid_video_url, minimize_url
 from app.dl.metadata import parse_input_data, find_duplicate_video_by_url, get_title_from_html, API_SITES, \
-    get_title_from_api, get_description_from_api
+    get_title_from_api, get_description_from_api, get_description_from_source
 from app.serve.db import db_session, Video, AUTH_LEVEL_EDITOR
-from ..dl.youtube import get_description_from_source
-from ..serve.search import index_video_data
 
 core = Blueprint('core', __name__)
 logger = LocalProxy(lambda: current_app.logger)
