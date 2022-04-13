@@ -101,6 +101,20 @@ def recommend_videos(video, size=10) -> list:
                     },
                 ]
             }
+        },
+        "aggregations": {
+            "rare_sample": {
+                "sampler": {
+                    "shard_size": 100,
+                },
+                "aggregations": {
+                    "keywords": {
+                        "significant_text": {
+                            "field": "title"
+                        }
+                    }
+                }
+            }
         }
     }
 
