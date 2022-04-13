@@ -68,11 +68,6 @@
                         <div class="uk-width-1-1 uk-width-1-2@s uk-padding-small">
                             <a class="uk-input uk-button uk-button-warning {% if video.ready_to_play %}" href="/check_duplicates/{{ video.video_id }}"{% else %}uk-button-disabled"{% endif %}><span uk-icon="icon: copy"></span> Duplicate check</a>
                         </div>
-                        {% if current_user.check_auth(AUTH_LEVEL_ADMIN) %}
-                        <div class="uk-width-1-1 uk-width-1-2@s uk-padding-small">
-                            <a class="uk-input uk-button uk-button-warning {% if video.ready_to_play %}" href="/api/v1/core/desc_from_source/{{ video.video_id }}"{% else %}uk-button-disabled"{% endif %}><span uk-icon="icon: quote-right"></span> Fetch description</a>
-                        </div>
-                        {% endif %}
                         {% endif %}
 
                         <div class="uk-width-1-1 uk-width-1-2@s uk-padding-small">
