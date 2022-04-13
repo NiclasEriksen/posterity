@@ -155,6 +155,64 @@ function suggestTitle() {
 }
 
 
+function suggestDescription(video_id) {
+    var desc_field = document.getElementById("description");
+    var suggest_btn = document.getElementById("suggest-description-button");
+    console.log(video_id);
+    if (!video_id || !desc_field) {
+        return;
+    }
+    if (video_id.length <= 0) {
+        return;
+    }
+    console.log("Asking for description suggestion.");
+
+    var suggest_btn_old_text = "";
+    if (suggest_btn) {
+        suggest_btn.disabled = true;
+        suggest_btn_old_text = suggest_btn.innerHTML;
+        suggest_btn.innerHTML = "<div uk-spinner='ratio: 0.5'></div> Awaiting suggestion";
+    }
+
+    var request = new XMLHttpRequest();
+    request.open('GET', '/api/v1/core/desc_from_source/' + video_id, true);
+    request.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
+    request.onload = function() {
+        if (suggest_btn) {
+            suggest_btn.disabled = false;
+            suggest_btn.innerHTML = suggest_btn_old_text;
+        }
+        if (this.status == 200) {
+            if (this.response.length > 0) {
+                desc_field.value = this.response;
+            } else if (desc_field.value.length == 0) {
+                title_field.value = "No description found";
+            }
+        } else if (this.status >= 400 && this.status < 500) {
+            if (suggest_btn) {
+                suggest_btn.classList.add("uk-animation-shake");
+            }
+            console.log(this.response);
+        } else {
+            console.log("Unknown error from server when requesting title suggestion.");
+        }
+    }
+    request.onerror = function(err) {
+        console.error(err);
+        if (suggest_btn) {
+            suggest_btn.disabled = false;
+            suggest_btn.innerHTML = suggest_btn_old_text;
+        }
+        return;
+    }
+    try {
+        request.send("");
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+
 function startDownload(video_id) {
     var dl_btn = document.getElementById("start-download-button");
     var status_field = document.getElementById("video-download-status");

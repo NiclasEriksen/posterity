@@ -167,7 +167,7 @@
                                 {% include "content_tag_list.html" %}
                                 {% include "category_tag_list.html" %}
                             {% endif %}
-                            {% if video.can_be_changed and video.user_can_edit(current_user) %}
+                            {% if video.user_can_edit(current_user) %}
                             <a href="/edit_video/{{ video.video_id }}" class="uk-icon-link" uk-icon="icon: pencil; ratio: 0.85"></a>
                             {% endif %}
                         </div>

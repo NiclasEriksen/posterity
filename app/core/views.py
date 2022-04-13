@@ -33,17 +33,18 @@ def before_request_func():
 
 @core.route("/desc_from_source/<video_id>")
 @login_required
-def test_desc(video_id: str):
+@limiter.limit("10/minute", override_defaults=False, exempt_when=lambda: current_user.is_editor)
+def description_suggestion(video_id: str):
     video = db_session.query(Video).filter_by(video_id=video_id).first()
     if not video:
-        return "Video not found"
+        return Response("Video not found", 404)
     if not video.user_can_edit(current_user):
-        return "No permissions, you douche"
+        return Response("No permissions, you douche", 401)
     desc = get_description_from_source(video.url)
     if not len(desc):
         desc = get_description_from_api(video.url)
     if not len(desc):
-        return "No description found"
+        return Response("No description found", 404)
 
     video.orig_title = desc
     db_session.add(video)

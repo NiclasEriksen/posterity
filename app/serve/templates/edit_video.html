@@ -27,10 +27,14 @@
                             <textarea
                             class="uk-input uk-width-1-1 uk-form-width-medium uk-height-small"
                             placeholder="Description"
+                            id="description"
                             name="description"
                             autofocus=""
                             {% if video.status == STATUS_DOWNLOADING %}disabled{% endif %}
                             >{{ video.orig_title }}</textarea>
+                        </div>
+                        <div class="uk-margin-small uk-width-1-1">
+                            <button type="button" class="uk-button uk-button-secondary uk-button-small" id="suggest-description-button" onclick="suggestDescription('{{ video.video_id }}');" {% if video.status == STATUS_DOWNLOADING %}disabled{% endif %}>Scrape source for description</button>
                         </div>
                     </div>
 
@@ -83,4 +87,5 @@
         </div>
     </div>
 </div>
+<script src="{{ url_for('serve.static', filename='js/klippekort.js') }}"></script>
 {% endblock content %}
