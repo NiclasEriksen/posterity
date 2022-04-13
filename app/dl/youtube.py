@@ -110,12 +110,12 @@ def get_content_info(url: str) -> dict:
     if url.lower().endswith(".mp4"):
         log.debug(f"It's a direct mp4 link, that's nice.")
         return {
-            "video_formats": {"source": {"url": url, "dimensions": (0, 0)}},
+            "video_formats": {"source": {"url": url, "dimensions": (0, 0), "audio": True}},
             "audio_formats": {},
             "sub_formats": {},
             "duration": 0.0,
             "thumbnail": "",
-            "title": "No title (mp4)"
+            "title": "No title (mp4)",
         }
     url = fix_youtube_shorts(url)
     url = fix_reddit_old(url)
@@ -171,7 +171,7 @@ def get_content_info(url: str) -> dict:
             url = find_highest_quality_url(urls)
 
             return {
-                "video_formats": {"source": {"url": url, "dimensions": (0, 0)}},
+                "video_formats": {"source": {"url": url, "dimensions": (0, 0), "audio": True}},
                 "audio_formats": {},
                 "sub_formats": {},
                 "duration": 0.0,
