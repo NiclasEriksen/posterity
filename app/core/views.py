@@ -46,11 +46,6 @@ def description_suggestion(video_id: str):
     if not len(desc):
         return Response("No description found", 404)
 
-    video.orig_title = desc
-    db_session.add(video)
-    db_session.commit()
-    index_video_data(video)
-
     return desc
 
 
