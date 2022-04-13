@@ -166,6 +166,11 @@ def download_from_json_data(metadata: dict, file_name: str):
         log.error("Need cookies for age restricted videos...")
         metadata["status"] = STATUS_COOKIES
         yield metadata
+    except Exception as e:
+        log.error(e)
+        log.error("Unhandled exception during fetching of content info.")
+        metadata["status"] = STATUS_FAILED
+        yield metadata
 
     video_formats = list(d["video_formats"].keys())
     video_links = d["video_formats"]
