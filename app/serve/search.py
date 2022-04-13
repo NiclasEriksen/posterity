@@ -62,8 +62,16 @@ def index_video_data(video: Video):
 @cache.memoize(60)
 def recommend_videos(video, size=10) -> list:
     fields = ["title", "orig_title", "content_warning"]
-    title = video.title.lower()
-    orig_title = video.orig_title.lower()
+    if video.title:
+        title = video.title.lower()
+    else:
+        title = ""
+
+    if video.orig_title:
+        orig_title = video.orig_title.lower()
+    else:
+        orig_title = ""
+
     for c in COMMON:
         title = title.replace(c, "")
     for c in COMMON:
