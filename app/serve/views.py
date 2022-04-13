@@ -213,8 +213,13 @@ def serve_video(video_id):
             logger.error("Video is set to private.")
             return render_template("private.html")
 
-    results = recommend_videos(video, size=MAX_RELATED_VIDEOS * 2)
-    results = sorted(results, key=lambda x: x["_score"], reverse=True)
+    try:
+        results = recommend_videos(video, size=MAX_RELATED_VIDEOS * 2)
+        results = sorted(results, key=lambda x: x["_score"], reverse=True)
+    except Exception as e:
+        logger.error(e)
+        logger.error("Unable to get recommendations for video, error above.")
+        results = []
 
     recommended = []
     for result in results:
