@@ -164,10 +164,7 @@ def get_content_info(url: str) -> dict:
         if "thumbnail" in video:
             d["thumbnail"] = video["thumbnail"]
         if "description" in video:
-            if "title" in video:
-                desc = video["title"] + "\n" + video["description"]
-            else:
-                desc = video["description"]
+            desc = video["description"]
             d["title"] = clean_description(desc)
 
         elif "title" in video:
