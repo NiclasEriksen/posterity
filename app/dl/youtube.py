@@ -2,7 +2,7 @@ from yt_dlp import YoutubeDL
 from yt_dlp.utils import DownloadError
 import logging
 from .helpers import program_path, height_to_width, fix_youtube_shorts, fix_reddit_old, check_stream, \
-    is_dash, is_hls, is_avc, is_streaming_site, remove_links
+    is_dash, is_hls, is_avc, is_streaming_site, remove_links, is_http
 
 from .metadata import get_source_links, find_highest_quality_url, strip_useless, clean_description
 
@@ -195,6 +195,7 @@ def get_content_info(url: str) -> dict:
             log.debug(video)
             log.error("No format key in video.")
         else:
+            print(video["formats"])
             for u in [f for f in video["formats"]]:
                 video_id_found = ""
                 if "url" in u:
@@ -216,7 +217,7 @@ def get_content_info(url: str) -> dict:
                         video_id_found = u["format_id"]
                         d["video_formats"][vid_ids[u["format_id"]]] = {"url": u["url"], "dimensions": (x, y), "audio": False}
                     elif not is_streaming_site(url):
-                        if is_hls(u["format_id"]) or is_dash(u["format_id"]) or is_avc(u["format_id"]):
+                        if is_http(u["format_id"]) or is_hls(u["format_id"]) or is_dash(u["format_id"]) or is_avc(u["format_id"]):
                             video_id_found = u["format_id"]
                             d["video_formats"][u["format"]] = {"url": u["url"], "dimensions": (x, y), "audio": False}
                         else:
@@ -234,7 +235,7 @@ def get_content_info(url: str) -> dict:
                         if u["format_id"] in vid_ids.keys():
                             video_id_found = u["format_id"]
                             d["video_formats"][vid_ids[u["format_id"]]] = {"url": u["url"], "dimensions": (x, y), "audio": False}
-                        elif is_hls(u["format_id"]) or is_dash(u["format_id"]) or is_avc(u["format_id"]):
+                        elif is_http(u["format_id"]) or is_hls(u["format_id"]) or is_dash(u["format_id"]) or is_avc(u["format_id"]):
                             video_id_found = u["format_id"]
                             d["video_formats"][u["format"]] = {"url": u["url"], "dimensions": (x, y), "audio": False}
 
@@ -291,3 +292,95 @@ if __name__ == "__main__":
     print("=================================")
     print(get_content_info("https://www.youtube.com/watch?v=AndsdQO0Wmk"))
     print("=================================")
+
+#
+# [
+#     {
+#         'format_id': 'hls-288',
+#         'format_index': None,
+#         'url': 'https://video.twimg.com/amplify_video/1507863263668748288/pl/480x270/fAtBxreSuYgh6ZOn.m3u8?container=fmp4', 'manifest_url': 'https://video.twimg.com/amplify_video/1507863263668748288/pl/1wYOS01EuAVRitch.m3u8?tag=14&container=fmp4', 'tbr': 288.0, 'ext': 'mp4', 'fps': None, 'protocol': 'm3u8_native', 'preference': None, 'quality': None, 'width': 480, 'height': 270, 'vcodec': 'avc1.4d001e', 'acodec': 'mp4a.40.2', 'dynamic_range': 'SDR', 'video_ext': 'mp4', 'audio_ext': 'none', 'vbr': 288.0, 'abr': 0.0, 'format': 'hls-288 - 480x270',
+#         'resolution': '480x270',
+#         'filesize_approx': 2773647.36,
+#         'http_headers': {
+#             'User-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+#             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+#             'Accept-encoding': 'gzip, deflate, br',
+#             'Accept-language': 'en-us,en;q=0.5',
+#             'Sec-fetch-mode': 'navigate'
+#         }
+#     }, {
+#         'url': 'https://video.twimg.com/amplify_video/1507863263668748288/vid/480x270/AYotHadA0tE0Y-Gi.mp4?tag=14',
+#         'format_id': 'http-288',
+#         'tbr': 288,
+#         'width': 480,
+#         'height': 270,
+#         'protocol': 'https',
+#         'ext': 'mp4',
+#         'video_ext': 'mp4',
+#         'audio_ext': 'none',
+#         'vbr': 288, 'abr': 0,
+#         'format': 'http-288 - 480x270',
+#         'resolution': '480x270',
+#         'dynamic_range':'SDR',
+#         'filesize_approx': 2773647.36,
+#         'http_headers': {
+#             'User-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+#             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+#             'Accept-encoding': 'gzip, deflate, br',
+#             'Accept-language': 'en-us,en;q=0.5',
+#             'Sec-fetch-mode': 'navigate'
+#         }
+#     }, {
+#         'format_id': 'hls-832',
+#         'format_index': None,
+#         'url': 'https://video.twimg.com/amplify_video/1507863263668748288/pl/640x360/b4am5XambTJ62AfU.m3u8?container=fmp4',
+#         'manifest_url': 'https://video.twimg.com/amplify_video/1507863263668748288/pl/1wYOS01EuAVRitch.m3u8?tag=14&container=fmp4',
+#         'tbr': 832.0,
+#         'ext': 'mp4',
+#         'fps': None,
+#         'protocol': 'm3u8_native',
+#         'preference': None,
+#         'quality': None,
+#         'width': 640,
+#         'height': 360,
+#         'vcodec': 'avc1.4d001f',
+#         'acodec': 'mp4a.40.2',
+#         'dynamic_range': 'SDR',
+#         'video_ext': 'mp4',
+#         'audio_ext': 'none',
+#         'vbr': 832.0,
+#         'abr': 0.0,
+#         'format': 'hls-832 - 640x360',
+#         'resolution': '640x360',
+#         'filesize_approx': 8012759.039999999,
+#         'http_headers': {
+#             'User-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+#             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+#             'Accept-encoding': 'gzip, deflate, br',
+#             'Accept-language': 'en-us,en;q=0.5',
+#             'Sec-fetch-mode': 'navigate'
+#         }
+#     }, {
+#         'url': 'https://video.twimg.com/amplify_video/1507863263668748288/vid/640x360/vKzkUBwDZZOZz68Y.mp4?tag=14',
+#         'format_id': 'http-832',
+#         'tbr': 832,
+#         'width': 640,
+#         'height': 360,
+#         'protocol': 'https',
+#         'ext': 'mp4',
+#         'video_ext': 'mp4',
+#         'audio_ext': 'none',
+#         'vbr': 832,
+#         'abr': 0,
+#         'format': 'http-832 - 640x360',
+#         'resolution': '640x360',
+#         'dynamic_range': 'SDR',
+#         'filesize_approx': 8012759.039999999,
+#         'http_headers': {
+#             'User-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36', 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8', 'Accept-encoding': 'gzip, deflate, br', 'Accept-language': 'en-us,en;q=0.5', 'Sec-fetch-mode': 'navigate'}}, {'format_id': 'hls-2176', 'format_index': None, 'url': 'https://video.twimg.com/amplify_video/1507863263668748288/pl/1280x720/jRaNYws_hWK5Hc9W.m3u8?container=fmp4', 'manifest_url': 'https://video.twimg.com/amplify_video/1507863263668748288/pl/1wYOS01EuAVRitch.m3u8?tag=14&container=fmp4', 'tbr': 2176.0, 'ext': 'mp4', 'fps': None, 'protocol': 'm3u8_native', 'preference': None, 'quality': None, 'width': 1280, 'height': 720, 'vcodec': 'avc1.640020', 'acodec': 'mp4a.40.2', 'dynamic_range': 'SDR', 'video_ext': 'mp4', 'audio_ext': 'none', 'vbr': 2176.0, 'abr': 0.0, 'format': 'hls-2176 - 1280x720', 'resolution': '1280x720', 'filesize_approx': 20956446.72, 'http_headers': {'User-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36', 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8', 'Accept-encoding': 'gzip, deflate, br', 'Accept-language': 'en-us,en;q=0.5', 'Sec-fetch-mode': 'navigate'}}, {'url': 'https://video.twimg.com/amplify_video/1507863263668748288/vid/1280x720/huTzhl3CuOrmltWl.mp4?tag=14', 'format_id': 'http-2176', 'tbr': 2176, 'width': 1280, 'height': 720, 'protocol': 'https', 'ext': 'mp4', 'video_ext': 'mp4', 'audio_ext': 'none', 'vbr': 2176, 'abr': 0, 'format': 'http-2176 - 1280x720', 'resolution': '1280x720', 'dynamic_range': 'SDR', 'filesize_approx': 20956446.72, 'http_headers': {'User-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+#             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+#             'Accept-encoding': 'gzip, deflate, br',
+#             'Accept-language': 'en-us,en;q=0.5', 'Sec-fetch-mode': 'navigate'
+#         }
+#     }
+# ]

@@ -245,6 +245,19 @@ def is_streaming_site(url: str) -> bool:
     return False
 
 
+def is_http(f: str) -> bool:
+    if len(f.split("http-")) == 2:
+        try:
+            int(f.split("http-")[1])
+        except ValueError:
+            try:
+                int(f.split("-")[1])
+            except ValueError:
+                return False
+        return True
+    return False
+
+
 def is_hls(f: str) -> bool:
     if len(f.split("hls-")) == 2:
         try:
