@@ -111,6 +111,7 @@ def start_processing(video_id: str):
     except Exception as e:
         video.status = STATUS_COMPLETED
         video.post_processed = False
+        video.task_id = ""
         db_session.add(video)
         db_session.commit()
         logger.error(e)
@@ -118,6 +119,7 @@ def start_processing(video_id: str):
     else:
         video.status = STATUS_PROCESSING
         video.post_processed = False
+        video.task_id = task_id
         db_session.add(video)
         db_session.commit()
         logger.info(f"Started new processing task with id: {task_id}")
@@ -143,6 +145,7 @@ def start_download(video_id: str):
         task_id = download_task.apply_async(args=[video.to_json(), video.video_id], priority=1)
     except Exception as e:
         video.status = STATUS_PENDING
+        video.task_id = ""
         db_session.add(video)
         db_session.commit()
 
@@ -150,6 +153,7 @@ def start_download(video_id: str):
         return Response("Error during adding of download task. Link has been put back in pending queue.", status=400)
     else:
         video.status = STATUS_DOWNLOADING
+        video.task_id = task_id
         db_session.add(video)
         db_session.commit()
 

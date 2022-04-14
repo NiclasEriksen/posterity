@@ -200,6 +200,7 @@ def post_process_task(data: dict, video_id: str):
             with session_scope() as session:
                 video = session.query(Video).filter_by(video_id=video_id).first()
                 if video:
+                    video.task_id = ""
                     video.status = STATUS_COMPLETED
                     video.post_processed = True
                     orig_data = video.to_json()
@@ -231,6 +232,7 @@ def post_process_task(data: dict, video_id: str):
             with session_scope() as session:
                 video = session.query(Video).filter_by(video_id=video_id).first()
                 if video:
+                    video.task_id = ""
                     video.status = STATUS_COMPLETED
                     video.post_processed = False
                     session.add(video)
@@ -292,6 +294,7 @@ def download_task(data: dict, file_name: str):
             with session_scope() as session:
                 video = session.query(Video).filter_by(video_id=file_name).first()
                 if video:
+                    video.task_id = ""
                     if video.status != STATUS_COMPLETED:
                         video.status = STATUS_COMPLETED
                         session.add(video)
@@ -309,6 +312,7 @@ def download_task(data: dict, file_name: str):
             with session_scope() as session:
                 video = session.query(Video).filter_by(video_id=file_name).first()
                 if video:
+                    video.task_id = ""
                     if video.status == STATUS_DOWNLOADING:
                         video.status = STATUS_FAILED
                         session.add(video)

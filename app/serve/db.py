@@ -128,6 +128,7 @@ class Video(Base):
     location = Column(String, default="")
     verified = Column(Boolean, default=False)
     post_processed = Column(Boolean, default=False)
+    task_id = Column(String, default="")
     private = Column(Boolean, default=False)
     user_reports = relationship("UserReport", back_populates="video")
     duplicates = relationship(
