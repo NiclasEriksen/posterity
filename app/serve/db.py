@@ -374,18 +374,30 @@ class Video(Base):
         }
     
     def from_json(self, d: dict):
-        self.url = d["url"]
-        self.title = d["title"]
-        self.orig_title = d["video_title"]
-        self.duration = d["duration"]
+        try:
+            self.url = d["url"]
+        except KeyError:
+            pass
+        try:
+            self.title = d["title"]
+        except KeyError:
+            pass
+        try:
+            self.orig_title = d["video_title"]
+        except KeyError:
+            pass
+        try:
+            self.duration = d["duration"]
+        except KeyError:
+            pass
         try:
             self.status = d["status"]
         except KeyError:
-            self.status = 2
+            pass
         try:
             self.source = d["source"]
         except KeyError:
-            self.source = ""
+            pass
         try:
             formats = d["format"].split(" / ")
             self.video_format = formats[0]

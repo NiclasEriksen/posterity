@@ -202,7 +202,8 @@ def post_process_task(data: dict, video_id: str):
                 if video:
                     video.status = STATUS_COMPLETED
                     video.post_processed = True
-                    data = {
+                    orig_data = video.to_json()
+                    orig_data.update({
                         "format": data["format"],
                         "width": data["width"],
                         "height": data["height"],
@@ -213,8 +214,8 @@ def post_process_task(data: dict, video_id: str):
                         "processed_bit_rate": data["processed_bit_rate"],
                         "processed_frame_rate": data["processed_frame_rate"],
                         "processed_file_size": data["processed_file_size"],
-                    }
-                    video.from_json(data)
+                    })
+                    video.from_json(orig_data)
                     session.add(video)
                     session.commit()
         except Exception as e:
