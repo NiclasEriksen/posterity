@@ -29,6 +29,17 @@ def before_request_func():
     current_app.logger.name = 'core'
 
 
+@core.route("/cancel_task/<task_id>")
+@login_required
+def cancel_task(task_id: str):
+    video = db_session.query(Video).filter_by(task_id=task_id).first()
+    if not video:
+        return Response("No video found with that task id.", 404)
+    elif not video.user_can_edit(current_user):
+        return Response("You don't have permissions to cancel that task.", 401)
+    return Response("Task has been canceled", 200)
+
+
 @core.route("/desc_from_source/<video_id>")
 @login_required
 @limiter.limit("10/minute", override_defaults=False, exempt_when=lambda: current_user.is_editor)
@@ -119,7 +130,8 @@ def start_processing(video_id: str):
     else:
         video.status = STATUS_PROCESSING
         video.post_processed = False
-        video.task_id = task_id
+        if task_id:
+            video.task_id = task_id.id
         db_session.add(video)
         db_session.commit()
         logger.info(f"Started new processing task with id: {task_id}")
@@ -153,7 +165,8 @@ def start_download(video_id: str):
         return Response("Error during adding of download task. Link has been put back in pending queue.", status=400)
     else:
         video.status = STATUS_DOWNLOADING
-        video.task_id = task_id
+        if task_id:
+            video.task_id = task_id.id
         db_session.add(video)
         db_session.commit()
 

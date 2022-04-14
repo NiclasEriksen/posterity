@@ -38,12 +38,21 @@
                         </td>
                         <td>
                             <span class="uk-text-meta">{{ v.source }}</span><br>
+                            <span class="uk-text-small">
                             {% if v.status != STATUS_COMPLETED and not v.user_reports|length %}
                             {{ v.status_str.capitalize() }}
-                            {% if not v.can_be_changed %}{{ v.progress }}{% endif %}
+                            {% if not v.can_be_changed %}
+                                {{ v.progress }}
+                                {% if v.task_id|length %}
+                                <br><a href="/api/v1/core/cancel_task/{{ v.task_id }}" class="uk-text-danger">
+                                    <span class="uk-link-icon" uk-icon="icon: close; ratio: 0.8;"></span> Cancel
+                                </a>
+                                {% endif %}
+                            {% endif %}
                             {% else %}
                             Reports pending
                             {% endif %}
+                            </span>
                         </td>
                     </tr>
                     {% endfor %}
