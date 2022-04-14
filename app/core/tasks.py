@@ -178,16 +178,16 @@ def post_process_task(data: dict, video_id: str):
             status = data["status"]
             if status == STATUS_PROCESSING:
                 log.info(f"Update from post-processing task: {video_id}")
-                update_video(video_id, status, data=data)
+                update_video(video_id, status)
                 continue
             elif status == STATUS_COMPLETED:
                 log.info(f"Post-process task has completed with no errors: {video_id}")
-                update_video(video_id, status, data=data)
+                update_video(video_id, status)
                 success = True
                 break
             elif status in [STATUS_FAILED]:
                 log.info(f"Post-processing for {video_id} has failed.")
-                update_video(video_id, status, data=data)
+                update_video(video_id, status)
                 break
     except Exception as e:
         log.error(e)
@@ -202,6 +202,19 @@ def post_process_task(data: dict, video_id: str):
                 if video:
                     video.status = STATUS_COMPLETED
                     video.post_processed = True
+                    data = {
+                        "format": data["format"],
+                        "width": data["width"],
+                        "height": data["height"],
+                        "bit_rate": data["bit_rate"],
+                        "frame_rate": data["frame_rate"],
+                        "file_size": data["file_size"],
+                        "processed_format": data["processed_format"],
+                        "processed_bit_rate": data["processed_bit_rate"],
+                        "processed_frame_rate": data["processed_frame_rate"],
+                        "processed_file_size": data["processed_file_size"],
+                    }
+                    video.from_json(data)
                     session.add(video)
                     session.commit()
         except Exception as e:
