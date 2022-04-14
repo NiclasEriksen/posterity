@@ -227,7 +227,7 @@ def find_highest_quality_url(urls: list) -> str:
 
         if ".mp4" in url:
             best += 10
-        elif "mp4" in url and not "fmp4" in url:
+        elif "mp4" in url and "fmp4" not in url:
             best += 5
         elif ".mkv" in url:
             best += 3
