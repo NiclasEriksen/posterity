@@ -129,6 +129,7 @@ class Video(Base):
     verified = Column(Boolean, default=False)
     post_processed = Column(Boolean, default=False)
     task_id = Column(String, default="")
+    pid = Column(Integer, default=-1)
     private = Column(Boolean, default=False)
     user_reports = relationship("UserReport", back_populates="video")
     duplicates = relationship(
@@ -378,6 +379,14 @@ class Video(Base):
         try:
             self.url = d["url"]
         except KeyError:
+            pass
+        try:
+            self.task_id = d["task_id"]
+        except KeyError:
+            pass
+        try:
+            self.pid = int(d["pid"])
+        except (KeyError, TypeError, ValueError):
             pass
         try:
             self.title = d["title"]

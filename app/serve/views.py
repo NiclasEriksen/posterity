@@ -768,7 +768,6 @@ def serve_favicon():
 @serve.route("/check_progress/<video_id>", methods=["GET"])
 @cache.memoize(timeout=1)
 def check_progress(video_id):
-
     video = Video.query.filter_by(video_id=video_id).first()
 
     if not video:

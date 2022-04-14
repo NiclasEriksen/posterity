@@ -105,16 +105,19 @@ def process_from_json_data(metadata: dict, input_file: str, output_file: str) ->
         pass_1 = cmd
         pass_2 = []
 
-    #cur_dir = os.getcwd()
-    #os.chdir(tmp_path)
-
     for i, p in enumerate([pass_1, pass_2]):
         if not len(p):
             continue
 
         log.info(f"{metadata['video_id']} | Running pass {i}...")
-        result = subprocess.run(p, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        if result.returncode != 0:
+
+        result = subprocess.Popen(p, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+
+        metadata["pid"] = result.pid
+        yield metadata
+        result = result.wait()
+
+        if result != 0:
             try:
                 open(log_path, "w").close()
             except:
@@ -236,9 +239,14 @@ def download_from_json_data(metadata: dict, file_name: str):
 
     yield metadata
 
-    result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    result = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 
-    if result.returncode != 0:
+    metadata["pid"] = result.pid
+    yield metadata
+    result = result.wait()
+    # result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+
+    if result != 0:
         log.error(result)
         log.error("Well this all went to shit. Removing video.")
 
@@ -252,10 +260,14 @@ def download_from_json_data(metadata: dict, file_name: str):
             pass
 
         metadata["status"] = STATUS_FAILED
+        metadata["task_id"] = ""
+        metadata["pid"] = -1
         yield metadata
 
     else:
         metadata["status"] = STATUS_COMPLETED
+        metadata["task_id"] = ""
+        metadata["pid"] = -1
         try:
             open(log_path, "w").close()
         except:

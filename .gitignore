@@ -82,6 +82,8 @@ db.sqlite3-journal
 instance/
 .webassets-cache
 
+celery_tmp/
+
 # Scrapy stuff:
 .scrapy
 

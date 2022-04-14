@@ -1,5 +1,7 @@
 import os
+import signal
 import requests
+import redis
 from flask import Blueprint, current_app, request, abort, Response
 from flask_login import current_user, login_required
 from flask_limiter import Limiter
@@ -9,6 +11,7 @@ from authentication import require_appkey
 from urllib.parse import urlparse
 
 from .tasks import download_task, post_process_task
+from app import celery
 from app.dl import STATUS_DOWNLOADING, STATUS_PENDING, STATUS_FAILED, STATUS_COMPLETED, STATUS_PROCESSING
 from app.dl.helpers import unique_filename, remove_emoji, valid_video_url, minimize_url
 from app.dl.metadata import parse_input_data, find_duplicate_video_by_url, get_title_from_html, API_SITES, \
@@ -22,6 +25,17 @@ limiter = Limiter(
     key_func=get_remote_address,
     default_limits=["1000 per day", "100 per hour"]
 )
+redis_url = os.environ.get("BROKER_URL", "")
+if len(redis_url):
+    redis_url = redis_url.strip("redis://").split(":")[0]
+    try:
+        redis_port = int(redis_url.split(":")[-1])
+    except (ValueError, TypeError):
+        redis_port = 6379
+else:
+    redis_port = -1
+
+redis_client = redis.StrictRedis(host=redis_url, port=redis_port, charset="utf-8", decode_responses=True)
 
 
 @core.before_request
@@ -37,7 +51,29 @@ def cancel_task(task_id: str):
         return Response("No video found with that task id.", 404)
     elif not video.user_can_edit(current_user):
         return Response("You don't have permissions to cancel that task.", 401)
-    return Response("Task has been canceled", 200)
+    try:
+        if video.pid > 0:
+            try:
+                os.kill(video.pid, signal.SIGTERM)
+                return Response("Task has been killed by PID!", 200)
+            except OSError as e:
+                logger.error(e)
+                return Response("Error when killing process.", 400)
+        else:
+            try:
+                res = celery.control.revoke(task_id, terminate=True)
+                res.poll()
+                logger.info("Deleting task.")
+                logger.info(redis_client.smembers("_kombu.binding.downloads"))
+                redis_client.srem("_kombu.binding.downloads", task_id)
+                redis_client.srem("_kombu.binding.processing", task_id)
+            except Exception as e:
+                logger.error(e)
+                return Response(f"Error during removal of task", 200)
+            return Response(f"Task was completely removed from Celery: {res}", 200)
+    except Exception as e:
+        logger.error(e)
+        return Response("Unknown error during task cancellation.")
 
 
 @core.route("/desc_from_source/<video_id>")
@@ -130,8 +166,7 @@ def start_processing(video_id: str):
     else:
         video.status = STATUS_PROCESSING
         video.post_processed = False
-        if task_id:
-            video.task_id = task_id.id
+        video.task_id = task_id.id
         db_session.add(video)
         db_session.commit()
         logger.info(f"Started new processing task with id: {task_id}")
@@ -158,6 +193,7 @@ def start_download(video_id: str):
     except Exception as e:
         video.status = STATUS_PENDING
         video.task_id = ""
+        video.pid = -1
         db_session.add(video)
         db_session.commit()
 
@@ -165,8 +201,7 @@ def start_download(video_id: str):
         return Response("Error during adding of download task. Link has been put back in pending queue.", status=400)
     else:
         video.status = STATUS_DOWNLOADING
-        if task_id:
-            video.task_id = task_id.id
+        video.task_id = task_id.id
         db_session.add(video)
         db_session.commit()
 

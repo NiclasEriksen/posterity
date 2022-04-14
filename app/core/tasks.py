@@ -28,7 +28,7 @@ log = get_task_logger(__name__)
 #         db_session.remove()
 
 
-def update_video(video_id: str, status: int, data: dict = {}) -> bool:
+def update_video(video_id: str, status: int, data: dict = {}, pid: int = -1, task_id: str = "") -> bool:
     from app.dl.metadata import write_metadata
 
     if len(data.keys()):
@@ -43,6 +43,10 @@ def update_video(video_id: str, status: int, data: dict = {}) -> bool:
             if not video:
                 return False
             video.status = status
+            if pid >= 0:
+                video.pid = pid
+            if len(task_id):
+                video.task_id = task_id
 
             db_session.add(video)
             db_session.commit()
@@ -155,9 +159,9 @@ def gen_images_task(metadata: dict):
 
 
 @celery.task(name="core.tasks.post_process", soft_time_limit=10800, time_limit=10860, priority=5, queue="processing")
-def post_process_task(data: dict, video_id: str):
+def post_process_task(metadata: dict, video_id: str):
     from app.dl.dl import process_from_json_data
-    if "video_id" not in data:
+    if "video_id" not in metadata:
         log.error("Bad metadata to process from, aborting task.")
         update_video(video_id, STATUS_COMPLETED)    # Completed == original file
         return
@@ -173,12 +177,18 @@ def post_process_task(data: dict, video_id: str):
     log.info("Starting processing of " + str(video_id))
 
     success = False
+    data = {}
     try:
-        for data in process_from_json_data(data, input_path, output_path):
+        for data in process_from_json_data(metadata, input_path, output_path):
             status = data["status"]
             if status == STATUS_PROCESSING:
                 log.info(f"Update from post-processing task: {video_id}")
-                update_video(video_id, status)
+                if "pid" in data and "task_id" in data:
+                    update_video(video_id, status, pid=data["pid"], task_id=data["task_id"])
+                elif "pid" in data:
+                    update_video(video_id, status, pid=data["pid"])
+                else:
+                    update_video(video_id, status)
                 continue
             elif status == STATUS_COMPLETED:
                 log.info(f"Post-process task has completed with no errors: {video_id}")
@@ -201,6 +211,7 @@ def post_process_task(data: dict, video_id: str):
                 video = session.query(Video).filter_by(video_id=video_id).first()
                 if video:
                     video.task_id = ""
+                    video.pid = -1
                     video.status = STATUS_COMPLETED
                     video.post_processed = True
                     orig_data = video.to_json()
@@ -233,6 +244,7 @@ def post_process_task(data: dict, video_id: str):
                 video = session.query(Video).filter_by(video_id=video_id).first()
                 if video:
                     video.task_id = ""
+                    video.pid = -1
                     video.status = STATUS_COMPLETED
                     video.post_processed = False
                     session.add(video)
@@ -255,6 +267,7 @@ def download_task(data: dict, file_name: str):
     if "video_id" not in data:
         log.error("Bad metadata to download from, aborting task.")
         return
+    video_id = data["video_id"]
 
     dur = time.time()
     log.info("Starting download of " + str(file_name))
@@ -264,7 +277,7 @@ def download_task(data: dict, file_name: str):
             status = data["status"]
             if status == STATUS_DOWNLOADING:
                 log.info("Update from download process...")
-                update_video(file_name, status, data=data)
+                update_video(video_id, status, data=data)
                 continue
             elif status == STATUS_COMPLETED:
                 log.info("Download function has completed with no errors.")
@@ -295,6 +308,7 @@ def download_task(data: dict, file_name: str):
                 video = session.query(Video).filter_by(video_id=file_name).first()
                 if video:
                     video.task_id = ""
+                    video.pid = -1
                     if video.status != STATUS_COMPLETED:
                         video.status = STATUS_COMPLETED
                         session.add(video)
@@ -313,6 +327,7 @@ def download_task(data: dict, file_name: str):
                 video = session.query(Video).filter_by(video_id=file_name).first()
                 if video:
                     video.task_id = ""
+                    video.pid = -1
                     if video.status == STATUS_DOWNLOADING:
                         video.status = STATUS_FAILED
                         session.add(video)
