@@ -219,7 +219,10 @@ def get_content_info(url: str) -> dict:
                     elif not is_streaming_site(url):
                         if is_http(u["format_id"]) or is_hls(u["format_id"]) or is_dash(u["format_id"]) or is_avc(u["format_id"]):
                             video_id_found = u["format_id"]
-                            d["video_formats"][u["format"]] = {"url": u["url"], "dimensions": (x, y), "audio": False}
+                            if is_http(u["format_id"]):
+                                d["video_formats"][u["format"]] = {"url": u["url"], "dimensions": (x, y), "audio": True}
+                            else:
+                                d["video_formats"][u["format"]] = {"url": u["url"], "dimensions": (x, y), "audio": False}
                         else:
                             try:
                                 int(u["format_id"])
