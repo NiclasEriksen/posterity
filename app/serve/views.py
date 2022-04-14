@@ -258,6 +258,10 @@ def edit_video_page(video_id: str):
     if not video.user_can_edit(current_user):
         flash("Lacking permissions to edit that video.", "error")
         return serve_video(video.video_id)
+    if not video.can_be_changed:
+        flash("Can't edit video right now, sorry.", "warning")
+        return serve_video(video.video_id)
+
 
     available_tags = ContentTag.query.order_by(ContentTag.category.desc(), ContentTag.name).all()
     available_categories = Category.query.order_by(Category.name).all()
