@@ -43,7 +43,7 @@
                             {{ v.status_str.capitalize() }}
                             {% if not v.can_be_changed %}
                                 {{ v.progress }}
-                                {% if v.task_id|length %}
+                                {% if v.pid > 0 %}
                                 <br><a href="/api/v1/core/cancel_task/{{ v.task_id }}" class="uk-text-danger">
                                     <span class="uk-link-icon" uk-icon="icon: close; ratio: 0.8;"></span> Cancel
                                 </a>
