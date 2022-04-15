@@ -96,17 +96,24 @@
                         </div>
                         <div class="uk-width-1-1">
                             <ul class="uk-list uk-list-square uk-list-collapse">
-                                <li>Everything is single-pass</li>
-                                <li>Deinterlacing <span class="uk-text-meta"> enabled</span></li>
-                                <li>Normalized audio
-                                    <ul>
-                                        <li>Technique<span class="uk-text-meta"> dynaudnorm</span></li>
-                                        <li>Bit rate<span class="uk-text-meta"> VBR</span></li>
-                                        <li>Peak<span class="uk-text-meta"> 85%</span></li>
-                                    </ul>
-                                </li>
-                                <li>Downmix to stereo</li>
-                                <li>Subtitles<span class="uk-text-meta"> soft (container)</span></li>
+                                <ul>1st pass (Download)
+                                    <li>CRF <span class="uk-text-meta">24</span></li>
+                                    <li>Normalized audio
+                                        <ul>
+                                            <li>Technique<span class="uk-text-meta"> dynaudnorm</span></li>
+                                            <li>Bit rate<span class="uk-text-meta"> VBR</span></li>
+                                            <li>Peak<span class="uk-text-meta"> 85%</span></li>
+                                        </ul>
+                                    </li>
+                                    <li>Downmix to stereo</li>
+                                    <li>Subtitles<span class="uk-text-meta"> soft (container)</span></li>
+                                </ul>
+                                <ul>2nd pass (Post-processing)
+                                    <li>Deinterlacing<span class="uk-text-meta"> enabled</span></li>
+                                    <li>CRF <span class="uk-text-meta">26<->34</span></li>
+                                    <li>FPS <span class="uk-text-meta">30<->60 (divide at >40)</span></li>
+                                    <li>Audio <span class="uk-text-meta"><=128kbps AAC</span></li>
+                                </ul>
                             </ul>
                         </div>
                     </div>
