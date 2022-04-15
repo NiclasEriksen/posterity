@@ -102,49 +102,59 @@
                         <div class="uk-grid uk-width-1-1 uk-margin uk-margin-remove-left">
                             {% if video.status == STATUS_COMPLETED and video.user_can_edit(current_user) and not video.post_processed %}
                             <div class="uk-width-1-4 uk-text-center uk-padding-small">
+                                <span uk-tooltip="title: Post-process video">
                                 <a
                                     class="uk-icon-button {% if video.recommend_post_process %}uk-text-primary{% else %}uk-text-secondary{% endif %}"
-                                    uk-icon="icon: move; ratio: 1.35"
+                                    uk-icon="icon: move; ratio: 1.3"
                                     onclick="startProcessing('{{ video.video_id }}');"
                                 >
                                 </a>
+                                </span>
                             </div>
                             {% endif %}
                             {% if not video.ready_to_play and video.can_be_changed %}
                             <div class="uk-width-1-4 uk-text-center uk-padding-small">
+                                <span uk-tooltip="title: Start archiving process">
                                 <a
-                                    class="uk-icon-button uk-text-primary"
-                                    uk-icon="icon: cloud-download; ratio: 1.35"
+                                    class="uk-icon-button uk-text-success"
+                                    uk-icon="icon: cloud-download; ratio: 1.3"
                                     onclick="startDownload('{{ video.video_id }}')"
                                 >
                                 </a>
+                                </span>
                             </div>
                             {% endif %}
                             {% if video.status != STATUS_DOWNLOADING %}
                             <div class="uk-width-1-4 uk-text-center uk-padding-small">
+                                <span uk-tooltip="title: Edit video">
                                 <a
                                     class="uk-icon-button{% if video.status == STATUS_DOWNLOADING %} isDisabled{% endif %}"
-                                    uk-icon="icon: pencil; ratio: 1.35"
+                                    uk-icon="icon: pencil; ratio: 1.3"
                                     href="/edit_video/{{ video.video_id }}"
                                 >
                                 </a>
+                                </span>
                             </div>
                             {% endif %}
                             {% if video.ready_to_play or video.status == STATUS_PROCESSING %}
                             <div class="uk-width-1-4 uk-text-center uk-padding-small">
+                                <span uk-tooltip="title: Download high quality version">
                                 <a
                                     class="uk-icon-button uk-text-primary"
-                                    uk-icon="icon: download; ratio: 1.35"
+                                    uk-icon="icon: download; ratio: 1.3"
                                     href="{{ dl_path }}"
                                 ></a>
+                                </span>
                             </div>
                             {% endif %}
                             <div class="uk-width-1-4 uk-text-center uk-padding-small">
+                                <span uk-tooltip="title: Report video">
                                 <a
                                     class="uk-icon-button uk-text-danger"
                                     href="/report_video/{{ video.video_id }}"
-                                    uk-icon="icon: warning; ratio: 1.35;"
+                                    uk-icon="icon: warning; ratio: 1.3;"
                                 ></a>
+                                </span>
                             </div>
                         </div>
                     </div>
