@@ -45,7 +45,8 @@ AD_DESCRIPTIONS = [
     "we need your support", "channel page:", "follow me..", "more videos here:", "(merch)", "available here:",
     "watch and listen to", "read the latest ", "top stories:", "24/7 here:", "24/7:", "support the channel",
     "thanks to our co-producers", "get breaking news", "our patron", "want early access", "videos without ads",
-    "follow the story here", "connect with us on", "social media handles:", "news on the hour"
+    "follow the story here", "connect with us on", "social media handles:", "news on the hour",
+    "business inquiries:", "please help the channel", "youtube algorithm", "subscribe:", "wallet:", "@gmail.com"
 ]
 IGNORED = ["usa", "invasion", "ukrainewar", "ukrainerussia", "russianinvasion", "europe", "warinukraine"]
 reddit = praw.Reddit(
