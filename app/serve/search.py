@@ -5,7 +5,6 @@ from flask import current_app
 from datetime import datetime
 from elasticsearch import Elasticsearch, NotFoundError
 from elastic_transport import ConnectionError, ConnectionTimeout
-from .db import Video
 from app.extensions import cache
 
 
@@ -36,7 +35,7 @@ def remove_videos_index():
 
 
 @catch_es_errors
-def remove_video_data(video: Video):
+def remove_video_data(video):
     _result = es.delete(index="videos", id=video.video_id)
 
 
@@ -45,7 +44,7 @@ def remove_video_data_by_id(video_id: str):
     _result = es.delete(index="videos", id=video_id)
 
 @catch_es_errors
-def index_video_data(video: Video):
+def index_video_data(video):
     body = {
         "title": video.title,
         "orig_title": video.orig_title,
