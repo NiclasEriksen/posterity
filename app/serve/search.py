@@ -14,7 +14,7 @@ log = LocalProxy(lambda: current_app.logger)
 
 COMMON = [
     "talking", "about", "subtitles", "with", "without", "longer", "quality", "cnn", "video", "full version",
-    "nexta", "rob lee", "how"
+    "nexta", "rob lee", "how", "reportedly", "possibly", "possible", "footage"
 ]
 
 
