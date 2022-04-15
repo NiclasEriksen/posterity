@@ -44,16 +44,6 @@ def remove_video_data(video: Video):
 def remove_video_data_by_id(video_id: str):
     _result = es.delete(index="videos", id=video_id)
 
-
-@catch_es_errors
-def index_all_videos():
-    from app.serve.db import session_scope, Video
-    with session_scope() as session:
-        videos = session.query(Video).filter_by(private=False).all()
-        for v in videos:
-            index_video_data(v)
-
-
 @catch_es_errors
 def index_video_data(video: Video):
     body = {
@@ -65,6 +55,16 @@ def index_video_data(video: Video):
     }
 
     _result = es.index(index="videos", id=video.video_id, body=body)
+
+
+@catch_es_errors
+def index_all_videos():
+    from app.serve.db import session_scope, Video
+    with session_scope() as session:
+        videos = session.query(Video).filter_by(private=False).all()
+        for v in videos:
+            index_video_data(v)
+
 
 
 @catch_es_errors
