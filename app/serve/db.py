@@ -482,7 +482,7 @@ class Video(Base):
             ot = d["orig_upload_time"]
             if isinstance(ot, datetime):
                 self.orig_upload_time = ot
-            elif isinstance(ot, str) or isinstance(ot, int):
+            elif isinstance(ot, str) or isinstance(ot, int) or isinstance(ot, float):
                 self.orig_upload_time = datetime.utcfromtimestamp(ot)
         except KeyError:
             pass
