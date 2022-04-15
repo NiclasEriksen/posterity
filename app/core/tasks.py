@@ -267,7 +267,7 @@ def download_task(data: dict, file_name: str):
     if "video_id" not in data:
         log.error("Bad metadata to download from, aborting task.")
         return
-    video_id = data["video_id"]
+    video_id = file_name
 
     dur = time.time()
     log.info("Starting download of " + str(file_name))
@@ -281,7 +281,7 @@ def download_task(data: dict, file_name: str):
                 continue
             elif status == STATUS_COMPLETED:
                 log.info("Download function has completed with no errors.")
-                update_video(file_name, status, data=data)
+                update_video(video_id, status, data=data)
                 success = True
                 break
             elif status in [STATUS_FAILED, STATUS_INVALID, STATUS_COOKIES]:
@@ -293,7 +293,7 @@ def download_task(data: dict, file_name: str):
                 elif status == STATUS_COOKIES:
                     log.error("That video needs cookies for geo-locked or age restricted content.")
 
-            update_video(file_name, status, data=data)
+            update_video(video_id, status, data=data)
             break   # Break on any yield that's not continued above
 
     except Exception as e:
@@ -305,7 +305,7 @@ def download_task(data: dict, file_name: str):
         try:
             from app.serve.db import Video, session_scope
             with session_scope() as session:
-                video = session.query(Video).filter_by(video_id=file_name).first()
+                video = session.query(Video).filter_by(video_id=video_id).first()
                 if video:
                     video.task_id = ""
                     video.pid = -1
@@ -317,14 +317,14 @@ def download_task(data: dict, file_name: str):
         except Exception as e:
             log.error(e)
         if hours > 0:
-            log.info(f"Download complete in {hours} hours, {minutes} minutes: {file_name}")
+            log.info(f"Download complete in {hours} hours, {minutes} minutes: {video_id}")
         else:
-            log.info(f"Download complete in {minutes} minutes, {seconds:.0f} seconds: {file_name}")
+            log.info(f"Download complete in {minutes} minutes, {seconds:.0f} seconds: {video_id}")
     else:
         try:
             from app.serve.db import Video, session_scope
             with session_scope() as session:
-                video = session.query(Video).filter_by(video_id=file_name).first()
+                video = session.query(Video).filter_by(video_id=video_id).first()
                 if video:
                     video.task_id = ""
                     video.pid = -1
