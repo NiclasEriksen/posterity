@@ -164,10 +164,13 @@
                     </div>
                     {% for r in video.user_reports %}
                     <div class="uk-width-1-1 report-list-item uk-padding-small">
-                        <h4><span class="uk-text-muted">Report #{{ r.id }}:</span> {{ r.reason_str }}</h4>
+                        <h4 class="uk-margin-remove-bottom"><span class="uk-text-muted">Report #{{ r.id }}:</span> {{ r.reason_str }}</h4>
+                        {% if r.report_time %}
+                        <span class="uk-text-meta">Reported on {{ r.report_time_str }} by {{ r.source }}</span><br>
+                        {% endif %}
                         {% if r.text|length %}
-                        <p class="uk-text-small uk-text-meta">
-                        {{ r.text }}
+                        <p class="uk-text-small">
+                            {{ r.text }}
                         </p>
                         {% endif %}
                         <p class="uk-text-small">
@@ -191,6 +194,7 @@
                                     {% endif %}
                                     <a href="{{ video.url }}" target="_blank" class="uk-icon-link" uk-icon="link">Source link</a><br>
                                     <span class="uk-text-meta">Submitted {% if current_user.is_authenticated %}by <i>"{{ video.source }}"</i> {% endif %}{{ video.upload_time_verbose }}</span>
+                                    {% if video.orig_upload_time %}<br><span class="uk-text-meta">Original post from {{ video.orig_upload_time_str }}</span>{% endif %}
                                 </p>
                             </div>
                         </div>

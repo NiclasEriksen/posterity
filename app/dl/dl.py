@@ -188,7 +188,7 @@ def download_from_json_data(metadata: dict, file_name: str):
     sub_links = d["sub_formats"]
     duration = d["duration"]
     video_title = d["title"]
-    uploaded = d["upload_time"]
+    uploaded = d["upload_date"]
 
     if duration > MAX_DURATION_SD:
         log.error("Video is too long to download! Duration: " + str(duration))

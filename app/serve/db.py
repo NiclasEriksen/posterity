@@ -226,6 +226,10 @@ class Video(Base):
         return f"{seconds_to_verbose_time(s)} ago"
 
     @property
+    def orig_upload_time_str(self) -> str:
+        return self.orig_upload_time.strftime("%b %d, %H:%M").lower()
+
+    @property
     def upload_time_elapsed_verbose(self) -> str:
         s = self.upload_time_elapsed
         if s >= 86400:  # 24 hours
@@ -636,6 +640,12 @@ class UserReport(Base):
         self.text = text
         self.source = source
         self.report_time = datetime.now()
+
+    @property
+    def report_time_str(self) -> str:
+        if self.report_time:
+            return self.report_time.strftime("%b %d, %H:%M").lower()
+        return "Unknown"
 
     @property
     def reason_str(self) -> str:
