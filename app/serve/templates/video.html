@@ -98,39 +98,49 @@
             <div class="uk-container">
                 <div class="uk-grid uk-grid-small uk-width-1-1 uk-margin-remove-left">
                     <div class="uk-width-1-1 uk-text-small uk-text-center uk-text-meta" id="video-download-status"></div>
-
-                    {% if video.user_can_edit(current_user) %}
                     <div class="uk-width-1-1 uk-padding-small">
                         <div class="uk-grid uk-width-1-1 uk-margin uk-margin-remove-left">
-                            {% if video.can_be_changed %}
-                            {% if video.ready_to_play %}
-                            {% if current_user.check_auth(AUTH_LEVEL_EDITOR) or video.recommend_post_process %}
-                            <div class="uk-width-1-1 uk-width-1-2@s uk-text-center uk-padding-small">
-                                <button
-                                    class="uk-input uk-button {% if video.recommend_post_process %}uk-button-primary{% else %}uk-button-secondary{% endif %}"
-                                    type="button"
-                                    id="start-processing-button"
+                            {% if video.status == STATUS_COMPLETED and video.user_can_edit(current_user) and not video.post_processed %}
+                            <div class="uk-width-1-3 uk-text-center uk-padding-small">
+                                <a
+                                    class="uk-icon-button {% if video.recommend_post_process %}uk-text-primary{% else %}uk-text-secondary{% endif %}"
+                                    uk-icon="icon: move; ratio: 1.35"
                                     onclick="startProcessing('{{ video.video_id }}');"
-                                    {% if video.status != STATUS_COMPLETED or video.post_processed %}disabled{% endif %}
                                 >
-                                        Post-process
-                                </button>
+                                </a>
                             </div>
                             {% endif %}
-                            {% else %}
-                            <div class="uk-width-1-1 uk-width-1-2@s uk-text-center uk-padding-small">
-                                <button class="uk-input uk-button uk-button-primary" type="button" id="start-download-button" onclick="startDownload('{{ video.video_id }}');" {% if video.status == STATUS_COMPLETED %}disabled{% endif %}>Start download</button>
+                            {% if not video.ready_to_play and video.can_be_changed %}
+                            <div class="uk-width-1-3 uk-text-center uk-padding-small">
+                                <a
+                                    class="uk-icon-button uk-text-primary"
+                                    uk-icon="icon: cloud-download; ratio: 1.35"
+                                    onclick="startDownload('{{ video.video_id }}')"
+                                >
+                                </a>
                             </div>
-                            {% endif %}
                             {% endif %}
                             {% if video.status != STATUS_DOWNLOADING %}
-                            <div class="uk-width-1-1 uk-width-1-2@s uk-text-center uk-padding-small">
-                                <a class="uk-input uk-button uk-button-secondary" href="/edit_video/{{ video.video_id }}">Edit video</a>
+                            <div class="uk-width-1-3 uk-text-center uk-padding-small">
+                                <a
+                                    class="uk-icon-button{% if video.status == STATUS_DOWNLOADING %} isDisabled{% endif %}"
+                                    uk-icon="icon: pencil; ratio: 1.35"
+                                    href="/edit_video/{{ video.video_id }}"
+                                >
+                                </a>
+                            </div>
+                            {% endif %}
+                            {% if video.ready_to_play or video.status == STATUS_PROCESSING %}
+                            <div class="uk-width-1-3 uk-text-center uk-padding-small">
+                                <a
+                                    class="uk-icon-button uk-text-primary"
+                                    uk-icon="icon: download; ratio: 1.35"
+                                    href="{{ dl_path }}"
+                                ></a>
                             </div>
                             {% endif %}
                         </div>
                     </div>
-                    {% endif %}
                     {% if current_user.check_auth(AUTH_LEVEL_EDITOR) and video.user_reports|length %}
                     <div class="uk-width-1-1 report-list-item">
                         <h3 class="uk-text-danger">User reports:</h3>
@@ -195,20 +205,6 @@
                         </div>
                     </div>
                     <div class="uk-width-1-1 uk-text-center uk-padding-small">
-                    {% if video.status == STATUS_DOWNLOADING %}
-                    {% elif video.status == STATUS_COMPLETED or video.status == STATUS_PROCESSING %}
-                        <a href="{{ dl_path }}"><h3 class="uk-text-primary uk-margin-remove-bottom ">Click here to download video in original quality</h3></a>
-                    {% elif video.status == STATUS_INVALID %}
-                        <h3 class="uk-text-danger">Invalid URL, no video to download.</h3>
-                    {% elif video.status == STATUS_COOKIES %}
-                        <h3 class="uk-text-danger">Video might be region/age restricted and requires cookies (not implemented).</h3>
-                    {% elif video.status == STATUS_PENDING %}
-                        <h3 class="uk-text-warning">Link is pending approval by an editor and has not started downloading yet.</h3>
-                    {% else %}
-                        <h3 class="uk-text-danger">Download failed.</h3>
-                    {% endif %}
-                    </div>
-                    <div class="uk-width-1-1 uk-padding-small">
                         <div class="uk-grid uk-width-1-1 uk-margin uk-margin-remove-left">
                             <div class="uk-width-1-1 uk-text-center uk-padding-small uk-link-danger">
                                 <a href="/report_video/{{ video.video_id }}">
@@ -216,28 +212,37 @@
                                 </a>
                             </div>
                         </div>
+                    {% if video.status == STATUS_FAILED %}
+                        <h3 class="uk-text-danger">Download failed.</h3>
+                    {% elif video.status == STATUS_INVALID %}
+                        <h3 class="uk-text-danger">Invalid URL, no video to download.</h3>
+                    {% elif video.status == STATUS_COOKIES %}
+                        <h3 class="uk-text-danger">Video might be region/age restricted and requires cookies (not implemented).</h3>
+                    {% elif video.status == STATUS_PENDING %}
+                        <h3 class="uk-text-warning">Link is pending approval by an editor and has not started downloading yet.</h3>
+                    {% endif %}
                     </div>
                 </div>
             </div>
             {% if recommended|length %}
-            <div class="uk-container uk-background-muted">
+            <div class="uk-container">
                 <div class="uk-width-1-1 uk-text-center">
                     <h2>Related videos</h2>
                 </div>
-                <div class="uk-width-1-1 uk-padding-small">
+                <div class="uk-width-1-1 uk-padding-small uk-background-muted">
 
                     <table class="uk-table uk-table-small uk-table-striped">
-                        <thead>
-                            <tr>
-                                <td class="uk-table-expand">Video</td>
-                                <td class="uk-table-shrink">Content tags</td>
-                                <td class="uk-table-shrink uk-visible@m">Video type</td>
-                            </tr>
-                        </thead>
+<!--                        <thead>-->
+<!--                            <tr>-->
+<!--                                <td class="uk-table-expand">Video</td>-->
+<!--                                <td class="uk-table-shrink">Content tags</td>-->
+<!--                                <td class="uk-table-shrink uk-visible@m">Video type</td>-->
+<!--                            </tr>-->
+<!--                        </thead>-->
                         <tbody>
                             {% for v in recommended %}
                             <tr>
-                                <td style="min-height: 64px;">
+                                <td class="uk-flex uk-flex-middle" style="min-height: 64px;">
                                     <div class="list-thumbnail uk-position-relative" style="display: table-cell;">
                                         <a href="/{{ v.video_id }}">
                                             <img src="/thumbnail/{{ v.video_id }}.jpg" loading="lazy" class="thumbnail-rounded uk-position-absolute uk-position-center">
