@@ -122,6 +122,8 @@
                                 <button class="uk-input uk-button uk-button-primary" type="button" id="start-download-button" onclick="startDownload('{{ video.video_id }}');" {% if video.status == STATUS_COMPLETED %}disabled{% endif %}>Start download</button>
                             </div>
                             {% endif %}
+                            {% endif %}
+                            {% if video.status != STATUS_DOWNLOADING %}
                             <div class="uk-width-1-1 uk-width-1-2@s uk-text-center uk-padding-small">
                                 <a class="uk-input uk-button uk-button-secondary" href="/edit_video/{{ video.video_id }}">Edit video</a>
                             </div>
