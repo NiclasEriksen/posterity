@@ -124,7 +124,7 @@
                                 </span>
                             </div>
                             {% endif %}
-                            {% if video.status != STATUS_DOWNLOADING %}
+                            {% if video.status != STATUS_DOWNLOADING and video.user_can_edit(current_user) %}
                             <div class="uk-width-1-4 uk-text-center uk-padding-small">
                                 <span uk-tooltip="title: Edit video">
                                 <a
