@@ -6,6 +6,7 @@ import shortuuid
 from sqlalchemy import create_engine, Column, Integer, String, DateTime, ForeignKey, Float, Boolean, Table
 from sqlalchemy.orm import relationship, sessionmaker, scoped_session
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.ext.hybrid import hybrid_method, hybrid_property
 from flask_login import UserMixin
 from contextlib import contextmanager
 from werkzeug.local import LocalProxy
@@ -157,6 +158,7 @@ class Video(Base):
     def __init__(self):
         self.upload_time = datetime.now()
 
+    @hybrid_method
     def user_can_edit(self, user: User) -> bool:
         if user.check_auth(AUTH_LEVEL_EDITOR):
             return True
@@ -164,6 +166,7 @@ class Video(Base):
             return True
         return False
 
+    @hybrid_method
     def user_can_see(self, user: User) -> bool:
         if not self.private and self.ready_to_play:
             return True
