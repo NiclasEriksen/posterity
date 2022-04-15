@@ -164,6 +164,15 @@ class Video(Base):
             return True
         return False
 
+    def user_can_see(self, user: User) -> bool:
+        if not self.private and self.ready_to_play:
+            return True
+        elif user.check_auth(AUTH_LEVEL_EDITOR):
+            return True
+        elif user.check_auth(AUTH_LEVEL_USER) and user.username == self.source:
+            return True
+        return False
+
     @property
     def has_duplicates(self) -> bool:
         if not len(self.duplicates):
@@ -191,7 +200,7 @@ class Video(Base):
 
     @property
     def ready_to_play(self) -> bool:
-        return self.status == STATUS_COMPLETED
+        return self.status == STATUS_COMPLETED or self.status == STATUS_PROCESSING
 
     @property
     def can_be_changed(self) -> bool:

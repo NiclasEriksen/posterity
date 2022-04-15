@@ -279,7 +279,7 @@
                 </div>
             </div>
             {% endif %}
-                    {% if current_user.check_auth(AUTH_LEVEL_EDITOR) and video.duplicates|length %}
+                    {% if current_user.check_auth(AUTH_LEVEL_EDITOR) and video.pending_duplicates|length %}
                     <div class="uk-width-1-1 uk-margin uk-background-muted uk-padding-small">
                         <h3>Possible duplicates:</h3>
                         <table class="uk-table uk-table-small uk-table-striped">
@@ -291,7 +291,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                {% for v in video.duplicates %}
+                                {% for v in video.pending_duplicates %}
                                 <tr>
                                     <td style="min-height: 64px;">
                                         <div class="list-thumbnail uk-position-relative" style="display: table-cell;">

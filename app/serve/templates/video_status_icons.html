@@ -35,7 +35,7 @@
                             <span class="uk-text-warning" uk-icon="icon: question; ratio: 0.9"></span>
                             {% endif %}
                             {% if video.user_can_edit(current_user) or current_user.check_auth(1) %}
-                            {% if video.duplicates|length %}
+                            {% if video.pending_duplicates|length %}
                             <span uk-tooltip="title: Video has {{ video.duplicates|length }} possible duplicates;pos: top-left;">
                                 <span class="uk-text-warning" uk-icon="icon: copy; ratio: 0.9"></span>
                             </span>

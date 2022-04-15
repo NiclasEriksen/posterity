@@ -47,7 +47,7 @@
                         <li{% if request.path == "/download_archive" %} class="uk-active"{% endif %}>
                             <a href="/download_archive" uk-icon="icon: cloud-download">Downloads </a>
                         </li>
-                        {% if current_user.check_auth(AUTH_LEVEL_EDITOR) %}
+                        {% if current_user.check_auth(AUTH_LEVEL_USER) %}
                         <li{% if request.path == "/dashboard" %} class="uk-active"{% endif %}>
                             <a href="/dashboard" uk-icon="icon: settings">Dashboard </a>
                         </li>
@@ -101,7 +101,7 @@
                             Downloads
                         </a>
                     </li>
-                    {% if current_user.check_auth(AUTH_LEVEL_EDITOR) %}
+                    {% if current_user.check_auth(AUTH_LEVEL_USER) %}
                     <li class="">
                         <a href="/dashboard">
                             <span class="uk-margin-small-right uk-icon" data-uk-icon="icon: settings"></span>

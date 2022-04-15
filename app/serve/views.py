@@ -129,7 +129,7 @@ def front_page():
             if v:
                 if (tag and not tag in v.tags) or (category and not category in v.categories):
                     removed += 1
-                elif v.private and (not v.source == current_user.username or not current_user.check_auth(AUTH_LEVEL_EDITOR)):
+                elif not v.user_can_see(current_user):
                     removed += 1
                 else:
                     videos.append(v)
@@ -142,28 +142,17 @@ def front_page():
 
     else:
         vq = Video.query
-        if not current_user.check_auth(AUTH_LEVEL_USER):
-            vq = vq.filter(
-                or_(
-                    Video.status == STATUS_DOWNLOADING,
-                    Video.status == STATUS_COMPLETED,
-                    Video.status == STATUS_PROCESSING
-                )
-            ).filter(Video.private == False)
-        elif not current_user.check_auth(AUTH_LEVEL_EDITOR):
-            vq = vq.filter(
-                Video.status != STATUS_PENDING
-            ).filter(or_(Video.source == current_user.username, Video.private == False))
 
         if category:
             vq = vq.filter(Video.categories.any(id=category.id))
         if tag:
             vq = vq.filter(Video.tags.any(id=tag.id))
 
-        total = vq.count()
         videos = vq.order_by(
             Video.upload_time.desc()
         ).offset(offset).limit(pp).all()
+        videos = [v for v in videos if v.user_can_see(current_user)]
+        total = len(videos)
 
     total_pages = total // pp + (1 if total % pp else 0)
 
@@ -204,14 +193,6 @@ def serve_video(video_id):
     if not video:
         logger.error("Video was not found.")
         return render_template("not_found.html")
-    elif video.private:
-        if current_user.check_auth(AUTH_LEVEL_ADMIN):
-            pass
-        elif current_user.is_authenticated and current_user.username == video.source:
-            pass
-        else:
-            logger.error("Video is set to private.")
-            return render_template("private.html")
 
     try:
         results = recommend_videos(video, size=MAX_RELATED_VIDEOS * 2)
@@ -225,9 +206,7 @@ def serve_video(video_id):
     for result in results:
         v = Video.query.filter_by(video_id=result["_id"]).first()
         if v and not v == video:
-            if v.private and (not v.source == current_user.username or not current_user.check_auth(AUTH_LEVEL_EDITOR)):
-                continue
-            else:
+            if v.user_can_see(current_user):
                 recommended.append(v)
 
     recommended = recommended[:MAX_RELATED_VIDEOS]
@@ -536,14 +515,15 @@ def dashboard_page():
     q = db_session.query(Video).filter(
         or_(Video.status != STATUS_COMPLETED, Video.user_reports.any())
     )
-    if not current_user.check_auth(AUTH_LEVEL_EDITOR):
-        q = q.filter(or_(Video.private == False, Video.source == current_user.username))
 
     current_tasks = q.order_by(
         Video.status
     ).all()
+    if not current_user.check_auth(AUTH_LEVEL_EDITOR):
+        current_tasks = [v for v in current_tasks if v.user_can_see(current_user)]
 
     possible_duplicates = list_all_duplicates()
+    possible_duplicates = [v for v in possible_duplicates if v.user_can_see(current_user)]
     pairs = []
     paired = {}
     for v in possible_duplicates:
@@ -707,24 +687,27 @@ def download_archive():
 @serve.route("/download/<video_id>")
 def download_video(video_id=""):
     video = db_session.query(Video).filter_by(video_id=video_id).first()
-    if not video:
-        return "Video not found."
+    orig = request.args.get("orig", 1)
 
-    if video.private:
-        if current_user.check_auth(AUTH_LEVEL_ADMIN):
-            pass
-        elif current_user.is_authenticated and current_user.username == video.source:
-            pass
-        else:
-            return "Missing permissions to download video."
+    if not video:
+        return Response(render_template("not_found.html"), 404)
+
+    if orig == 0:
+        first_p = processed_path
+        last_p = original_path
+    else:
+        first_p = original_path
+        last_p = processed_path
 
     try:
-        if os.path.isfile(os.path.join(original_path, video_id + ".mp4")):
-            return send_from_directory(original_path, video_id + ".mp4", as_attachment=True, conditional=True)
+        if os.path.isfile(os.path.join(first_p, video_id + ".mp4")):
+            return send_from_directory(first_p, video_id + ".mp4", as_attachment=True, conditional=True)
+        elif os.path.isfile(os.path.join(last_p, video_id + ".mp4")):
+            return send_from_directory(last_p, video_id + ".mp4", as_attachment=True, conditional=True)
     except OSError as e:
         logger.error(e)
         logger.error("Unable to serve video!")
-    return "Video file not found."
+    return Response(render_template("not_found.html"), 404)
 
 
 @serve.route("/view/<video_id>.mp4")
