@@ -95,7 +95,7 @@ def recommend_videos(video, size=10) -> list:
                     {
                         "multi_match": {
                             "query": q,
-                            "fields": fields,
+                            "fields": fields + ["upload_date"],
                             "fuzziness": "AUTO",
                             "prefix_length": 4,
                             "boost": 5
