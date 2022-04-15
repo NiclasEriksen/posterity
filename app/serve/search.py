@@ -51,7 +51,7 @@ def index_video_data(video: Video):
         "title": video.title,
         "orig_title": video.orig_title,
         "content_warning": video.content_warning,
-        "upload_date": datetime.timestamp(video.upload_time),
+        "upload_date": datetime.timestamp(video.orig_upload_time if video.orig_upload_time else video.upload_time),
         "source": video.source,
     }
 
