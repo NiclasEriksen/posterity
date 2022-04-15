@@ -65,13 +65,15 @@
             <table class="uk-table uk-table-small uk-table-striped">
                 <thead>
                     <tr>
-                        <td class="uk-width-1-2 uk-text-center">Video 1</td>
-                        <td class="uk-width-1-2 uk-text-center">Video 2</td>
+                        <td class="uk-width-1-5 uk-text-center"></td>
+                        <td class="uk-width-2-5 uk-text-center">Video 1</td>
+                        <td class="uk-width-2-5 uk-text-center">Video 2</td>
                     </tr>
                 </thead>
                 <tbody>
                     {% for v1, v2 in duplicates %}
                     <tr>
+                        <td><a href="/clear_duplicate?v1={{ v1.video_id }}&v2={{ v2.video_id }}">Clear</a></td>
                         <td>
                             <div class="list-thumbnail uk-position-relative" style="display: table-cell;">
                                 <a href="/{{ v1.video_id }}">

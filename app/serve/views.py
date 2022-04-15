@@ -547,7 +547,7 @@ def dashboard_page():
     pairs = []
     paired = {}
     for v in possible_duplicates:
-        for d in v.duplicates:
+        for d in v.pending_duplicates:
             if d.video_id in paired:
                 if v.video_id in paired[d.video_id]:
                     continue
@@ -658,6 +658,38 @@ def clear_report_route(report_id):
     flash("User report has been deleted.", "success")
 
     return redirect(url_for("serve.serve_video", video_id=video.video_id))
+
+
+@serve.route("/clear_duplicate", methods=["GET"])
+@login_required
+def clear_duplicate_route():
+    v1 = request.args.get("v1", "")
+    v2 = request.args.get("v2", "")
+
+    if not len(v1) or not len(v2):
+        flash("Missing one or both video ids to clear for duplicate", "warning")
+        return redirect(url_for("serve.dashboard_page"))
+    if any(x in v1 + v2 for x in ";/:\\&_"):
+        flash("Invalid characters in video ids", "warning")
+        return redirect(url_for("serve.dashboard_page"))
+
+    video1 = db_session.query(Video).filter_by(video_id=v1).first()
+    video2 = db_session.query(Video).filter_by(video_id=v2).first()
+
+    if not video1 or not video2:
+        flash("One or both of the video ids are invalid", "warning")
+        return redirect(url_for("serve.dashboard_page"))
+
+    if video2 in video1.duplicates:
+        video1.duplicates.remove(video2)
+        video1.false_positives.append(video2)
+    if video1 in video2.duplicates:
+        video2.duplicates.remove(video1)
+        video2.false_positives.append(video1)
+    db_session.add(video1, video2)
+    db_session.commit()
+    flash("Duplicate link cleared", "success")
+    return redirect(url_for("serve.dashboard_page"))
 
 
 @serve.route("/download_archive", methods=["GET"])
@@ -1035,9 +1067,14 @@ def get_possible_duplicates(video_id: str) -> list:
         if not video:
             return candidates
 
-        vid_q = db_session.query(Video).filter(Video.video_id != video_id).filter_by(status=STATUS_COMPLETED).all()
+        db_vids = db_session.query(Video).filter(Video.video_id != video_id).filter_by(status=STATUS_COMPLETED).all()
 
         duration_candidates = []
+
+        vid_q = []
+        for v in db_vids:
+            if v not in video.false_positives and video not in v.false_positives:
+                vid_q.append(v)
 
         for v in vid_q:
             if v.duration and video.duration:

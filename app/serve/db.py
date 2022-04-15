@@ -71,6 +71,12 @@ category_association_table = Table(
     Column("category_id", ForeignKey("categories.id"))
 )
 
+false_positive_association_table = Table(
+    "false_positive_association", Base.metadata,
+    Column("left_id", ForeignKey('videos.id'), primary_key=True),
+    Column("right_id", ForeignKey('videos.id'), primary_key=True)
+)
+
 
 @contextmanager
 def session_scope():
@@ -139,6 +145,12 @@ class Video(Base):
         secondaryjoin=lambda: Video.id == video_duplicates.c.duplicate_id,
         backref="duplicate_of"
     )
+    false_positives = relationship(
+        "Video", secondary=false_positive_association_table,
+        primaryjoin=id==false_positive_association_table.c.left_id,
+        secondaryjoin=id==false_positive_association_table.c.right_id,
+        backref="false_positives_left"
+    )
     tags = relationship("ContentTag", secondary=tag_association_table)
     categories = relationship("Category", secondary=category_association_table)
 
@@ -151,6 +163,27 @@ class Video(Base):
         elif user.is_authenticated and user.username == self.source:
             return True
         return False
+
+    @property
+    def has_duplicates(self) -> bool:
+        if not len(self.duplicates):
+            return False
+        for v in self.duplicates:
+            if v not in self.false_positives:
+                return True
+        return False
+
+    @property
+    def duplicate_count(self):
+        c = 0
+        for v in self.duplicates:
+            if v not in self.false_positives:
+                c += 1
+        return c
+
+    @property
+    def pending_duplicates(self):
+        return [v for v in self.duplicates if v not in self.false_positives]
 
     @property
     def content_warning(self):

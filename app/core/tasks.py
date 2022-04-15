@@ -102,7 +102,7 @@ def check_all_duplicates_task():
 
         log.info(f"There are {len(videos)} videos to test.")
         for v1, v2 in itertools.combinations(videos, 2):
-            if (v1.can_be_changed and v2.can_be_changed) and check_duplicate_video(v1, v2):
+            if (v1.can_be_changed and v2.can_be_changed) and check_duplicate_video(v1, v2) and not v2 in v1.false_positives:
                 total_duplicates += 1
                 if v2 not in v1.duplicates:
                     v1.duplicates.append(v2)
