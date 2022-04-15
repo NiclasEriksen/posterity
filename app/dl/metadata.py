@@ -8,14 +8,16 @@ import codecs
 import praw
 from prawcore.exceptions import NotFound
 from datetime import datetime
+from dateutil import parser
+from dateutil.parser._parser import ParserError
 from urllib.parse import urlparse
 from yt_dlp import YoutubeDL
 from yt_dlp.utils import DownloadError
 from dotenv import load_dotenv
 from . import json_path, tmp_path, original_path,\
     STATUS_DOWNLOADING, STATUS_INVALID
-from .helpers import reverse_readline, get_og_tags, find_between, remove_links, fix_reddit_old, fix_youtube_shorts,\
-    program_path
+from .helpers import reverse_readline, get_og_tags, find_between, remove_links, fix_reddit_old, fix_youtube_shorts, \
+    program_path, remove_emoji
 
 API_SITES = {
     "twitter.com": "twitter", "www.twitter.com": "twitter", "t.co": "twitter", "www.t.co": "twitter",
@@ -539,17 +541,38 @@ def add_technical_info_to_metadata(metadata: dict, video_path: str, post_process
     return metadata
 
 
-def get_title_from_api(url: str):
+def get_metadata_from_api(url: str) -> str:
     from dotenv import load_dotenv
     load_dotenv()
+    {
+        'data': {
+            'id': '1514966521952583691',
+            'text': 'This Russian abbot opened his monastery in Germany to Ukrainians against the will of the Russian Orthodox Church. https://t.co/RnViPxWMQR',
+            'created_at': '2022-04-15T13:59:00.000Z'
+        }
+    }
+    ['STR_FIELD', '__class__', '__delattr__', '__dict__', '__dir__', '__doc__', '__eq__', '__format__', '__ge__',
+     '__getattr__', '__getattribute__', '__gt__', '__hash__', '__init__', '__init_subclass__', '__le__', '__lt__',
+     '__module__', '__ne__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__setattr__', '__sizeof__',
+     '__str__', '__subclasshook__', '__weakref__', '_chunk', '_comments_by_id', '_fetch', '_fetch_data', '_fetch_info',
+     '_fetched', '_kind', '_reddit', '_reset_attributes', '_safely_add_arguments', '_url_parts', '_vote', 'award',
+     'clear_vote', 'comment_limit', 'comment_sort', 'comments', 'crosspost', 'delete', 'disable_inbox_replies',
+     'downvote', 'duplicates', 'edit', 'enable_inbox_replies', 'flair', 'fullname', 'gild', 'hide', 'id', 'id_from_url',
+     'mark_visited', 'mod', 'parse', 'reply', 'report', 'save', 'shortlink', 'unhide', 'unsave', 'upvote']
 
+    metadata = {
+        "title": "",
+        "desc": "",
+        "upload_time": datetime.now()
+    }
+
+    u = urlparse(url)
     headers = {
         'Accept-Encoding': 'identity',
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.75 Safari/537.36',
     }
-
-    u = urlparse(url)
     if u.netloc in API_SITES:
+
         if API_SITES[u.netloc] == "twitter":
             try:
                 tweet_id = int(u.path.split("/")[-1])
@@ -558,79 +581,104 @@ def get_title_from_api(url: str):
 
             token = os.environ.get("TWITTER_BEARER_TOKEN", "")
             if not len(token) or not tweet_id:
-                return ""
+                return metadata
 
             headers["Authorization"] = f"Bearer {token}"
-            req_url = f"https://api.twitter.com/2/tweets/{tweet_id}?tweet.fields=text"
+            req_url = f"https://api.twitter.com/2/tweets/{tweet_id}?tweet.fields=text,created_at"
             try:
                 r = requests.get(req_url, headers=headers)
-            except:
-                return ""
-                pass
-
-            data = r.json()
-            try:
-                tweet = data["data"]["text"]
-            except KeyError:
-                return ""
-
-            return remove_links(tweet.split("\n")[0])[:256].lstrip().rstrip().strip("\t")
-
-        elif API_SITES[u.netloc] == "reddit":
-            try:
-                page = reddit.submission(url=url)
-                if page:
-                    return page.title
             except Exception as e:
-                log.error(e)
-            return ""
-
-        return ""
-
-
-def get_description_from_api(url: str) -> str:
-    u = urlparse(url)
-    desc = ""
-    headers = {
-        'Accept-Encoding': 'identity',
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.75 Safari/537.36',
-    }
-    if u.netloc in API_SITES:
-
-        if API_SITES[u.netloc] == "twitter":
-            try:
-                tweet_id = int(u.path.split("/")[-1])
-            except (ValueError, IndexError, TypeError):
-                tweet_id = 0
-
-            token = os.environ.get("TWITTER_BEARER_TOKEN", "")
-            if not len(token) or not tweet_id:
-                return ""
-
-            headers["Authorization"] = f"Bearer {token}"
-            req_url = f"https://api.twitter.com/2/tweets/{tweet_id}?tweet.fields=text"
-            try:
-                r = requests.get(req_url, headers=headers)
-            except:
-                pass
+                print(e)
+                print("Error during API request, returning blank")
+                return metadata
 
             data = r.json()
             try:
                 tweet = data["data"]["text"]
             except KeyError as e:
                 tweet = ""
+            try:
+                d = data["data"]["created_at"]
+                metadata["upload_time"] = parser.parse(d).replace(tzinfo=None)
+            except (KeyError, ParserError) as e:
+                metadata["upload_time"] = datetime.now()
 
-            desc = remove_links(tweet).lstrip().rstrip().strip("\t")[:1024]
+            metadata["desc"] = remove_links(tweet).lstrip().rstrip().strip("\t")[:1024]
+            metadata["title"] = remove_emoji(remove_links(tweet.split("\n")[0]))[:256].lstrip().rstrip().strip("\t")
 
         elif API_SITES[u.netloc] == "reddit":
             try:
                 page = reddit.submission(url=url)
                 if page:
-                    desc = page.title
+                    d = page.created_utc
+                    metadata["upload_time"] = datetime.utcfromtimestamp(d)
+                    metadata["desc"] = remove_links(page.selftext)
+                    metadata["title"] = remove_emoji(page.title)
             except Exception as e:
                 log.error(e)
 
-    return desc
+    return metadata
+
+
+def get_title_from_api(url: str):
+    metadata = get_metadata_from_api(url)
+    return metadata["title"]
+
+
+def get_description_from_api(url: str) -> str:
+    metadata = get_metadata_from_api(url)
+    return metadata["desc"]
+
+
+def get_upload_time_from_api(url: str) -> str:
+    metadata = get_metadata_from_api(url)
+    return metadata["upload_time"]
+
+
+def scrape_metadata_from_source(url: str) -> dict:
+    metadata = {}
+    url = fix_youtube_shorts(url)
+    url = fix_reddit_old(url)
+
+    log.info("Fetching data from YouTube link...")
+    ydl = YoutubeDL({
+        "cookiefile": program_path("cookies.txt"),
+        "noplaylist": True
+    })
+
+    video = None
+
+    with ydl:
+        try:
+            result = ydl.extract_info(
+                url,
+                download=False
+            )
+        except DownloadError as e:
+            log.error("Error during fetching of video info, doing manual")
+            video = None
+        except Exception as e:
+            log.error(e)
+            log.error("Unhandled error during YoutubeDL extraction.")
+        else:
+            if "entries" in result:
+                try:
+                    video = result["entries"][0]
+                except (IndexError, ValueError, AttributeError):
+                    video = None
+            else:
+                video = result
+
+    if not video:
+        log.error("Was not able to find a video on the url given.")
+        return metadata
+
+    else:
+        if "description" in video:
+            desc = video["description"]
+
+        elif "title" in video:
+            desc = video["title"]
 
 
 def get_description_from_source(url: str) -> str:

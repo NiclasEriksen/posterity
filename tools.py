@@ -79,4 +79,16 @@ def clean_up_media_dir():
 
 
 if __name__ == "__main__":
-    clean_up_media_dir()
+    from app.serve.db import session_scope, Video
+    from app.dl.metadata import get_upload_time_from_api
+    with session_scope() as session:
+        videos = session.query(Video).all()
+        print("Starting upload time scraping.")
+        for v in videos:
+            print(f"Scraping video {v.video_id}")
+            d = get_upload_time_from_api(v.url)
+            if d < v.upload_time:
+                print(f"Updating video {v.video_id}")
+                v.orig_upload_time = d
+                session.add(v)
+        session.commit()
