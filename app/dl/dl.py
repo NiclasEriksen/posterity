@@ -240,7 +240,7 @@ def download_from_json_data(metadata: dict, file_name: str):
 
     yield metadata
 
-    result = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    result = subprocess.Popen(cmd)
 
     metadata["pid"] = result.pid
     yield metadata
