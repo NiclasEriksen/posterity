@@ -227,7 +227,7 @@ class Video(Base):
 
     @property
     def orig_upload_time_str(self) -> str:
-        return self.orig_upload_time.strftime("%b %d, %H:%M").lower()
+        return self.orig_upload_time.strftime("%b %d").lower()
 
     @property
     def upload_time_elapsed_verbose(self) -> str:
