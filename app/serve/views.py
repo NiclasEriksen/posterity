@@ -628,7 +628,7 @@ def report_video_post(video_id):
         flash("Invalid data in report form, it was not submitted.", "error")
         return report_video_route(video_id)
 
-    user_report = UserReport(video, reason, text)
+    user_report = UserReport(video, reason, text, current_user.username)
     db_session.add(user_report)
     db_session.commit()
 

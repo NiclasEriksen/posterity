@@ -110,7 +110,8 @@ class Video(Base):
     orig_title = Column(String, default="")
     url = Column(String, default="")
     status = Column(Integer)
-    upload_time = Column(DateTime, default="")
+    upload_time = Column(DateTime, default=datetime.now())
+    orig_upload_time = Column(DateTime, default=datetime.now())
     video_format = Column(String, default="")
     audio_format = Column(String, default="")
     processed_video_format = Column(String, default="")
@@ -619,13 +620,17 @@ class UserReport(Base):
     id = Column(Integer, primary_key=True)
     video_db_id = Column(Integer, ForeignKey("videos.id"))
     video = relationship("Video", back_populates="user_reports")
-    text = Column(String)
+    report_time = Column(DateTime, default=datetime.now())
+    source = Column(String, default="Anonymous")
+    text = Column(String, default="")
     reason = Column(Integer, default=REASON_OTHER)
 
-    def __init__(self, video: Video, reason: int, text: str):
+    def __init__(self, video: Video, reason: int, text: str, source: str):
         self.video = video
         self.reason = reason
         self.text = text
+        self.source = source
+        self.report_time = datetime.now()
 
     @property
     def reason_str(self) -> str:
@@ -635,15 +640,15 @@ class UserReport(Base):
             return "Unknown reason"
 
 
-class FailedDownload(Base):
-    __tablename__ = "failed"
+class RejectedVideo(Base):
+    __tablename__ = "rejected"
     id = Column(Integer, primary_key=True)
     url = Column(String)
     reason = Column(Integer)
     upload_time = Column(DateTime)
-    source = Column(String)
+    reject_time = Column(DateTime)
+    uploader = Column(String)
     title = Column(String)
-    content_warning = Column(String)
 
 
 # To avoid circular imports of Video model
