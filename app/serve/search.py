@@ -103,7 +103,7 @@ def recommend_videos(video, size=10) -> list:
                     },
                     {
                         "more_like_this": {
-                            "fields": fields + ["upload_date"],
+                            "fields": fields,
                             "like": [
                                 {
                                     "_index": "videos",
