@@ -59,18 +59,18 @@ def cancel_task(task_id: str):
             except OSError as e:
                 logger.error(e)
                 return Response("Error when killing process.", 400)
-        else:
-            try:
-                res = celery.control.revoke(task_id, terminate=True)
-                res.poll()
-                logger.info("Deleting task.")
-                logger.info(redis_client.smembers("_kombu.binding.downloads"))
-                redis_client.srem("_kombu.binding.downloads", task_id)
-                redis_client.srem("_kombu.binding.processing", task_id)
-            except Exception as e:
-                logger.error(e)
-                return Response(f"Error during removal of task", 200)
-            return Response(f"Task was completely removed from Celery: {res}", 200)
+        # else:
+        #     try:
+        #         res = celery.control.revoke(task_id, terminate=True)
+        #         res.poll()
+        #         logger.info("Deleting task.")
+        #         logger.info(redis_client.smembers("_kombu.binding.downloads"))
+        #         redis_client.srem("_kombu.binding.downloads", task_id)
+        #         redis_client.srem("_kombu.binding.processing", task_id)
+        #     except Exception as e:
+        #         logger.error(e)
+        #         return Response(f"Error during removal of task", 200)
+        #     return Response(f"Task was completely removed from Celery: {res}", 200)
     except Exception as e:
         logger.error(e)
         return Response("Unknown error during task cancellation.")
