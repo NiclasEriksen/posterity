@@ -368,7 +368,7 @@ function redirectOnComplete(video_id) {
                 if (prog == 0.0) {
                     progress_text.innerHTML = "<span class='uk-text-small'>Waiting...</span>";
                 } else {
-                    progress_text.innerHTML = Math.floor(prog * 100.0).toString() + "%";
+                    progress_text.innerHTML = Math.floor((prog * 100.0) + 0.5).toString() + "%";
                 }
 //                console.log(prog);
             }
