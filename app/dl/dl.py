@@ -111,8 +111,7 @@ def process_from_json_data(metadata: dict, input_file: str, output_file: str) ->
 
         log.info(f"{metadata['video_id']} | Running pass {i}...")
 
-        #result = subprocess.Popen(p, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        result = subprocess.Popen(p)
+        result = subprocess.Popen(p, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 
         metadata["pid"] = result.pid
         yield metadata
@@ -242,7 +241,7 @@ def download_from_json_data(metadata: dict, file_name: str):
 
     yield metadata
 
-    result = subprocess.Popen(cmd)
+    result = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 
     metadata["pid"] = result.pid
     yield metadata
