@@ -188,6 +188,7 @@ def download_from_json_data(metadata: dict, file_name: str):
     sub_links = d["sub_formats"]
     duration = d["duration"]
     video_title = d["title"]
+    uploaded = d["upload_time"]
 
     if duration > MAX_DURATION_SD:
         log.error("Video is too long to download! Duration: " + str(duration))
@@ -225,9 +226,8 @@ def download_from_json_data(metadata: dict, file_name: str):
 
     print("===================")
     print(f"Format: {f}, audio: {audio_included}")
-    print(f"Vid: {video_url}")
     if not audio_included:
-        print(f"Aud: {audio_url}")
+        print(f"Audio in video stream")
     print("===================")
 
     cmd = get_ffmpeg_cmd(video_url, audio_url, sub_url, vid_save_path, log_path=log_path)
@@ -236,6 +236,7 @@ def download_from_json_data(metadata: dict, file_name: str):
     metadata["format"] = f
     metadata["duration"] = duration
     metadata["status"] = STATUS_DOWNLOADING
+    metadata["orig_upload_time"] = uploaded
 
     yield metadata
 

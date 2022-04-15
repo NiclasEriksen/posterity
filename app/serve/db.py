@@ -373,6 +373,7 @@ class Video(Base):
             "video_id": self.video_id,
             "verified": self.verified,
             "upload_time": time.mktime(self.upload_time.timetuple()) if self.upload_time else 0,
+            "orig_upload_time": time.mktime(self.orig_upload_time.timetuple()) if self.orig_upload_time else 0,
             "duplicate": ", ".join(v.video_id for v in self.duplicates),
         }
     
@@ -471,6 +472,10 @@ class Video(Base):
             self.processed_bit_rate = 0.0
         try:
             self.upload_time = datetime.utcfromtimestamp(d["upload_time"])
+        except KeyError:
+            pass
+        try:
+            self.orig_upload_time = datetime.utcfromtimestamp(d["orig_upload_time"])
         except KeyError:
             pass
         try:

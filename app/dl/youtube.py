@@ -1,5 +1,7 @@
 from yt_dlp import YoutubeDL
 from yt_dlp.utils import DownloadError
+from datetime import datetime
+import time
 import logging
 from .helpers import program_path, height_to_width, fix_youtube_shorts, fix_reddit_old, check_stream, \
     is_dash, is_hls, is_avc, is_streaming_site, remove_links, is_http
@@ -93,6 +95,7 @@ def get_content_info(url: str) -> dict:
             "duration": 0.0,
             "thumbnail": "",
             "title": "No title (mp4)",
+            "upload_date": time.mktime(datetime.now().timetuple())
         }
     url = fix_youtube_shorts(url)
     url = fix_reddit_old(url)
@@ -105,6 +108,7 @@ def get_content_info(url: str) -> dict:
         "duration": 0.0,
         "thumbnail": "",
         "title": "",
+        "upload_date": time.mktime(datetime.now().timetuple())
     }
 
     log.info("Fetching data from YouTube link...")
@@ -153,13 +157,30 @@ def get_content_info(url: str) -> dict:
                 "sub_formats": {},
                 "duration": 0.0,
                 "thumbnail": "",
-                "title": title
+                "title": title,
+                "upload_date": time.mktime(datetime.now().timetuple())
             }
 
         log.error("Was not able to find a video on the url given.")
         return d
 
     else:
+        # [
+        #   'id', 'title', 'formats', 'thumbnails', 'thumbnail',
+        #   'description', 'uploader', 'uploader_id', 'uploader_url',
+        #   'channel_id', 'channel_url', 'duration', 'view_count',
+        #   'average_rating', 'age_limit', 'webpage_url', 'categories',
+        #   'tags', 'playable_in_embed', 'is_live', 'was_live', 'live_status',
+        #   'release_timestamp', 'automatic_captions', 'subtitles', 'chapters',
+        #   'upload_date', 'like_count', 'channel', 'channel_follower_count',
+        #   'availability', 'original_url', 'webpage_url_basename',
+        #   'webpage_url_domain', 'extractor', 'extractor_key', 'playlist',
+        #   'playlist_index', 'display_id', 'fulltitle', 'duration_string',
+        #   'requested_subtitles', '__has_drm', 'requested_formats', 'format',
+        #   'format_id', 'ext', 'protocol', 'language', 'format_note',
+        #   'filesize_approx', 'tbr', 'width', 'height', 'resolution', 'fps',
+        #   'dynamic_range', 'vcodec', 'vbr', 'stretched_ratio', 'acodec', 'abr', 'asr'
+        # ]
         log.debug(f"YoutubeDL found a video.")
         if "thumbnail" in video:
             d["thumbnail"] = video["thumbnail"]
@@ -169,6 +190,21 @@ def get_content_info(url: str) -> dict:
 
         elif "title" in video:
             d["title"] = video["title"]
+
+        if "tags" in video and len(video["tags"]):
+            d["title"] += "\n" + ", ".join(video["tags"])
+        if "categories" in video and len(video["categories"]):
+            d["title"] += "\n" + ", ".join(video["categories"])
+
+
+        if "release_timestamp" in video and video["release_timestamp"]:
+            print(video["release_timestamp"])
+            print("TIMESTAMP!!!!!")
+        if "upload_date" in video and video["upload_date"]:
+            t = datetime.strptime(video["upload_date"], "%Y%m%d")
+            d["upload_date"] = time.mktime(t.timetuple())
+        else:
+            d["upload_date"] = time.mktime(datetime.now().timetuple())
 
         if "requested_subtitles" in video:
             try:
@@ -189,10 +225,8 @@ def get_content_info(url: str) -> dict:
                 return d
 
         if "formats" not in video:
-            log.debug(video)
             log.error("No format key in video.")
         else:
-            print(video["formats"])
             for u in [f for f in video["formats"]]:
                 video_id_found = ""
                 if "url" in u:
@@ -270,7 +304,8 @@ def get_content_info(url: str) -> dict:
                 "sub_formats": {},
                 "duration": 0.0,
                 "thumbnail": "",
-                "title": title
+                "title": title,
+                "upload_date": time.mktime(datetime.now().timetuple())
             }
         if video:
             if "formats" in video:
