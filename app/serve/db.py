@@ -479,7 +479,11 @@ class Video(Base):
         except KeyError:
             pass
         try:
-            self.orig_upload_time = datetime.utcfromtimestamp(d["orig_upload_time"])
+            ot = d["orig_upload_time"]
+            if isinstance(ot, datetime):
+                self.orig_upload_time = ot
+            elif isinstance(ot, str) or isinstance(ot, int):
+                self.orig_upload_time = datetime.utcfromtimestamp(d["orig_upload_time"])
         except KeyError:
             pass
         try:
