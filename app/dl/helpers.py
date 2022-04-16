@@ -145,6 +145,10 @@ def seconds_to_verbose_time(t: float) -> str:
             return "0 seconds"
 
 
+def map_range(x: float, a1: float, a2: float, b1: float, b2: float) -> float:
+    return (x - a1) / (a2 - a1) * (b2 - b1) + b1
+
+
 def remove_emoji(data: str):
     emoj = re.compile("["
                       u"\U0001F600-\U0001F64F"  # emoticons

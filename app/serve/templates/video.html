@@ -266,11 +266,13 @@
                             {% for v in recommended %}
                             <tr uk-scrollspy="cls:uk-animation-fade">
                                 <td class="uk-flex uk-flex-middle" style="min-height: 64px;">
-                                    <div class="list-thumbnail uk-position-relative" style="display: table-cell;">
-                                        <a href="/{{ v.video_id }}">
-                                            <img src="/thumbnail/{{ v.video_id }}.jpg" loading="lazy" class="thumbnail-rounded uk-position-absolute uk-position-center">
-                                        </a>
-                                    </div>
+                                    <span uk-tooltip="title: Rel. score: {{ (v.score * 100.0 + 0.5) // 1 }}%">
+                                        <div class="list-thumbnail uk-position-relative" style="display: table-cell;">
+                                            <a href="/{{ v.video_id }}">
+                                                <img src="/thumbnail/{{ v.video_id }}.jpg" loading="lazy" class="thumbnail-rounded uk-position-absolute uk-position-center">
+                                            </a>
+                                        </div>
+                                    </span>
                                     <div style="display: table-cell;">
                                         <a href="/{{ v.video_id }}">{{ v.title }}</a>
                                     </div>

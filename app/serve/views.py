@@ -28,7 +28,7 @@ from app.dl import media_path, original_path, json_path, processed_path, \
     STATUS_PROCESSING, STATUS_PENDING
 from app.dl.dl import get_celery_scheduled, get_celery_active
 from app.dl.metadata import write_metadata_to_disk, get_progress_for_video
-from app.dl.helpers import seconds_to_verbose_time
+from app.dl.helpers import seconds_to_verbose_time, map_range
 from app.serve.db import db_session, Video, User, ContentTag, UserReport, Category,\
     init_db, AUTH_LEVEL_ADMIN, AUTH_LEVEL_EDITOR, AUTH_LEVEL_USER, REASON_TEXTS,\
     RegisterToken, MAX_TOKEN_USES
@@ -208,9 +208,16 @@ def serve_video(video_id):
         v = Video.query.filter_by(video_id=result["_id"]).first()
         if v and not v == video:
             if v.user_can_see(current_user):
+                v.score = result["_score"]
                 recommended.append(v)
 
     recommended = recommended[:MAX_RELATED_VIDEOS]
+    scores = [v.score for v in recommended]
+    if len(recommended):
+        min_score = min(scores)
+        max_score = max(scores)
+        for v in recommended:
+            v.score = map_range(v.score, min_score, max_score, 0.0, 1.0)
 
     if "embed" in request.args:
         return render_template(
