@@ -57,7 +57,6 @@
                             width="100%"
                             loop="loop"
                             poster=""
-                            style="max-width: {{ video.player_width }}px;"
                             data-setup='{"fluid": true, "poster":"/preview/{{ video.video_id }}.jpg", "aspectRatio":"{{video.width}}:{{video.height}}", "playbackRates": [0.25, 0.5, 1, 2, 4] }'
                             >
                                 <source src="{{ stream_path }}" type="video/mp4" />
