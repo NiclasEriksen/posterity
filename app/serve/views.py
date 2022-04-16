@@ -7,7 +7,7 @@ import json
 from datetime import datetime
 from flask import Blueprint, current_app, request, abort,\
     render_template, send_from_directory, url_for, flash,\
-    redirect, get_flashed_messages, Response
+    redirect, get_flashed_messages, Response, session
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import login_user, login_required, logout_user, current_user
 from redis.exceptions import ConnectionError
@@ -67,6 +67,8 @@ def remove_session(*_args):
 
 @serve.before_request
 def before_request_func():
+    if "view_counter" not in session:
+        session["view_counter"] = dict()
     current_app.logger.name = "posterity.serve"
 
 
@@ -755,16 +757,46 @@ def view_video(video_id=""):
     else:
         processed = video.post_processed
 
+    resp = None
     try:
         if processed and not original:
             proc_path = os.path.join(processed_path, f"{video_id}.mp4")
             if os.path.isfile(proc_path):
-                return send_from_directory_partial(processed_path, f"{video_id}.mp4")
-        if os.path.isfile(os.path.join(original_path, f"{video_id}.mp4")):
-            return send_from_directory_partial(original_path, f"{video_id}.mp4")
+                resp = send_from_directory_partial(processed_path, f"{video_id}.mp4")
+        if os.path.isfile(os.path.join(original_path, f"{video_id}.mp4")) and not resp:
+            resp = send_from_directory_partial(original_path, f"{video_id}.mp4")
     except OSError as e:
         logger.error(e)
         logger.error("Unable to serve video!")
+
+    if resp:
+        return resp
+        # if "Content-Length" in resp.headers:
+        #     try:
+        #         file_size = os.path.getsize(processed_path) if processed else os.path.getsize(original_path)
+        #     except OSError as e:
+        #         logger.error(e)
+        #         file_size = 0
+        #
+        #     try:
+        #         sent_bytes = int(resp.headers["Content-Length"])
+        #         content_range = resp.headers["Content-Range"]
+        #
+        #         # Content-Range: bytes 3244032-3285875/3285876
+        #     except (TypeError, ValueError):
+        #         pass
+        #     else:
+        #         if file_size > 0:
+        #             try:
+        #                 if video_id not in session["view_counter"]:
+        #                     session["view_counter"][video_id] = 0
+        #                 if session["view_counter"][video_id] < file_size:
+        #                     session["view_counter"][video_id] += sent_bytes
+        #                     if session["view_counter"][video_id] > file_size: # * 0.33:
+        #                         print("View!")
+        #             except KeyError:
+        #                 pass
+
     return "Video file not found."
 
 

@@ -349,6 +349,13 @@
             videojs('video-player', {}, function() {
                 this.volume(0.5);
                 this.playbackRate(1);
+<!--                this.on('progress', checkBuffered);-->
+
+<!--                function checkBuffered () {-->
+<!--                    var buffPerc = this.bufferedPercent();-->
+<!--                        console.log(buffPerc);-->
+<!--                    }-->
+                return true;
             });
         }
         </script>
