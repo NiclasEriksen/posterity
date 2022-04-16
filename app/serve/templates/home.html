@@ -152,7 +152,7 @@
             </thead>
             <tbody>
                 {% for video in videos %}
-                <tr>
+                <tr uk-scrollspy="cls:uk-animation-fade">
                     <td class="uk-flex uk-flex-middle" style="min-height: 64px;">
                         <div class="list-thumbnail uk-position-relative" style="display: table-cell;">
                             <a href="/{{ video.video_id }}">
