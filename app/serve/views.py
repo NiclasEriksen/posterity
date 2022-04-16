@@ -585,6 +585,25 @@ def remove_video_route(video_id):
     return redirect(url_for("serve.front_page"), code=302)
 
 
+@serve.route("/publish_video/<video_id>")
+@login_required
+def publish_video_route(video_id: str):
+    video = db_session.query(Video).filter_by(video_id=video_id).first()
+    if video and video.user_can_edit(current_user):
+        if not video.verified:
+            video.verified = True
+            db_session.add(video)
+            db_session.commit()
+            flash("Video has been published!", "success")
+        else:
+            flash("Video was already published", "warning")
+    else:
+        flash("No video found with that id", "error")
+        return render_template("not_found.html")
+
+    return redirect(url_for("serve.serve_video", video_id=video_id))
+
+
 @serve.route("/report_video/<video_id>", methods=["GET"])
 def report_video_route(video_id):
     video = db_session.query(Video).filter_by(video_id=video_id).first()

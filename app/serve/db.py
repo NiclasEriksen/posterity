@@ -165,7 +165,9 @@ class Video(Base):
         return False
 
     def user_can_see(self, user: User) -> bool:
-        if self.ready_to_play and not self.private:
+        if self.ready_to_play and not self.private and self.verified:
+            return True
+        elif user.check_auth(AUTH_LEVEL_USER) and self.ready_to_play and not self.private:
             return True
         if user.check_auth(AUTH_LEVEL_EDITOR):
             return True
