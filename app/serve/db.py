@@ -10,7 +10,7 @@ from flask_login import UserMixin
 from contextlib import contextmanager
 from werkzeug.local import LocalProxy
 from flask import current_app
-from app.dl.helpers import seconds_to_verbose_time, seconds_to_hhmmss, convert_file_size
+from app.dl.helpers import seconds_to_verbose_time, seconds_to_hhmmss, convert_file_size, make_stub
 from app.dl import STATUS_DOWNLOADING, STATUS_PROCESSING, STATUS_INVALID,\
     STATUS_FAILED, STATUS_COMPLETED, STATUS_PENDING, STATUS_COOKIES, STATUS_STRINGS,\
     MAX_BIT_RATE_PER_PIXEL, MIN_BIT_RATE_PER_PIXEL
@@ -665,6 +665,7 @@ class ContentTag(Base):
 
     def __init__(self, name: str):
         self.name = name
+        self.stub = make_stub(name)
         self.censor = False
         self.category = 0
 
@@ -677,6 +678,7 @@ class Category(Base):
 
     def __init__(self, name: str):
         self.name = name
+        self.stub = make_stub(name)
 
 
 class UserReport(Base):
