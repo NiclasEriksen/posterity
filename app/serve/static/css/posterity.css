@@ -67,6 +67,9 @@ body, html {
     border-top: 1px solid var(--medium-grey);
     border-bottom: 1px solid var(--medium-grey);
 }
+.uk-table-striped tbody tr:nth-of-type(even):last-child, .uk-table-striped>tr:nth-of-type(even):last-child {
+    border-bottom: 1px solid var(--medium-grey);
+}
 
 .uk-h1, .uk-h2, .uk-h3, .uk-h4, .uk-h5, .uk-h6, .uk-heading-2xlarge, .uk-heading-large, .uk-heading-medium, .uk-heading-small, .uk-heading-xlarge, h1, h2, h3, h4, h5, h6 {
     color: var(--grey);
@@ -279,8 +282,12 @@ body, html {
 }
 
 .video-button-box {
-    box-shadow: 0 5px 15px rgb(0,0,0,0.08);
+    box-shadow: 0 8px 15px rgb(0,0,0,0.15);
     background-color: var(--dark-grey);
+}
+
+.recommended-box {
+    box-shadow: 0px 0px 25px rgb(0,0,0,0.15);
 }
 
 .video-link:hover {

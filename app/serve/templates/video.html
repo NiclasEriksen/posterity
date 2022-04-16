@@ -158,29 +158,6 @@
                             </div>
                         </div>
                     </div>
-                    {% if current_user.check_auth(AUTH_LEVEL_EDITOR) and video.user_reports|length %}
-                    <div class="uk-width-1-1 report-list-item">
-                        <h3 class="uk-text-danger">User reports:</h3>
-                    </div>
-                    {% for r in video.user_reports %}
-                    <div class="uk-width-1-1 report-list-item uk-padding-small">
-                        <h4 class="uk-margin-remove-bottom"><span class="uk-text-muted">Report #{{ r.id }}:</span> {{ r.reason_str }}</h4>
-                        {% if r.report_time %}
-                        <span class="uk-text-meta">Reported on {{ r.report_time_str }} by {{ r.source }}</span><br>
-                        {% endif %}
-                        {% if r.text|length %}
-                        <p class="uk-text-small">
-                            {{ r.text }}
-                        </p>
-                        {% endif %}
-                        <p class="uk-text-small">
-                            <a href="/clear_report/{{ r.id }}">
-                                <span class="uk-link-icon" uk-icon="icon: trash; ratio: 0.8;"></span> Delete this report
-                            </a>
-                        </p>
-                    </div>
-                    {% endfor %}
-                    {% endif %}
                     <div class="uk-width-1-1 uk-width-1-2@s uk-margin">
                         <div class="uk-grid uk-padding-small">
                             <div class="uk-width-1-6">
@@ -238,12 +215,44 @@
                     </div>
                 </div>
             </div>
+            {% if current_user.check_auth(AUTH_LEVEL_EDITOR) and video.user_reports|length %}
+            <div class="uk-container">
+                <div class="uk-width-1-1 report-list-item uk-text-center">
+                    <h3 class="uk-text-danger">User reports:</h3>
+                </div>
+                <table class="uk-table uk-table-small uk-table-responsive">
+                    <thead>
+                        <tr>
+                            <td>Reason</td>
+                            <td>Message</td>
+                            <td>Info</td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                       {% for r in video.user_reports %}
+                        <tr>
+                            <td class="uk-text-large"><span class="uk-text-muted">Report #{{ r.id }}:</span> {{ r.reason_str }}</td>
+                            <td><i>"{{ r.text }}"</i></td>
+                            <td>
+                                {% if r.report_time %}
+                                <span class="uk-text-meta">Reported on {{ r.report_time_str }} by {{ r.source }}</span><br>
+                                {% endif %}
+                                <a href="/clear_report/{{ r.id }}">
+                                    <span class="uk-link-icon" uk-icon="icon: trash; ratio: 0.8;"></span> Delete this report
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% endif %}
             {% if recommended|length %}
             <div class="uk-container">
                 <div class="uk-width-1-1 uk-text-center">
                     <h2>Possibly related videos:</h2>
                 </div>
-                <div class="uk-width-1-1 uk-padding-small uk-background-muted">
+                <div class="uk-width-1-1 uk-padding-small uk-background-muted recommended-box">
 
                     <table class="uk-table uk-table-small uk-table-striped">
 <!--                        <thead>-->
