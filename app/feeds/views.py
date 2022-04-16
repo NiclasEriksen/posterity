@@ -5,6 +5,7 @@ from sqlalchemy import or_, not_
 from werkzeug.local import LocalProxy
 
 from app.dl import STATUS_COMPLETED
+from app.extensions import cache
 from app.serve.db import Video, db_session, ContentTag, Category
 
 feeds = Blueprint(
@@ -28,12 +29,18 @@ def rss():
     if any([
         len(content_tag),
         len(category_tag),
-        len(ignore_content_tag),
-        len(ignore_category_tag)
     ]):
         title += ", filtered by: "
         title += ", ".join([
-            t for t in [content_tag, category_tag, ignore_content_tag, ignore_category_tag] if len(t)
+            t for t in [content_tag, category_tag] if len(t)
+        ])
+    if any([
+        len(ignore_content_tag),
+        len(ignore_category_tag)
+    ]):
+        title += ", ignoring: "
+        title += ", ".join([
+            t for t in [ignore_category_tag, ignore_content_tag] if len(t)
         ])
 
     fg.title(title)
@@ -61,9 +68,7 @@ def rss():
 
     videos = vq.order_by(Video.upload_time.desc()).limit(30).all()
 
-    txt = ", ".join([v.video_id for v in videos])
-
-    for video in videos:
+    for video in reversed(videos):
         fe = fg.add_entry()
         fe.title(video.title)
         fe.link(href=video.page_url)
