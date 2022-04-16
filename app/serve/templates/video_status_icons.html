@@ -9,7 +9,7 @@
                             </span>
                             {% elif video.status == STATUS_COMPLETED %}
                             <span uk-tooltip="title: Video is archived;pos: top-left;">
-                                <span class="{% if video.verified %}uk-text-success{% else %}uk-text-warning" uk-icon="icon: check; ratio: 0.9"></span>
+                                <span class="{% if video.verified %}uk-text-success{% else %}uk-text-warning{% endif %}" uk-icon="icon: check; ratio: 0.9"></span>
                             </span>
                             {% elif video.status == STATUS_FAILED %}
                             <span uk-tooltip="title: Video failed to download;pos: top-left;">
