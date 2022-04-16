@@ -146,7 +146,10 @@ def seconds_to_verbose_time(t: float) -> str:
 
 
 def map_range(x: float, a1: float, a2: float, b1: float, b2: float) -> float:
-    return (x - a1) / (a2 - a1) * (b2 - b1) + b1
+    try:
+        return (x - a1) / (a2 - a1) * (b2 - b1) + b1
+    except ZeroDivisionError:
+        return b1
 
 
 def remove_emoji(data: str):
