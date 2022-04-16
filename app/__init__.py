@@ -53,6 +53,11 @@ def create_app():
     app.register_blueprint(
         serve_blueprint
     )
+    from .feeds.views import feeds as feeds_blueprint
+    app.register_blueprint(
+        feeds_blueprint
+    )
+
     cache.init_app(app)
 
     @app.errorhandler(404)

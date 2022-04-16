@@ -152,6 +152,18 @@ def map_range(x: float, a1: float, a2: float, b1: float, b2: float) -> float:
         return b1
 
 
+def make_stub(name) -> str:
+    return name.replace(
+        " ", "_"
+    ).replace(
+        "/", "_"
+    ).replace(
+        "\\", "_"
+    ).replace(
+        "&", "_and_"
+    ).lower()
+
+
 def remove_emoji(data: str):
     emoj = re.compile("["
                       u"\U0001F600-\U0001F64F"  # emoticons

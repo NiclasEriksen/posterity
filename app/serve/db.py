@@ -157,6 +157,10 @@ class Video(Base):
     def __init__(self):
         self.upload_time = datetime.now()
 
+    @property
+    def page_url(self) -> str:
+        return f"https://www.posterity.no/{self.video_id}"
+
     def user_can_edit(self, user: User) -> bool:
         if user.check_auth(AUTH_LEVEL_EDITOR):
             return True
@@ -655,6 +659,7 @@ class ContentTag(Base):
     __tablename__ = "content_tags"
     id = Column(Integer, primary_key=True)
     name = Column(String, unique=True)
+    stub = Column(String, unique=True)
     category = Column(Integer, default=0)
     censor = Column(Boolean)
 
@@ -668,6 +673,7 @@ class Category(Base):
     __tablename__ = "categories"
     id = Column(Integer, primary_key=True)
     name = Column(String, unique=True)
+    stub = Column(String, unique=True)
 
     def __init__(self, name: str):
         self.name = name
