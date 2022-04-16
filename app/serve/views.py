@@ -687,6 +687,10 @@ def clear_duplicate_route():
         flash("One or both of the video ids are invalid", "warning")
         return redirect(url_for("serve.dashboard_page"))
 
+    if not video1.user_can_change(current_user) or not video2.user_can_change(current_user):
+        flash("Lacking permissions to edit one or both of those videos. Leave a report?", "warning")
+        return redirect(url_for("serve.report_video", video_id=v1))
+
     if video2 in video1.duplicates:
         video1.duplicates.remove(video2)
         video1.false_positives.append(video2)

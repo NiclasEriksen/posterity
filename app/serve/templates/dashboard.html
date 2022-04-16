@@ -118,6 +118,7 @@
         {% endif %}
     </div>
 </section>
+{% if current_user.check_auth(AUTH_LEVEL_EDITOR) %}
 <section class="uk-section uk-section-default uk-section-small uk-container">
     <div class="uk-grid uk-grid-small">
         <div clasS="uk-width-1-1">
@@ -235,4 +236,5 @@
         {% endif %}
     </div>
 </section>
+{% endif %}
 {% endblock %}
