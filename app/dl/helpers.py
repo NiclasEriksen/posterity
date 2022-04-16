@@ -333,6 +333,10 @@ def valid_video_url(url: str) -> bool:
 
     if u.scheme not in ["http", "https", "ftp"]:
         return False
+    elif u.netloc.startswith("127.") or u.netloc.startswith("localhost"):
+        return False
+    elif u.netloc.startswith("192.") or u.netloc.startswith("10.0."):
+        return False
 
     return True
 
@@ -351,6 +355,7 @@ def fix_reddit_old(url: str) -> str:
 
 def minimize_url(url: str) -> str:
     u = urlparse(url)
+
     if len(u.query):
         query = parse_qs(u.query, keep_blank_values=True)
         for dq in DISPOSABLE_QUERIES:
