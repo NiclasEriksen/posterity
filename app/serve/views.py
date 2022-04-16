@@ -214,10 +214,13 @@ def serve_video(video_id):
     recommended = recommended[:MAX_RELATED_VIDEOS]
     scores = [v.score for v in recommended]
     if len(recommended):
-        min_score = min(scores)
-        max_score = max(scores)
-        for v in recommended:
-            v.score = map_range(v.score, min_score, max_score, 0.0, 1.0)
+        if len(recommended) == 1:
+            recommended[0].score = 1.0
+        else:
+            min_score = min(scores)
+            max_score = max(scores)
+            for v in recommended:
+                v.score = map_range(v.score, min_score, max_score, 0.0, 1.0)
 
     if "embed" in request.args:
         return render_template(
