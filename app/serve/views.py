@@ -141,19 +141,19 @@ def front_page():
         total -= removed
 
     else:
-        vq = Video.query
+        vq = db_session.query(Video)
 
         if category:
             vq = vq.filter(Video.categories.any(id=category.id))
         if tag:
             vq = vq.filter(Video.tags.any(id=tag.id))
 
-        vq = vq.filter(Video.user_can_see(current_user)).order_by(
+        vq = vq.order_by(
             Video.upload_time.desc()
         )
-        total = vq.count()
-        videos = vq.offset(offset).limit(pp).all()
-        videos = [v for v in videos if v.user_can_see(current_user)]
+        all_videos = [v for v in vq.all() if v.user_can_see(current_user)]
+        total = len(all_videos)
+        videos = all_videos[offset: offset + MAX_RESULT_PER_PAGE]
 
     total_pages = total // pp + (1 if total % pp else 0)
 
