@@ -278,6 +278,11 @@ body, html {
     text-align: center;
 }
 
+.video-button-box {
+    box-shadow: 0 5px 15px rgb(0,0,0,0.08);
+    background-color: var(--dark-grey);
+}
+
 .video-link:hover {
     color: var(--light-grey);
 }
