@@ -45,7 +45,7 @@ def rss():
 
     fg.title(title)
     fg.description('Videos archived for posterity')
-    fg.link(href='https://www.posterity.no')
+    fg.link(href='https://posterity.no')
 
     vq = db_session.query(Video).filter_by(verified=True).filter_by(private=False).filter_by(status=STATUS_COMPLETED)
 

@@ -159,7 +159,7 @@ class Video(Base):
 
     @property
     def page_url(self) -> str:
-        return f"https://www.posterity.no/{self.video_id}"
+        return f"https://posterity.no/{self.video_id}"
 
     def user_can_edit(self, user: User) -> bool:
         if user.check_auth(AUTH_LEVEL_EDITOR):
