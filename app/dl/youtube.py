@@ -185,17 +185,17 @@ def get_content_info(url: str) -> dict:
         if "thumbnail" in video:
             d["thumbnail"] = video["thumbnail"]
         if "description" in video:
-            desc = video["description"]
-            d["title"] = clean_description(desc)
+            d["title"] = video["description"]
 
         elif "title" in video:
-            d["title"] = clean_description(video["title"])
+            d["title"] = video["title"]
 
         if "tags" in video and len(video["tags"]):
             d["title"] += "\n" + ", ".join(video["tags"])
         if "categories" in video and len(video["categories"]):
             d["title"] += "\n" + ", ".join(video["categories"])
 
+        d["title"] = clean_description(d["title"])
 
         if "release_timestamp" in video and video["release_timestamp"]:
             print(video["release_timestamp"])
