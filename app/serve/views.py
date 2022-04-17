@@ -441,19 +441,6 @@ def login_post_route():
     return redirect(next_target)
 
 
-@serve.route("/settings", methods=["GET", "POST"])
-@login_required
-def settings_page():
-    tags = ContentTag.query.all()
-    if not tags:
-        tags = []
-
-    if request.method == "POST":
-        pass
-
-    return render_template("settings.html", tags=tags)
-
-
 @serve.route("/add_tag", methods=["POST"])
 @login_required
 def add_tag_post():
@@ -569,7 +556,7 @@ def about_us_page():
     return render_template("about.html", total_time=seconds_to_verbose_time(get_total_duration()))
 
 
-@serve.route("/remove/<video_id>")
+@serve.route("/remove/<video_id>", methods=["POST"])
 @login_required
 def remove_video_route(video_id):
     video = db_session.query(Video).filter_by(video_id=video_id).first()
@@ -588,6 +575,24 @@ def remove_video_route(video_id):
         flash("No video by that id, nothing to remove.", "error")
 
     return redirect(url_for("serve.front_page"), code=302)
+
+
+@serve.route("/confirm_delete/<video_id>")
+def confirm_delete_route(video_id: str):
+    video = db_session.query(Video).filter_by(video_id=video_id).first()
+
+    if not video:
+        return Response(render_template("not_found.html"), 404)
+    if not video.user_can_edit(current_user):
+        flash("Lacking permissions to delete that video", "warning")
+        return redirect(url_for("serve.edit_video", video_id=video_id))
+
+    return render_template(
+        "confirm_action.html",
+        video=video,
+        action_description=f"Delete video with id \"{video_id}\""
+    )
+
 
 
 @serve.route("/restore/<video_id>")

@@ -225,6 +225,9 @@ body, html {
 .uk-background-secondary {
     background-color: var(--dark-grey);
 }
+.uk-background-dark {
+    background-color: var(--black);
+}
 .uk-light, .uk-light a {
     color: var(--grey);
 }

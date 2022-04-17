@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block page_title %}Confirm action{% endblock %}
+{% block content %}
+<div class="uk-container uk-height-1-1">
+    <div class="uk-position-center uk-height-medium uk-width-1-1" style="width:100%;">
+        <div class="uk-position-center">
+            <div class="uk-grid uk-grid-small uk-margin uk-flex-center uk-padding-large">
+                <div class="uk-width-1-1 uk-text-center uk-height-medium">
+                    <span uk-icon="icon: question; ratio: 4;" class="uk-text-danger uk-padding-small uk-margin-remove"></span><br>
+                    <h2>Confirm this action:</h2>
+                    <i class="uk-text-danger uk-background-dark uk-padding-small">{{ action_description }}</i>
+                </div>
+                <div class="uk-width-1-1 uk-margin uk-text-center">
+                    <h4>Video in question:</h4>
+                </div>
+                <div class="uk-width-1-1 uk-grid uk-flex-center uk-background-secondary uk-margin" style="max-width: 600px;">
+                    <div class="uk-width-1-6">
+                        <div class="list-thumbnail uk-position-relative">
+                            <a href="/{{ video.video_id }}">
+                                <img src="/thumbnail/{{ video.video_id }}.jpg" loading="lazy" class="thumbnail-rounded uk-position-absolute uk-position-center">
+                            </a>
+                        </div>
+                    </div>
+                    <div class="uk-width-5-6">
+                        {{ video.title }}<br>
+                        <span class="uk-text-meta">Uploaded {{ video.upload_time_verbose }} by {{ video.source }}</span><br>
+                        <span class="uk-text-meta">Duration: {{ video.duration_str_verbose }}</span>
+                    </div>
+                </div>
+                <div class="uk-width-1-1 uk-height-small uk-text-center">
+                    <form class="uk-form" method="POST" action="/remove/{{ video.video_id }}">
+                        <a class="uk-button uk-button-secondary uk-form-width-medium" href="/edit_video/{{ video.video_id }}">Cancel</a>
+                        <button type="submit" class="uk-input uk-form-width-medium uk-button uk-button-danger">Yes, I confirm</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
