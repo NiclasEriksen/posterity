@@ -454,14 +454,16 @@ def find_best_format(formats_dict: dict, limit: int=2160) -> (str, bool):
     formats = list(formats_dict.keys())
     for f in reversed(formats):
         if "1920x1080" in f:
-            return f
+            return f, False
     for f in reversed(formats):
         if "1080p" in f:
-            return f
+            return f, False
     for f in reversed(formats):
         if "720p" in f:
-            return f
-    print(formats[-1])
+            return f, False
+    for f in reversed(formats):
+        if "http" not in f:
+            return f, False
     return formats[-1], False
 
 
