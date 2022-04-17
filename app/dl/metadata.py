@@ -507,8 +507,13 @@ def parse_input_data(data: dict) -> dict:
         metadata["status"] = STATUS_INVALID
         return metadata
 
+    print(data)
+
     try:
-        metadata["content_warning"] = data["content_warning"]
+        if isinstance(data["content_warning"], str):
+            metadata["content_warning"] = data["content_warning"] if data["content_warning"] != "default" else ""
+        elif isinstance(data["content_warning"], list):
+            metadata["tags"] = ",".join([d for d in data["content_warning"] if d != "default"])
     except KeyError:
         pass
 
@@ -520,7 +525,10 @@ def parse_input_data(data: dict) -> dict:
         except KeyError:
             pass
     try:
-        metadata["category"] = data["category"]
+        if isinstance(data["category"], str):
+            metadata["category"] = data["category"] if data["category"] != "default" else ""
+        elif isinstance(data["content_warning"], list):
+            metadata["categories"] = ",".join(d for d in data["category"] if d != "default")
     except KeyError:
         pass
     try:
@@ -528,8 +536,6 @@ def parse_input_data(data: dict) -> dict:
             metadata["private"] = True
     except KeyError:
         pass
-    metadata["content_warning"] = metadata["content_warning"].replace("default", "")
-    metadata["category"] = metadata["category"].replace("default", "")
 
     return metadata
 

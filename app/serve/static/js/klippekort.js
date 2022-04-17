@@ -13,6 +13,9 @@ function handleFormSubmit(event) {
     
     const formJSON = Object.fromEntries(data.entries());
 
+    formJSON.category = data.getAll("category");
+    formJSON.content_warning = data.getAll("content_warning");
+
     var submit_btn = document.getElementById("submit-button");
     var status_field = document.getElementById("video-post-status");
     var title_field = document.getElementById("title");

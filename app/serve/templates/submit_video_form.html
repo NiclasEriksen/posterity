@@ -1,0 +1,81 @@
+        <form action="" id="link-form" class="uk-form uk-padding-small uk-width-1-1 uk-height-1-1 link-form-toggle"{% if hide_first %} hidden{% endif %}>
+            <input type="hidden" id="source_user" name="source_user" value="{{ current_user.username }}">
+            <fieldset class="uk-fieldset uk-grid">
+
+                <legend class="uk-legend uk-text-center uk-width-1-1">Post new video for posterity</legend>
+
+                <div class="uk-margin uk-width-1-1">
+                    <div class="uk-inline uk-width-1-1">
+                        <span class="uk-form-icon" uk-icon="icon: link"></span>
+                        <input class="uk-input" type="text" id="url" name="url" placeholder="URL" required>
+                    </div>
+                    <div class="uk-margin-small uk-width-1-1">
+                        <button type="button" class="uk-button uk-button-secondary uk-button-small" id="suggest-button" onclick="suggestTitle();">Suggest title</button>
+                    </div>
+                </div>
+
+                <div class="uk-margin uk-width-1-1">
+                    <div class="uk-inline uk-width-1-1">
+                        <span class="uk-form-icon" uk-icon="icon: quote-right"></span>
+                        <input class="uk-input" type="text" id="title" name="title" placeholder="Descriptive title" required>
+                    </div>
+                </div>
+
+                <div class="uk-margin uk-width-1-2 uk-width-1-1@l">
+                    <div class="uk-form-label"><span class="uk-text-danger" uk-icon="icon: warning; ratio: 0.75"></span> Content warning</div>
+                    <div class="uk-inline uk-width-1-1">
+
+                        <select class="uk-select uk-height-small" multiple id="content_warning" name="content_warning">
+                            {% for tag in tags %}
+                            <option value="{{ tag.id }}" class="content-tag-option-{{ tag.category }}">{{ tag.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="uk-margin uk-width-1-2 uk-width-1-1@l">
+                    <div class="uk-form-label"><span class="uk-text-meta" uk-icon="icon: tag; ratio: 0.75"></span> Video type</div>
+                    <div class="uk-inline uk-width-1-1">
+
+                        <select class="uk-select uk-height-small" multiple id="category" name="category">
+                            {% for tag in categories %}
+                            <option value="{{ tag.id }}" class="category-option">{{ tag.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <div class="uk-width-1-1">
+                    <span class="uk-text-small">
+                        <span class="content-tag-option-2">Graphic</span> /
+                        <span class="content-tag-option-1">Emotional</span> /
+                        <span class="content-tag-option-0">Informative</span> /
+                        <span class="uk-text-category">Video type</span>
+                    </span><br>
+                    {% if current_user.is_authenticated %}
+                    {% if current_user.check_auth(AUTH_LEVEL_EDITOR) %}
+                    <div class="uk-margin">
+                        <label><input class="uk-checkbox" id="private-checkbox" name="private-checkbox" type="checkbox"> Mark as private</label>
+                    </div>
+                    {% endif %}
+                    <span class="uk-text-meta"><i>You can add more tags and categories later</i></span>
+                    {% else %}
+                    <span class="uk-text-meta"><i>Link will need to be approved by an editor before it's archived.</i></span>
+                    {% endif %}
+                </div>
+
+                <div class="uk-margin-left uk-width-1-1 uk-padding-small uk-flex uk-flex-center">
+                    <button class="uk-button uk-button-default" type="submit" id="submit-button">Save for posterity</button>
+                </div>
+                <p id="video-post-status" class="uk-text-small uk-text-meta"></p>
+            </fieldset>
+        </form>
+        {% if hide_first %}
+        <div class="uk-width-1-1 uk-position-relative" style="height: 48px;">
+            <a
+                class="uk-icon-button uk-position-center"
+                uk-icon="plus"
+                uk-toggle="target: .link-form-toggle; animation: uk-animation-fade"
+            >
+            </a>
+        </div>
+        {% endif %}
