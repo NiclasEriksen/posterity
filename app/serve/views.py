@@ -564,6 +564,9 @@ def remove_video_route(video_id):
     if video:
         if not video.user_can_edit(current_user):
             flash("You don't have permission to remove that video.", "error")
+        elif video.status in [STATUS_DOWNLOADING, STATUS_PROCESSING]:
+            flash("Can't delete a video in the middle of a process. Task needs to be killed/ended first.", "warning")
+            return redirect(url_for("serve.edit_video_page", video_id=video_id))
         else:
             success = delete_video_by_id(video_id)
             if not success:
