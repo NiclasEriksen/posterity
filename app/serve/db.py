@@ -64,10 +64,20 @@ tag_association_table = Table(
     Column("video_id", ForeignKey("videos.id")),
     Column("tag_id", ForeignKey("content_tags.id"))
 )
+tag_deleted_association_table = Table(
+    "tag_deleted_association", Base.metadata,
+    Column("video_id", ForeignKey("deleted_videos.id")),
+    Column("tag_id", ForeignKey("content_tags.id"))
+)
 
 category_association_table = Table(
     "category_association", Base.metadata,
     Column("video_id", ForeignKey("videos.id")),
+    Column("category_id", ForeignKey("categories.id"))
+)
+category_deleted_association_table = Table(
+    "category_deleted_association", Base.metadata,
+    Column("video_id", ForeignKey("deleted_videos.id")),
     Column("category_id", ForeignKey("categories.id"))
 )
 
@@ -721,6 +731,51 @@ class RejectedVideo(Base):
     reject_time = Column(DateTime)
     uploader = Column(String)
     title = Column(String)
+
+
+class DeletedVideo(Base):
+    __tablename__ = "deleted_videos"
+    id = Column(Integer, primary_key=True)
+    video_id = Column(String, unique=True)
+    url = Column(String)
+    upload_time = Column(DateTime)
+    delete_time = Column(DateTime)
+    deleted_by = Column(String, default="Unknown")
+    title = Column(String, default="")
+    orig_title = Column(String, default="")
+    source = Column(String, default="Unknown")
+    tags = relationship("ContentTag", secondary=tag_deleted_association_table)
+    categories = relationship("Category", secondary=category_deleted_association_table)
+
+    def __init__(self, video: Video, deleted_by="Unknown"):
+        self.video_id = video.video_id
+        self.url = video.url
+        self.upload_time = video.upload_time
+        self.title = video.title
+        self.orig_title = video.orig_title
+        self.source = video.source
+        self.deleted_by = deleted_by
+        self.delete_time = datetime.now()
+        for t in video.tags:
+            self.tags.append(t)
+        for t in video.categories:
+            self.categories.append(t)
+
+    def restore(self) -> Video:
+        v = Video()
+        v.video_id = self.video_id
+        v.title = self.title
+        v.orig_title = self.orig_title
+        v.source = self.source
+        v.upload_time = self.upload_time
+        v.url = self.url
+        v.status = STATUS_COMPLETED
+        v.verified = False
+        for t in self.tags:
+            v.tags.append(t)
+        for t in self.categories:
+            v.categories.append(t)
+        return v
 
 
 # To avoid circular imports of Video model

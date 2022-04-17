@@ -27,11 +27,11 @@ from app.dl import media_path, original_path, json_path, processed_path, \
     STATUS_COMPLETED, STATUS_COOKIES, STATUS_DOWNLOADING, STATUS_FAILED, STATUS_INVALID, \
     STATUS_PROCESSING, STATUS_PENDING
 from app.dl.dl import get_celery_scheduled, get_celery_active
-from app.dl.metadata import write_metadata_to_disk, get_progress_for_video
+from app.dl.metadata import write_metadata_to_disk, get_progress_for_video, load_metadata_from_disk
 from app.dl.helpers import seconds_to_verbose_time, map_range
-from app.serve.db import db_session, Video, User, ContentTag, UserReport, Category,\
-    init_db, AUTH_LEVEL_ADMIN, AUTH_LEVEL_EDITOR, AUTH_LEVEL_USER, REASON_TEXTS,\
-    RegisterToken, MAX_TOKEN_USES
+from app.serve.db import db_session, Video, User, ContentTag, UserReport, Category, \
+    init_db, AUTH_LEVEL_ADMIN, AUTH_LEVEL_EDITOR, AUTH_LEVEL_USER, REASON_TEXTS, \
+    RegisterToken, MAX_TOKEN_USES, DeletedVideo
 from app import get_environment
 from app.serve.search import search_videos, index_video_data, remove_video_data, remove_video_data_by_id, \
     recommend_videos
@@ -590,6 +590,22 @@ def remove_video_route(video_id):
     return redirect(url_for("serve.front_page"), code=302)
 
 
+@serve.route("/restore/<video_id>")
+@login_required
+def restore_video_route(video_id):
+    if not current_user.check_auth(AUTH_LEVEL_EDITOR):
+        flash("You don't have permission to restore videos, sorry.", "error")
+    else:
+        success = restore_video_by_id(video_id)
+        if not success:
+            flash("Error during restoration of video, might be some missing pieces.", "warning")
+            return redirect(url_for("serve.serve_video", video_id=video_id))
+        else:
+            flash(f"Video \"{video_id}\" has been restored successfully!", "success")
+
+    return redirect(url_for("serve.serve_video", video_id=video_id), code=302)
+
+
 @serve.route("/publish_video/<video_id>")
 @login_required
 def publish_video_route(video_id: str):
@@ -1010,30 +1026,48 @@ def delete_token_route(token_id):
 def delete_video_by_id(video_id: str) -> bool:
     success = 0
     v = Video.query.filter_by(video_id=video_id).first()
-    if v:
-        remove_video_data(v)
-        success += 1
-        db_session.delete(v)
-        db_session.commit()
+    if not v:
+        logger.error(f"Unable to delete video {video_id} as it's not in the database")
+        return False
+
+    # Remove search engine index
+    remove_video_data(v)
+    write_metadata_to_disk(v.video_id, v.to_json())
+
+    dv = DeletedVideo(v, deleted_by=current_user.username)
+    db_session.add(dv)
+
+    # Delete from database
+    db_session.delete(v)
+    db_session.commit()
 
     if os.path.isfile(os.path.join(original_path, video_id + ".mp4")):
         try:
-            os.remove(os.path.join(original_path, video_id + ".mp4"))
+            os.rename(
+                os.path.join(original_path, video_id + ".mp4"),
+                os.path.join(original_path, video_id + "_deleted.mp4")
+            )
             success += 1
         except OSError as e:
-            flash(f"Failed to delete .mp4 file! {str(e)}", "error")
+            flash(f"Failed to rename .mp4 file! {str(e)}", "error")
     if os.path.isfile(os.path.join(processed_path, video_id + ".mp4")):
         try:
-            os.remove(os.path.join(processed_path, video_id + ".mp4"))
+            os.rename(
+                os.path.join(processed_path, video_id + ".mp4"),
+                os.path.join(processed_path, video_id + "_deleted.mp4")
+            )
             success += 1
         except OSError as e:
-            flash(f"Failed to delete .mp4 file! {str(e)}", "error")
+            flash(f"Failed to rename .mp4 file! {str(e)}", "error")
     if os.path.isfile(os.path.join(json_path, video_id + ".json")):
         try:
-            os.remove(os.path.join(json_path, video_id + ".json"))
+            os.rename(
+                os.path.join(json_path, video_id + ".json"),
+                os.path.join(json_path, video_id + "_deleted.json")
+            )
             success += 1
         except OSError as e:
-            flash(f"Failed to delete .json file! {str(e)}", "error")
+            flash(f"Failed to rename .json file! {str(e)}", "error")
 
     if success < 3:
         logger.error(f"Might be some residue after video removal for {video_id}")
@@ -1041,6 +1075,71 @@ def delete_video_by_id(video_id: str) -> bool:
         logger.info(f"Deleted video {video_id} successfully.")
         return True
     return False
+
+
+def restore_video_by_id(video_id: str) -> bool:
+    success = 0
+    dv = DeletedVideo.query.filter_by(video_id=video_id).first()
+    if not dv:
+        logger.error(f"Unable to restore video {video_id} as it's not in the database")
+        return False
+
+    v = dv.restore()
+
+    if os.path.isfile(os.path.join(original_path, video_id + "_deleted.mp4")):
+        try:
+            os.rename(
+                os.path.join(original_path, video_id + "_deleted.mp4"),
+                os.path.join(original_path, video_id + ".mp4")
+            )
+            success += 1
+        except OSError as e:
+            flash(f"Failed to rename .mp4 file! {str(e)}", "error")
+    else:
+        flash("Did not find original mp4 file!", "warning")
+    if os.path.isfile(os.path.join(processed_path, video_id + "_deleted.mp4")):
+        try:
+            os.rename(
+                os.path.join(processed_path, video_id + "_deleted.mp4"),
+                os.path.join(processed_path, video_id + ".mp4"),
+            )
+            success += 1
+        except OSError as e:
+            flash(f"Failed to rename .mp4 file! {str(e)}", "error")
+        else:
+            v.post_processed = True
+    else:
+        flash("Did not find original processed mp4 file!", "warning")
+    if os.path.isfile(os.path.join(json_path, video_id + "_deleted.json")):
+        try:
+            os.rename(
+                os.path.join(json_path, video_id + "_deleted.json"),
+                os.path.join(json_path, video_id + ".json"),
+            )
+            success += 1
+        except OSError as e:
+            flash(f"Failed to rename .json file! {str(e)}", "error")
+        else:
+            metadata = load_metadata_from_disk(os.path.join(json_path, video_id + ".json"))
+            if len(metadata.keys()):
+                v.from_json(metadata)
+    else:
+        flash("Did not find original json file!", "warning")
+
+    index_video_data(v)
+
+    db_session.add(v)
+    db_session.delete(dv)
+
+    db_session.commit()
+
+    if success < 3:
+        logger.error(f"Might be some missing pieces after video restore for {video_id}")
+        flash("Might be some missing pieces that wasn't restored, please check the video", "warning")
+    if success == 0:
+        logger.error(f"No video files found to restore...")
+        return False
+    return True
 
 
 def list_videos(max_count=10) -> list:

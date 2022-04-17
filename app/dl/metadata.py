@@ -93,6 +93,17 @@ def write_metadata_to_disk(video_id: str, md: dict):
         log.error(f"JSON for {video_id} was not written to disk.")
 
 
+def load_metadata_from_disk(json_path: str) -> dict:
+    try:
+        if os.path.isfile(json_path):
+            with open(json_path, "r") as f:
+                return json.load(f)
+    except OSError as e:
+        print(e)
+
+    return {}
+
+
 def write_metadata(video_id: str, md: dict):
     write_metadata_to_disk(video_id, md)
     write_metadata_to_db(video_id, md)
