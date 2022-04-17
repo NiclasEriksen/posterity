@@ -98,7 +98,7 @@ def recommend_videos(video, size=10) -> list:
                             "fields": fields,
                             "fuzziness": "AUTO",
                             "prefix_length": 4,
-                            "boost": 5
+                            "boost": 6
                         }
                     },
                     {
@@ -112,7 +112,7 @@ def recommend_videos(video, size=10) -> list:
                             ],
                             "min_term_freq": 1,
                             "max_query_terms": 24,
-                            "boost": 3
+                            "boost": 2
                         }
                     },
                 ]
