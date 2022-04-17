@@ -189,7 +189,7 @@ def get_content_info(url: str) -> dict:
             d["title"] = clean_description(desc)
 
         elif "title" in video:
-            d["title"] = video["title"]
+            d["title"] = clean_description(video["title"])
 
         if "tags" in video and len(video["tags"]):
             d["title"] += "\n" + ", ".join(video["tags"])
