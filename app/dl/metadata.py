@@ -513,7 +513,7 @@ def parse_input_data(data: dict) -> dict:
         if isinstance(data["content_warning"], str):
             metadata["content_warning"] = data["content_warning"] if data["content_warning"] != "default" else ""
         elif isinstance(data["content_warning"], list):
-            metadata["tags"] = ",".join([d for d in data["content_warning"] if d != "default"])
+            metadata["tags"] = data["content_warning"]
     except KeyError:
         pass
 
@@ -528,7 +528,7 @@ def parse_input_data(data: dict) -> dict:
         if isinstance(data["category"], str):
             metadata["category"] = data["category"] if data["category"] != "default" else ""
         elif isinstance(data["content_warning"], list):
-            metadata["categories"] = ",".join(d for d in data["category"] if d != "default")
+            metadata["categories"] = data["category"]
     except KeyError:
         pass
     try:
