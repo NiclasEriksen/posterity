@@ -157,7 +157,7 @@ def get_content_info(url: str) -> dict:
                 "sub_formats": {},
                 "duration": 0.0,
                 "thumbnail": "",
-                "title": title,
+                "title": clean_description(title),
                 "upload_date": time.mktime(datetime.now().timetuple())
             }
 
