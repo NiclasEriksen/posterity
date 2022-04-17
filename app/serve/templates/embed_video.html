@@ -18,11 +18,22 @@
     preload="false"
     loop="loop"
     poster=""
-    data-setup='{"poster":"/preview/{{ video.video_id }}.jpg"}'
+    data-setup='{"poster":"/preview/{{ video.video_id }}.jpg", "playbackRates": [0.25, 0.5, 1, 2, 4] }'
     >
         <source src="{{ stream_path }}" type="video/mp4" />
     </video>
     <script src="https://vjs.zencdn.net/7.18.1/video.min.js"></script>
+    <script>
+    var vid_element = document.getElementById("video-player");
+    if (vid_element) {
+        videojs('video-player', {
+        }, function() {
+            this.volume(0.5);
+            this.playbackRate(1);
+            return true;
+        });
+    }
+    </script>
     {% elif video.status == STATUS_DOWNLOADING %}
     <p>
         <div class="video-spinner"></div>
