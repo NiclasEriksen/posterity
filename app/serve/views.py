@@ -32,7 +32,7 @@ from app.dl.metadata import write_metadata_to_disk, get_progress_for_video, load
 from app.dl.helpers import seconds_to_verbose_time, map_range, make_stub
 from app.serve.db import db_session, Video, User, ContentTag, UserReport, Category, \
     init_db, AUTH_LEVEL_ADMIN, AUTH_LEVEL_EDITOR, AUTH_LEVEL_USER, REASON_TEXTS, \
-    RegisterToken, MAX_TOKEN_USES, DeletedVideo, Theatre
+    RegisterToken, MAX_TOKEN_USES, DeletedVideo
 from app import get_environment
 from app.serve.search import search_videos, index_video_data, remove_video_data, remove_video_data_by_id, \
     recommend_videos
