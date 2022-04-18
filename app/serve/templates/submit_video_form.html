@@ -66,7 +66,7 @@
                 <div class="uk-margin-left uk-width-1-1 uk-padding-small uk-flex uk-flex-center">
                     <button class="uk-button uk-button-default" type="submit" id="submit-button">Save for posterity</button>
                     <div class="uk-flex uk-flex-middle" style="max-width: 96px;">
-                        <div class="uk-width-small uk-text-center theatre-dropdown-button theatre-button">
+                        <div class="uk-width-small uk-text-center theatre-dropdown-button theatre-button" style="z-index:1;">
                             <img id="selected-theatre-image" src="/uploaded/{% if current_theatre %}{{current_theatre.logo_name}}{% else %}all.png{% endif %}">
                             <div class="theatre-dropdown-content uk-animation-slide-top-small uk-text-center">
                                 {% for t in available_theaters %}
