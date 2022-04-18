@@ -66,10 +66,13 @@
                 <div class="uk-margin-left uk-width-1-1 uk-padding-small uk-flex uk-flex-center">
                     <button class="uk-button uk-button-default" type="submit" id="submit-button">Save for posterity</button>
                     <div class="uk-flex uk-flex-middle" style="max-width: 96px;">
-                        <div class="uk-width-small uk-text-center">
-                            <span uk-tooltip="title: Current theatre: {% if current_theatre %}{{current_theatre.name}}{% else %}All{% endif %}">
-                            <img src="/uploaded/{% if current_theatre %}{{current_theatre.logo_name}}{% else %}all.png{% endif %}" class="active-action">
-                            </span>
+                        <div class="uk-width-small uk-text-center theatre-dropdown-button">
+                            <img id="selected-theatre-image" src="/uploaded/{% if current_theatre %}{{current_theatre.logo_name}}{% else %}all.png{% endif %}" class="active-action">
+                            <div class="theatre-dropdown-content uk-animation-slide-top-small uk-text-center">
+                                {% for t in available_theaters %}
+                                <button class="theatre-button uk-animation-scale-up" type="button" onclick="selectTheatre('{{t.stub}}', '{{t.logo_name}}');"><img src="/uploaded/{{t.logo_name}}"></button>
+                                {% endfor %}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -87,3 +90,15 @@
             </a>
         </div>
         {% endif %}
+        <script>
+            function selectTheatre (theatre_stub, theatre_logo) {
+                var theatre_field = document.getElementById("theatre");
+                var theatre_image = document.getElementById("selected-theatre-image");
+                if (theatre_field) {
+                    theatre_field.value = theatre_stub;
+                }
+                if (theatre_image) {
+                    theatre_image.src = '/uploaded/' + theatre_logo;
+                }
+            }
+        </script>

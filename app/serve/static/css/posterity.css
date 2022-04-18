@@ -326,6 +326,24 @@ body, html {
 .theatre-active * {
     color: var(--primary);
 }
+.theatre-dropdown-content {
+  display: none;
+  position: absolute;
+  background: rgba(0.2, 0.2, 0.2, 0.33);
+  text-align: center;
+  padding: 5px;
+  border-radius: 6px;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  z-index: 1;
+}
+
+/* Links inside the dropdown */
+.theatre-dropdown-content button {
+  color: black;
+  display: block;
+}
+
+.theatre-dropdown-button:hover .theatre-dropdown-content {display: block;}
 
 img.active-action{
     animation: pulse 3s;
