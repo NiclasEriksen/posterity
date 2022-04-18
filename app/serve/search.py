@@ -86,7 +86,7 @@ def recommend_videos(video, size=10) -> list:
     for c in COMMON:
         orig_title = orig_title.replace(c, "")
     q = f"""
-    {title} {' '.join([t.name for t in video.tags])} {orig_title} {video.theatre_verbose}
+    {title} {' '.join([t.name for t in video.tags])} {orig_title}
     """
     body = {
         "size": size,
@@ -99,7 +99,7 @@ def recommend_videos(video, size=10) -> list:
                             "fields": fields,
                             "fuzziness": "AUTO",
                             "prefix_length": 4,
-                            "boost": 6
+                            "boost": 3
                         }
                     },
                     {
@@ -113,7 +113,7 @@ def recommend_videos(video, size=10) -> list:
                             ],
                             "min_term_freq": 1,
                             "max_query_terms": 24,
-                            "boost": 2
+                            "boost": 15
                         }
                     },
                 ]
