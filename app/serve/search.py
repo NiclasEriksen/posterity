@@ -67,7 +67,6 @@ def index_all_videos():
             index_video_data(v)
 
 
-
 @catch_es_errors
 @cache.memoize(60)
 def recommend_videos(video, size=10) -> list:
