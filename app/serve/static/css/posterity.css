@@ -303,14 +303,18 @@ body, html {
     padding: 0;
     margin: 0;
     background: none;
+    -webkit-filter: 0px 0px 4px rgb(0,0,0,0.5);
+    filter: drop-shadow(0px 0px 4px rgb(0,0,0,0.5));
     color: var(--grey);
 }
 .theatre-button > img:hover {
-    box-shadow: 0 0 6px var(--primary);
+    -webkit-filter: 0px 0px 4px rgb(93,196,247,0.75);
+    filter: drop-shadow(0px 0px 4px rgb(93,196,247,0.75));
 }
 .theatre-button > img, .theatre-dropdown > img {
     border-radius: 4px;
-    transition: box-shadow 0.33s ease-in-out;
+    transition: filter 0.33s ease-in-out;
+    transition: -webkit-filter 0.33s ease-in-out;
 }
 .theatre-dropdown {
     background: var(--black);
