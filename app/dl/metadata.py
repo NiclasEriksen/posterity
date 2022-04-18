@@ -49,6 +49,7 @@ AD_DESCRIPTIONS = [
     "follow the story here", "connect with us on", "social media handles:", "news on the hour",
     "business inquiries:", "please help the channel", "youtube algorithm", "subscribe:", "wallet:", "@gmail.com",
     "btc:", "xtz:", "tron:", "eth:", "brought to you by", "other crypto options", "your daily video", "we track news",
+    "reporting free for millions by"
 ]
 IGNORED = ["usa", "invasion", "ukrainewar", "ukrainerussia", "russianinvasion", "europe", "warinukraine"]
 reddit = praw.Reddit(
