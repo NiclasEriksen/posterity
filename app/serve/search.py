@@ -99,7 +99,7 @@ def recommend_videos(video, size=10) -> list:
                             "fields": fields,
                             "fuzziness": "AUTO",
                             "prefix_length": 4,
-                            "boost": 3
+                            "boost": 4
                         }
                     },
                     {
