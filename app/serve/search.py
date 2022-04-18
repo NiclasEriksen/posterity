@@ -70,7 +70,7 @@ def index_all_videos():
 @catch_es_errors
 @cache.memoize(60)
 def recommend_videos(video, size=10) -> list:
-    fields = ["title", "orig_title", "content_warning", "theatre"]
+    fields = ["title", "orig_title", "content_warning"]
     text_fields = ["title", "orig_title"]
     theatre_query = video.theatre_verbose
     if video.title:
