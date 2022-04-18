@@ -87,6 +87,12 @@ false_positive_association_table = Table(
     Column("right_id", ForeignKey('videos.id'), primary_key=True)
 )
 
+theatre_association_table = Table(
+    "theatre_association", Base.metadata,
+    Column("video_id", ForeignKey("videos.id")),
+    Column("theatre_id", ForeignKey("theatres.id"))
+)
+
 
 @contextmanager
 def session_scope():
@@ -165,6 +171,7 @@ class Video(Base):
     )
     tags = relationship("ContentTag", secondary=tag_association_table)
     categories = relationship("Category", secondary=category_association_table)
+    theatres = relationship("Theatre", secondary=theatre_association_table)
 
     def __init__(self):
         self.upload_time = datetime.now()
@@ -649,10 +656,10 @@ class Theatre(Base):
     to_time = Column(DateTime)
     ongoing = Column(Boolean, default=True)
     logo_name = Column(String, default="no_logo.jpg")
+#     videos = relationship("Video", back_populates="theatre")
 
     def from_time_verbose(self) -> str:
         return ""
-#     videos = relationship("Video", back_populates="theatre")
 
 
 class RegisterToken(Base):
