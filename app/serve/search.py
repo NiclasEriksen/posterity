@@ -43,6 +43,7 @@ def remove_video_data(video):
 def remove_video_data_by_id(video_id: str):
     _result = es.delete(index="videos", id=video_id)
 
+
 @catch_es_errors
 def index_video_data(video):
     body = {
@@ -51,6 +52,7 @@ def index_video_data(video):
         "content_warning": video.content_warning,
         "upload_date": datetime.timestamp(video.orig_upload_time if video.orig_upload_time else video.upload_time),
         "source": video.source,
+        "theatre": video.theatre_verbose
     }
 
     _result = es.index(index="videos", id=video.video_id, body=body)
@@ -69,7 +71,7 @@ def index_all_videos():
 @catch_es_errors
 @cache.memoize(60)
 def recommend_videos(video, size=10) -> list:
-    fields = ["title", "orig_title", "content_warning"]
+    fields = ["title", "orig_title", "content_warning", "theatre"]
     if video.title:
         title = video.title.lower()
     else:
@@ -85,7 +87,7 @@ def recommend_videos(video, size=10) -> list:
     for c in COMMON:
         orig_title = orig_title.replace(c, "")
     q = f"""
-    {title} {' '.join([t.name for t in video.tags])} {orig_title}
+    {title} {' '.join([t.name for t in video.tags])} {orig_title} {video.theatre_verbose}
     """
     body = {
         "size": size,

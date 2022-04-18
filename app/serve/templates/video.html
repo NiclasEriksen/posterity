@@ -182,6 +182,7 @@
                                     <span class="uk-icon-link" uk-icon="icon: {{ video.source_site_name }}; ratio: 0.9"></span>
                                     {% endif %}
                                     <a href="{{ video.url }}" target="_blank" class="uk-icon-link" uk-icon="link">Source link</a><br>
+                                    {% if video.theatres|length %}<span class="uk-text-meta">Theatre:</span> {{ video.theatre_verbose }}<br>{% endif %}
                                     <span class="uk-text-meta">Submitted {% if current_user.is_authenticated %}by <i>"{{ video.source }}"</i> {% endif %}{{ video.upload_time_verbose }}</span>
                                     {% if video.orig_upload_time %}<br><span class="uk-text-meta">Original post from {{ video.orig_upload_time_str }}</span>{% endif %}
                                 </p>

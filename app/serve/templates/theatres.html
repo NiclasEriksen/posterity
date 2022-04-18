@@ -1,5 +1,12 @@
 {% extends "base.html" %}
 {% block title %}Theatre overview{% endblock %}
 {% block content %}
-Theatersads
+<div class="uk-grid uk-grid-small uk-flex uk-flex-center">
+    {% for theatre in theaters %}
+    <div class="uk-width-1-1 uk-width-1-2@s uk-margin uk-background-secondary">
+        <img src="/uploaded/{{ theatre.logo_name }}">
+        {{theatre.name}} <span class="uk-text-small"><span class="uk-text-muted"><i>{{theatre.location}}{% if theatre.ongoing %} (ongoing){% endif %}</i></span> - {{theatre.video_count}} videos</span>
+    </div>
+    {% endfor %}
+</div>
 {% endblock %}

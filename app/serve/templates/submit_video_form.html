@@ -66,6 +66,7 @@
                 <div class="uk-margin-left uk-width-1-1 uk-padding-small uk-flex uk-flex-center">
                     <button class="uk-button uk-button-default" type="submit" id="submit-button">Save for posterity</button>
                 </div>
+                <input type="hidden" id="theatre" name="theatre" value="{% if current_theatre %}{{current_theatre.stub}}{% else %}all{% endif %}">
                 <p id="video-post-status" class="uk-text-small uk-text-meta"></p>
             </fieldset>
         </form>

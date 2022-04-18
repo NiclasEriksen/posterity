@@ -40,6 +40,14 @@
                     </div>
 
                     <div class="uk-margin">
+                        <div class="uk-text-meta">Theatre:</div>
+                        <select class="uk-select uk-height-small" multiple id="theatre_select" name="theatre_select">
+                            {% for t in theatres %}
+                            <option value="{{ t.id }}" {% if t in video.theatres %} selected{% endif %}>{{ t.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="uk-margin">
                         <div class="uk-text-meta">Content tags</div>
                         <select class="uk-select uk-height-small" multiple id="tags_select" name="tags_select">
                             {% for tag in tags %}

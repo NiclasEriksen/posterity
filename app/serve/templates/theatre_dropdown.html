@@ -1,0 +1,34 @@
+<button class="theatre-button" type="button">{% if current_theatre %}<img src="/uploaded/{{current_theatre.logo_name}}">{% else %}<img src="/uploaded/all.png">{% endif %}</button>
+<div class="uk-width-medium theatre-dropdown" uk-dropdown="animation: uk-animation-fade; duration: 333;delay-hide: 333;">
+    <div class="uk-dropdown-grid uk-child-width-1-2@m" uk-grid>
+        <div class="uk-width-1-1">
+            <h4>Theaters</h4>
+        </div>
+        <div class="uk-width-1-1">
+            <a class="{% if not current_theatre %}theatre-active{% endif %}" href="/set_theatre/-1?redirect={{request.path}}">
+            <div class="uk-grid uk-grid-small">
+                <div class="uk-width-1-4">
+                    <img src="/uploaded/all.png" class="{% if not current_theatre %}active-action{% endif %}">
+                </div>
+                <div class="uk-width-3-4">
+                    All
+                </div>
+            </div>
+            </a>
+        </div>
+        {% for t in available_theaters %}
+        <div class="uk-width-1-1">
+            <a class="{% if t == current_theatre %}theatre-active{% endif %}" href="/set_theatre/{{t.id}}?redirect={{request.path}}">
+            <div class="uk-grid uk-grid-small">
+                <div class="uk-width-1-4">
+                    <img src="/uploaded/{{t.logo_name}}" class="{% if t == current_theatre %}active-action{% endif %}">
+                </div>
+                <div class="uk-width-3-4">
+                    {{t.name}}
+                </div>
+            </div>
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+</div>

@@ -180,6 +180,14 @@ class Video(Base):
     def page_url(self) -> str:
         return f"https://posterity.no/{self.video_id}"
 
+    @property
+    def theatre_str(self) -> str:
+        return ", ".join([t.stub for t in self.theatres])
+
+    @property
+    def theatre_verbose(self) -> str:
+        return ", ".join([t.name for t in self.theatres])
+
     def user_can_edit(self, user: User) -> bool:
         if user.check_auth(AUTH_LEVEL_EDITOR):
             return True
@@ -432,7 +440,7 @@ class Video(Base):
             "format": f"{self.video_format} / {self.audio_format}",
             "processed_format": f"{self.processed_video_format} / {self.processed_audio_format}",
             "width": self.width if self.width else 0,
-            # "theatre": self.theatre.stub if self.theatre else "",
+            "theatres": ",".join([t.stub for t in self.theatres]),
             "height": self.height if self.height else 0,
             "bit_rate": self.bit_rate if self.bit_rate else 0,
             "frame_rate": self.frame_rate if self.frame_rate else 0.0,
@@ -487,6 +495,20 @@ class Video(Base):
             pass
         try:
             self.source = d["source"]
+        except KeyError:
+            pass
+        try:
+            if "," in d["theatres"]:
+                t = d["theatres"].split(",")
+            else:
+                t = [d["theatres"]]
+            for stub in t:
+                try:
+                    theatre = Theatre.query.filter_by(stub=stub).first()
+                    if theatre:
+                        self.theatres.append(theatre)
+                except Exception:
+                    pass
         except KeyError:
             pass
         try:
@@ -660,6 +682,14 @@ class Theatre(Base):
 
     def from_time_verbose(self) -> str:
         return ""
+
+    @property
+    def videos(self) -> list:
+        return Video.query.filter(Video.theatres.any(id=self.id)).all()
+
+    @property
+    def video_count(self) -> int:
+        return Video.query.filter(Video.theatres.any(id=self.id)).count()
 
 
 class RegisterToken(Base):

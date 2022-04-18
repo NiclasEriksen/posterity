@@ -544,6 +544,7 @@ def parse_input_data(data: dict) -> dict:
         "width": 0,
         "height": 0,
         "format": "",
+        "theatres": "",
         "duration": 0,
         "private": False,
         "upload_time": datetime.now().timestamp(),
@@ -558,6 +559,11 @@ def parse_input_data(data: dict) -> dict:
         log.error("Corrupted data?!")
         metadata["status"] = STATUS_INVALID
         return metadata
+
+    try:
+        metadata["theatres"] = data["theatre"]
+    except KeyError:
+        pass
 
     try:
         if isinstance(data["content_warning"], str):

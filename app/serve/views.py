@@ -31,7 +31,7 @@ from app.dl.dl import get_celery_scheduled, get_celery_active, generate_logo
 from app.dl.metadata import write_metadata_to_disk, get_progress_for_video, load_metadata_from_disk, \
     check_duplicate_for_video
 from app.dl.helpers import seconds_to_verbose_time, map_range, make_stub
-from app.serve.db import db_session, Video, User, ContentTag, UserReport, Category, \
+from app.serve.db import db_session, Video, User, ContentTag, UserReport, Category, Theatre, \
     init_db, AUTH_LEVEL_ADMIN, AUTH_LEVEL_EDITOR, AUTH_LEVEL_USER, REASON_TEXTS, \
     RegisterToken, MAX_TOKEN_USES, DeletedVideo, session_scope
 from app import get_environment
@@ -69,14 +69,29 @@ def remove_session(*_args):
 
 @serve.before_request
 def before_request_func():
-    if "view_counter" not in session:
-        session["view_counter"] = dict()
+    if "theatre" not in session:
+        session["theatre"] = os.environ.get("DEFAULT_THEATRE", "all")
     current_app.logger.name = "posterity.serve"
+
+
+@serve.context_processor
+def inject_theatre_object():
+    theaters = db_session.query(Theatre).all()
+    if "theatre" in session:
+        if session["theatre"] != "all":
+            theatre = db_session.query(Theatre).filter_by(stub=session["theatre"]).first()
+            if theatre:
+                return dict(
+                    current_theatre=theatre,
+                    available_theaters=theaters
+                )
+    return dict(current_theatre=None, available_theaters=theaters)
 
 
 @serve.after_request
 def after_request(response):
-    response.headers.add('Accept-Ranges', 'bytes')
+    if request.path.startswith("/view"):
+        response.headers.add('Accept-Ranges', 'bytes')
     return response
 
 
@@ -119,6 +134,15 @@ def front_page():
 
     offset = max(0, page - 1) * pp
 
+    try:
+        theatre_stub = session["theatre"]
+    except KeyError:
+        theatre_stub = "all"
+    if theatre_stub != "all":
+        theatre = db_session.query(Theatre).filter_by(stub=theatre_stub).first()
+    else:
+        theatre = None
+
     if len(kw):
         logger.info(f"Searching for {kw}.")
         results = search_videos(kw)
@@ -134,6 +158,8 @@ def front_page():
             if v:
                 if (tag and not tag in v.tags) or (category and not category in v.categories):
                     removed += 1
+                elif theatre and theatre not in v.theatres:
+                    removed += 1
                 elif not v.user_can_see(current_user):
                     removed += 1
                 else:
@@ -146,8 +172,11 @@ def front_page():
         total -= removed
 
     else:
+
         vq = db_session.query(Video)
 
+        if theatre:
+            vq = vq.filter(Video.theatres.any(id=theatre.id))
         if category:
             vq = vq.filter(Video.categories.any(id=category.id))
         if tag:
@@ -259,6 +288,7 @@ def edit_video_page(video_id: str):
 
     available_tags = ContentTag.query.order_by(ContentTag.category.desc(), ContentTag.name).all()
     available_categories = Category.query.order_by(Category.name).all()
+    available_theatres = Theatre.query.order_by(Theatre.id).all()
 
     for at in available_tags:
         if at in video.tags:
@@ -276,6 +306,7 @@ def edit_video_page(video_id: str):
         video=video,
         tags=available_tags,
         categories=available_categories,
+        theatres=available_theatres
     )
 
 
@@ -295,6 +326,7 @@ def edit_video_post(video_id: str):
     private = request.form.get("private-checkbox")
     tl = request.form.getlist("tags_select")
     cl = request.form.getlist("categories_select")
+    thl = request.form.getlist("theatre_select")
 
     video.tags = []
     for tag_id in tl:
@@ -319,6 +351,17 @@ def edit_video_post(video_id: str):
             cat = Category.query.filter_by(id=category_id).first()
             if cat and cat not in video.categories:
                 video.categories.append(cat)
+    video.theatres = []
+    for theatre_id in thl:
+        try:
+            theatre_id = int(theatre_id)
+        except (TypeError, ValueError):
+            logger.error("Invalid theatre value in form?")
+            continue
+        else:
+            theatre = Theatre.query.filter_by(id=theatre_id).first()
+            if theatre and theatre not in video.theatres:
+                video.theatres.append(theatre)
 
     if video.status != STATUS_DOWNLOADING:
         video.title = title
@@ -979,13 +1022,38 @@ def upload_logo_route():
     return Response(n, 200)
 
 
+@serve.route("/set_theatre/<theatre_id>")
+def set_theatre_route(theatre_id):
+    redir_path = request.args.get("redirect", "/")
+
+    try:
+        theatre_id = int(theatre_id)
+    except (ValueError, TypeError):
+        flash("Invalid theatre id!", "error")
+        return redirect(redir_path, code=302)
+
+    if theatre_id >= 0:
+        theatre = db_session.query(Theatre).filter_by(id=theatre_id).first()
+        if theatre:
+            session["theatre"] = theatre.stub
+        else:
+            flash("Did not find theatre with that id", "error")
+    else:
+        session["theatre"] = "all"
+
+    return redirect(redir_path, code=302)
+
+
 @serve.route("/dashboard/theatres")
 @login_required
 def theatre_route():
     if not current_user.check_auth(AUTH_LEVEL_EDITOR):
         flash("You don't have permissions for that.", "error")
         return redirect(url_for("serve.front_page"))
-    return render_template("theatres.html")
+
+    theaters = db_session.query(Theatre).all()
+
+    return render_template("theatres.html", theaters=theaters)
 
 
 @serve.route("/dashboard/create_theatre", methods=["POST"])
@@ -1011,21 +1079,21 @@ def create_theatre_route():
     if len(logo):
         if "/" in logo:
             return Response("", 400)
-    #
-    # theatre = Theatre()
-    # theatre.name = name
-    # theatre.ongoing = ongoing
-    # theatre.location = location
-    # theatre.stub = make_stub(name)
-    # theatre.logo_name = logo
-    #
-    # db_session.add(theatre)
-    # try:
-    #     db_session.commit()
-    # except IntegrityError:
-    #     flash(f"That name is either identical to or too similar to an existing theatre.", "error")
-    # else:
-    #     flash(f"Made theatre \"{name}\"", "success")
+
+    theatre = Theatre()
+    theatre.name = name
+    theatre.ongoing = ongoing
+    theatre.location = location
+    theatre.stub = make_stub(name)
+    theatre.logo_name = logo
+
+    db_session.add(theatre)
+    try:
+        db_session.commit()
+    except IntegrityError:
+        flash(f"That name is either identical to or too similar to an existing theatre.", "error")
+    else:
+        flash(f"Made theatre \"{name}\"", "success")
 
     return redirect(url_for("serve.dashboard_page"))
 
