@@ -71,6 +71,8 @@ def index_all_videos():
 @cache.memoize(60)
 def recommend_videos(video, size=10) -> list:
     fields = ["title", "orig_title", "content_warning", "theatre"]
+    text_fields = ["title", "orig_title"]
+    theatre_query = video.theatre_verbose
     if video.title:
         title = video.title.lower()
     else:
@@ -96,10 +98,10 @@ def recommend_videos(video, size=10) -> list:
                     {
                         "multi_match": {
                             "query": q,
-                            "fields": fields,
+                            "fields": text_fields,
                             "fuzziness": "AUTO",
                             "prefix_length": 4,
-                            "boost": 4
+                            "boost": 6
                         }
                     },
                     {
@@ -113,9 +115,16 @@ def recommend_videos(video, size=10) -> list:
                             ],
                             "min_term_freq": 1,
                             "max_query_terms": 24,
-                            "boost": 15
+                            "boost": 2
                         }
                     },
+                    {
+                        "multi_match": {
+                            "query": theatre_query,
+                            "fields": "theatre",
+                            "boost": 20,
+                        }
+                    }
                 ]
             }
         },
