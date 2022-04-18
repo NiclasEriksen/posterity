@@ -637,18 +637,18 @@ video_duplicates = Table(
     Column("video_id", Integer, ForeignKey(Video.id), primary_key=True),
     Column("duplicate_id", Integer, ForeignKey(Video.id), primary_key=True)
 )
-#
-#
-# class Theatre(Base):
-#     __tablename__ = "theatres"
-#     id = Column(Integer, primary_key=True)
-#     name = Column(String, unique=True)
-#     stub = Column(String, unique=True)
-#     location = Column(String, default="Unknown")
-#     from_time = Column(DateTime)
-#     to_time = Column(DateTime)
-#     ongoing = Column(Boolean, default=True)
-#     logo_name = Column(String, default="no_logo.jpg")
+
+
+class Theatre(Base):
+    __tablename__ = "theatres"
+    id = Column(Integer, primary_key=True)
+    name = Column(String, unique=True)
+    stub = Column(String, unique=True)
+    location = Column(String, default="Unknown")
+    from_time = Column(DateTime)
+    to_time = Column(DateTime)
+    ongoing = Column(Boolean, default=True)
+    logo_name = Column(String, default="no_logo.jpg")
 #     videos = relationship("Video", back_populates="theatre")
 
 
