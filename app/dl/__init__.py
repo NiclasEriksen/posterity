@@ -14,6 +14,7 @@ STATUS_INVALID = 3
 STATUS_COOKIES = 4
 STATUS_PENDING = 5
 STATUS_PROCESSING = 6
+STATUS_CHECKING = 7
 
 STATUS_STRINGS = {
     STATUS_DOWNLOADING: "downloading",
@@ -22,7 +23,8 @@ STATUS_STRINGS = {
     STATUS_INVALID: "invalid",
     STATUS_COOKIES: "cookies",
     STATUS_PENDING: "pending",
-    STATUS_PROCESSING: "processing"
+    STATUS_PROCESSING: "processing",
+    STATUS_CHECKING: "checking"
 }
 
 CRF = 26

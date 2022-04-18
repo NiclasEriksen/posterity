@@ -15,7 +15,7 @@ from app import celery
 from app.dl import STATUS_DOWNLOADING, STATUS_PENDING, STATUS_FAILED, STATUS_COMPLETED, STATUS_PROCESSING
 from app.dl.helpers import unique_filename, remove_emoji, valid_video_url, minimize_url
 from app.dl.metadata import parse_input_data, find_duplicate_video_by_url, get_title_from_html, API_SITES, \
-    get_title_from_api, get_description_from_api, get_description_from_source
+    get_title_from_api, get_description_from_api, get_description_from_source, write_metadata_to_disk
 from app.serve.db import db_session, Video, AUTH_LEVEL_EDITOR
 
 core = Blueprint('core', __name__)
@@ -186,9 +186,10 @@ def start_download(video_id: str):
         return Response("That video is already downloading.", status=400)
     elif video.status == STATUS_COMPLETED:
         return Response("That video is already downloaded.", status=400)
+    else:
+        write_metadata_to_disk(video.video_id, video.to_json())
 
     try:
-
         task_id = download_task.apply_async(args=[video.to_json(), video.video_id], priority=1)
     except Exception as e:
         video.status = STATUS_PENDING

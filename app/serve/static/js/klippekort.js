@@ -374,6 +374,9 @@ function redirectOnComplete(video_id) {
                     progress_text.innerHTML = Math.floor((prog * 100.0) + 0.5).toString() + "%";
                 }
 //                console.log(prog);
+            } else if (this.status == 202 && progress_text) {
+                progress_text.innerHTML = "<span class='uk-text-small'>Checking...</span>";
+
             }
             setTimeout(() => { redirectOnComplete(video_id); }, 1000);
         }

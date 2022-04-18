@@ -7,9 +7,9 @@ from imgcompare import is_equal, image_diff_percent
 from PIL import Image
 
 from app import celery
-from app.dl import STATUS_COMPLETED, STATUS_FAILED, STATUS_PROCESSING, STATUS_DOWNLOADING,\
-    STATUS_INVALID, STATUS_COOKIES,\
-    original_path, processed_path, thumbnail_path
+from app.dl import STATUS_COMPLETED, STATUS_FAILED, STATUS_PROCESSING, STATUS_DOWNLOADING, \
+    STATUS_INVALID, STATUS_COOKIES, \
+    original_path, processed_path, thumbnail_path, STATUS_CHECKING
 from app.dl.helpers import seconds_to_time
 import time
 
@@ -277,6 +277,10 @@ def download_task(data: dict, file_name: str):
             status = data["status"]
             if status == STATUS_DOWNLOADING:
                 log.info("Update from download process...")
+                update_video(video_id, status, data=data)
+                continue
+            elif status == STATUS_CHECKING:
+                log.info("Checking downloaded file...")
                 update_video(video_id, status, data=data)
                 continue
             elif status == STATUS_COMPLETED:

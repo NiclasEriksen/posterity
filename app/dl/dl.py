@@ -15,16 +15,17 @@ except ImportError:
 
 from .youtube import get_content_info, AgeRestrictedError
 from .helpers import valid_video_url
-from .metadata import technical_info, add_technical_info_to_metadata, find_best_format
-from . import FONT_SIZE_SMALL, FONT_SIZE_MEDIUM, FONT_SIZE_LARGE, CRF, CRF_LOW,\
-    preview_path, thumbnail_path, tmp_path, original_path,\
-    STATUS_DOWNLOADING, STATUS_COMPLETED, STATUS_FAILED, STATUS_INVALID, STATUS_COOKIES, STATUS_PROCESSING,\
-    MAX_DURATION_HD, MAX_DURATION_MD, MAX_AUD_BIT_RATE, MAX_RESOLUTION_MD, MAX_RESOLUTION_SD, MAX_DURATION_SD,\
-    MAX_FPS, SPLIT_FPS_THRESHOLD, MAX_BIT_RATE_PER_PIXEL, MIN_BIT_RATE_PER_PIXEL,\
-    GRAPHIC_COLOR, GRAPHIC_GS, GRAPHIC_STROKE_COLOR, GRAPHIC_STROKE_GS,\
-    EMOTIONAL_COLOR, EMOTIONAL_GS, EMOTIONAL_STROKE_COLOR, EMOTIONAL_STROKE_GS,\
-    FONT_COLOR, FONT_GS, FONT_STROKE_COLOR, FONT_STROKE_GS,\
-    STROKE_SMALL, STROKE_MEDIUM, STROKE_LARGE, TEXT_PADDING, TEXT_MARGIN
+from .metadata import technical_info, add_technical_info_to_metadata, find_best_format, \
+    check_duplicate_for_video, get_frame_count_from_log
+from . import FONT_SIZE_SMALL, FONT_SIZE_MEDIUM, FONT_SIZE_LARGE, CRF, CRF_LOW, \
+    preview_path, thumbnail_path, tmp_path, original_path, \
+    STATUS_DOWNLOADING, STATUS_COMPLETED, STATUS_FAILED, STATUS_INVALID, STATUS_COOKIES, STATUS_PROCESSING, \
+    MAX_DURATION_HD, MAX_DURATION_MD, MAX_AUD_BIT_RATE, MAX_RESOLUTION_MD, MAX_RESOLUTION_SD, MAX_DURATION_SD, \
+    MAX_FPS, SPLIT_FPS_THRESHOLD, MAX_BIT_RATE_PER_PIXEL, MIN_BIT_RATE_PER_PIXEL, \
+    GRAPHIC_COLOR, GRAPHIC_GS, GRAPHIC_STROKE_COLOR, GRAPHIC_STROKE_GS, \
+    EMOTIONAL_COLOR, EMOTIONAL_GS, EMOTIONAL_STROKE_COLOR, EMOTIONAL_STROKE_GS, \
+    FONT_COLOR, FONT_GS, FONT_STROKE_COLOR, FONT_STROKE_GS, \
+    STROKE_SMALL, STROKE_MEDIUM, STROKE_LARGE, TEXT_PADDING, TEXT_MARGIN, STATUS_CHECKING
 
 # log = LocalProxy(lambda: current_app.logger)
 log = logging.getLogger("posterity_dl.dl")
@@ -268,16 +269,29 @@ def download_from_json_data(metadata: dict, file_name: str):
         yield metadata
 
     else:
-        metadata["status"] = STATUS_COMPLETED
-        metadata["task_id"] = ""
+        metadata = add_technical_info_to_metadata(metadata, vid_save_path)
+        metadata["status"] = STATUS_CHECKING
+        yield metadata
+
         metadata["pid"] = -1
+        metadata["task_id"] = ""
+        metadata["status"] = STATUS_COMPLETED
+
         try:
             open(log_path, "w").close()
         except:
             pass
-        try:
-            if len(thumbnail_path) and len(preview_path):
-                generate_video_images(
+
+        valid = validate_video_file(vid_save_path, log_path, metadata["frame_rate"], metadata["duration"])
+
+        if not valid:
+            metadata["status"] = STATUS_FAILED
+
+        elif len(thumbnail_path) and len(preview_path):
+            try:
+                log.info("Generating images")
+
+                success = generate_video_images(
                     vid_save_path,
                     os.path.join(thumbnail_path, file_name + "_thumb.jpg"),
                     os.path.join(preview_path, file_name + "_preview.jpg"),
@@ -288,13 +302,46 @@ def download_from_json_data(metadata: dict, file_name: str):
                     desaturate=False,
                     content_text=metadata["content_warning"] if metadata["content_warning"].lower().strip() != "none" else ""
                 )
-        except Exception as e:
-            log.error(e)
-            log.error("FAILED THUMBNAIL GENERATION")
+            except Exception as e:
+                success = False
+                log.error(e)
+                log.error("FAILED THUMBNAIL GENERATION")
+            else:
+                if success:
+                    log.info("Checking for duplicates")
+                    duplicates = check_duplicate_for_video(file_name)
+                    if duplicates:
+                        log.error(f"Found {duplicates} possible duplicates.")
 
-        metadata = add_technical_info_to_metadata(metadata, vid_save_path)
+            if not success:
+                metadata["status"] = STATUS_FAILED
 
     yield metadata
+
+
+def validate_video_file(
+        video_path: str, log_path: str, fps: int, duration: float,
+) -> True:
+    result = subprocess.Popen(
+        ["ffmpeg", "-v", "24", "-i", video_path, "-progress", log_path, "-f", "null", "/dev/null"],
+        stdout=subprocess.PIPE, stderr=subprocess.STDOUT
+    )
+    _output, _errors = result.communicate()
+    if result.returncode != 0:
+        log.error(_output)
+        log.error(_errors)
+        log.error("Unable to verify video file.")
+        return False
+    else:
+        log.info("Checking log file for frame count.")
+        frames = get_frame_count_from_log(log_path)
+        if not frames > 0:
+            log.error("No frames!")
+            return False
+        if (fps * duration * 0.9) < frames < (fps * duration * 1.1):
+            return True
+
+        return False
 
 
 def get_post_process_ffmpeg_cmd(
@@ -412,7 +459,7 @@ def get_stroke_for_tag(tag: str, gs: bool = False) -> tuple:
 
 
 def generate_video_images(
-    video_path: str, thumbnail_path: str, preview_path: str,
+    video_path: str, thumb_out_path: str, preview_out_path: str,
     blurred_thumb_path: str, blurred_preview_path: str,
     preview_size: tuple = (640, 360), thumbnail_size: tuple = (64, 64),
     blur_amount: float = 0.66, desaturate: bool = False, start: float = 0.0,
@@ -431,14 +478,14 @@ def generate_video_images(
             .run(quiet=True)
         )
     except ffmpeg.Error as e:
-        print(e)
-        return
+        log.error(e)
+        return False
 
     try:
         img = Image.open(raw_frame.name)
     except (PermissionError, FileNotFoundError, UnidentifiedImageError) as e:
-        print(e)
-        return
+        log.error(e)
+        return False
 
     thumb = img.copy()
 
@@ -507,12 +554,15 @@ def generate_video_images(
     # thumb_blurred = thumb_blurred.convert("P", palette=palette, colors=64)
 
     try:
-        preview.save(preview_path, optimize=True, quality=75)
+        preview.save(preview_out_path, optimize=True, quality=75)
         preview_blurred.save(blurred_preview_path, optimize=True, quality=75)
-        thumb.save(thumbnail_path, optimize=True, quality=60)
+        thumb.save(thumb_out_path, optimize=True, quality=60)
         thumb_blurred.save(blurred_thumb_path, optimize=True, quality=60)
     except (PermissionError, IOError, FileExistsError) as e:
-        print(e)
+        log.error(e)
+        return False
+
+    return True
 
 
 def generate_logo(
@@ -551,7 +601,7 @@ def generate_all_images(
         else:
             content_text = ""
 
-        generate_video_images(
+        success = generate_video_images(
             video_path,
             os.path.join(thumbnail_path, video_id + "_thumb.jpg"),
             os.path.join(preview_path, video_id + "_preview.jpg"),
@@ -562,6 +612,8 @@ def generate_all_images(
             desaturate=False,
             content_text=content_text
         )
+        if not success:
+            log.error(f"Failed generating images for {video_id}")
 
 
 

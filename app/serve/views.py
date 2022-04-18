@@ -26,13 +26,14 @@ logger = LocalProxy(lambda: current_app.logger)
 
 from app.dl import media_path, original_path, json_path, processed_path, upload_path, \
     STATUS_COMPLETED, STATUS_COOKIES, STATUS_DOWNLOADING, STATUS_FAILED, STATUS_INVALID, \
-    STATUS_PROCESSING, STATUS_PENDING
+    STATUS_PROCESSING, STATUS_PENDING, STATUS_CHECKING
 from app.dl.dl import get_celery_scheduled, get_celery_active, generate_logo
-from app.dl.metadata import write_metadata_to_disk, get_progress_for_video, load_metadata_from_disk
+from app.dl.metadata import write_metadata_to_disk, get_progress_for_video, load_metadata_from_disk, \
+    check_duplicate_for_video
 from app.dl.helpers import seconds_to_verbose_time, map_range, make_stub
 from app.serve.db import db_session, Video, User, ContentTag, UserReport, Category, \
     init_db, AUTH_LEVEL_ADMIN, AUTH_LEVEL_EDITOR, AUTH_LEVEL_USER, REASON_TEXTS, \
-    RegisterToken, MAX_TOKEN_USES, DeletedVideo
+    RegisterToken, MAX_TOKEN_USES, DeletedVideo, session_scope
 from app import get_environment
 from app.serve.search import search_videos, index_video_data, remove_video_data, remove_video_data_by_id, \
     recommend_videos
@@ -89,6 +90,7 @@ def inject_status_codes_for_all_templates():
         STATUS_COOKIES=STATUS_COOKIES,
         STATUS_PENDING=STATUS_PENDING,
         STATUS_PROCESSING=STATUS_PROCESSING,
+        STATUS_CHECKING=STATUS_CHECKING,
         AUTH_LEVEL_USER=AUTH_LEVEL_USER,
         AUTH_LEVEL_EDITOR=AUTH_LEVEL_EDITOR,
         AUTH_LEVEL_ADMIN=AUTH_LEVEL_ADMIN
@@ -229,7 +231,7 @@ def serve_video(video_id):
         return render_template(
             "embed_video.html",
             video=video,
-            stream_path=f"/view/{video_id}.mp4"
+            stream_path=f"/view/{video_id}.mp4" + ("?orig=1" if video.status == STATUS_PROCESSING else "")
         )
 
     return render_template(
@@ -237,7 +239,7 @@ def serve_video(video_id):
         video=video,
         dl_path="/download/" + video_id,
         recommended=recommended,
-        stream_path=f"/view/{video_id}.mp4" + ("?orig=1" if video.status == STATUS_PROCESSING else ""),
+        stream_path=f"/view/{video_id}.mp4" + ("?orig=0" if video.post_processed else ""),
     )
 
 
@@ -251,10 +253,9 @@ def edit_video_page(video_id: str):
     if not video.user_can_edit(current_user):
         flash("Lacking permissions to edit that video.", "error")
         return serve_video(video.video_id)
-    if video.status == STATUS_DOWNLOADING:
+    if video.status == STATUS_DOWNLOADING or video.status == STATUS_CHECKING:
         flash("Can't edit video right now, sorry.", "warning")
         return serve_video(video.video_id)
-
 
     available_tags = ContentTag.query.order_by(ContentTag.category.desc(), ContentTag.name).all()
     available_categories = Category.query.order_by(Category.name).all()
@@ -565,7 +566,7 @@ def remove_video_route(video_id):
     if video:
         if not video.user_can_edit(current_user):
             flash("You don't have permission to remove that video.", "error")
-        elif video.status in [STATUS_DOWNLOADING, STATUS_PROCESSING]:
+        elif video.status in [STATUS_DOWNLOADING, STATUS_PROCESSING, STATUS_CHECKING]:
             flash("Can't delete a video in the middle of a process. Task needs to be killed/ended first.", "warning")
             return redirect(url_for("serve.edit_video_page", video_id=video_id))
         else:
@@ -893,14 +894,18 @@ def check_progress(video_id):
     s = video.status
     if s == STATUS_COMPLETED or s == STATUS_PENDING:
         if video.post_processed:
-            flash("Post processing seems to have completed successfully", "success")
+            flash("Post processing seems to have ended", "success")
             return "", 201
+        if video.duplicate_count > 0:
+            flash(f"Video has {video.duplicate_count} possible duplicates.", "warning")
         # if s == STATUS_COMPLETED:
         #     flash("Video has downloaded successfully", "success")
         return "", 200
     if s == STATUS_DOWNLOADING or s == STATUS_PROCESSING:
         p = get_progress_for_video(video)
         return f"{p}", 206
+    if s == STATUS_CHECKING:
+        return "", 202
     if s == STATUS_FAILED:
         return "", 200
     if s == STATUS_INVALID or s == STATUS_COOKIES:
@@ -916,26 +921,11 @@ def check_duplicates_route(video_id: str):
     video = db_session.query(Video).filter_by(video_id=video_id).first()
 
     if video and video.status == STATUS_COMPLETED:
-        duplicate_ids = get_possible_duplicates(video_id)
-        duplicates = []
+        db_session.close()
+        duplicate_count = check_duplicate_for_video(video_id)
 
-        for d_id in duplicate_ids:
-            v = db_session.query(Video).filter_by(video_id=d_id).first()
-            if v:
-                duplicates.append(v)
-
-        for vd in video.duplicates:
-            if vd not in duplicates:
-                video.duplicates.remove(vd)
-        for d in duplicates:
-            if d not in video.duplicates:
-                video.duplicates.append(d)
-
-        db_session.add(video)
-        db_session.commit()
-
-        if len(duplicates):
-            flash(f"{len(duplicates)} potential duplicates was found.", "warning")
+        if duplicate_count:
+            flash(f"{duplicate_count} potential duplicates was found.", "warning")
         else:
             flash("No potential duplicates was found.", "success")
     else:
@@ -1289,17 +1279,17 @@ def list_all_duplicates() -> list:
 
 
 @cache.memoize(timeout=60)
-def get_possible_duplicates(video_id: str) -> list:
+def get_possible_duplicates(video_id: str, tmp_session) -> list:
     try:
         from imgcompare import is_equal
         from PIL import Image
         candidates = []
 
-        video = db_session.query(Video).filter_by(video_id=video_id).first()
+        video = tmp_session.query(Video).filter_by(video_id=video_id).first()
         if not video:
             return candidates
 
-        db_vids = db_session.query(Video).filter(Video.video_id != video_id).filter_by(status=STATUS_COMPLETED).all()
+        db_vids = tmp_session.query(Video).filter(Video.video_id != video_id).filter_by(status=STATUS_COMPLETED).all()
 
         duration_candidates = []
 
@@ -1345,7 +1335,7 @@ def get_possible_duplicates(video_id: str) -> list:
         return [c.video_id for c in candidates]
     except Exception as e:
         logger.error(e)
-        db_session.rollback()
+        tmp_session.rollback()
         return []
 
 

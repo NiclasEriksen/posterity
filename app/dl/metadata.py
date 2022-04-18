@@ -14,6 +14,7 @@ from urllib.parse import urlparse
 from yt_dlp import YoutubeDL
 from yt_dlp.utils import DownloadError
 from dotenv import load_dotenv
+
 from . import json_path, tmp_path, original_path,\
     STATUS_DOWNLOADING, STATUS_INVALID
 from .helpers import reverse_readline, get_og_tags, find_between, remove_links, fix_reddit_old, fix_youtube_shorts, \
@@ -104,6 +105,35 @@ def load_metadata_from_disk(json_path: str) -> dict:
     return {}
 
 
+def check_duplicate_for_video(video_id: str) -> int:
+    from app.serve.db import session_scope, Video
+    from app.serve.views import get_possible_duplicates
+
+    with session_scope() as tmp_session:
+        video = tmp_session.query(Video).filter_by(video_id=video_id).first()
+        if not video:
+            return 0
+
+        duplicate_ids = get_possible_duplicates(video_id, tmp_session)
+        duplicates = []
+        for d_id in duplicate_ids:
+            v = tmp_session.query(Video).filter_by(video_id=d_id).first()
+            if v:
+                duplicates.append(v)
+
+        if len(duplicates):
+            for vd in video.duplicates:
+                if vd not in duplicates:
+                    video.duplicates.remove(vd)
+            for d in duplicates:
+                if d not in video.duplicates:
+                    video.duplicates.append(d)
+
+            tmp_session.add(video)
+            tmp_session.commit()
+            return len(duplicates)
+    return 0
+
 def write_metadata(video_id: str, md: dict):
     write_metadata_to_disk(video_id, md)
     write_metadata_to_db(video_id, md)
@@ -191,6 +221,27 @@ def get_last_time_from_log(log_path, max_search=100) -> float:
                 return 0
     except OSError:
         log.error("Can't open log file to read progress!")
+        pass
+
+    return 0
+
+
+def get_frame_count_from_log(log_path, max_search=100) -> float:
+    try:
+        i = 0
+        for l in reverse_readline(log_path):
+            if l.startswith("frame="):
+                ts = l.split("frame=")[1].strip()
+                try:
+                    return int(ts)
+                except (ValueError, TypeError):
+                    return 0
+
+            i += 1
+            if i >= max_search:
+                return 0
+    except OSError:
+        log.error("Can't open log file to read frame count!")
         pass
 
     return 0
@@ -506,8 +557,6 @@ def parse_input_data(data: dict) -> dict:
         log.error("Corrupted data?!")
         metadata["status"] = STATUS_INVALID
         return metadata
-
-    print(data)
 
     try:
         if isinstance(data["content_warning"], str):
