@@ -65,6 +65,13 @@
 
                 <div class="uk-margin-left uk-width-1-1 uk-padding-small uk-flex uk-flex-center">
                     <button class="uk-button uk-button-default" type="submit" id="submit-button">Save for posterity</button>
+                    <div class="uk-flex uk-flex-middle" style="max-width: 96px;">
+                        <div class="uk-width-small uk-text-center">
+                            <span uk-tooltip="title: Current theatre: {% if current_theatre %}{{current_theatre.name}}{% else %}All{% endif %}">
+                            <img src="/uploaded/{% if current_theatre %}{{current_theatre.logo_name}}{% else %}all.png{% endif %}" class="active-action">
+                            </span>
+                        </div>
+                    </div>
                 </div>
                 <input type="hidden" id="theatre" name="theatre" value="{% if current_theatre %}{{current_theatre.stub}}{% else %}all{% endif %}">
                 <p id="video-post-status" class="uk-text-small uk-text-meta"></p>
