@@ -77,6 +77,8 @@ def before_request_func():
 @serve.context_processor
 def inject_theatre_object():
     theaters = db_session.query(Theatre).all()
+    theaters = sorted(theaters, key=lambda x: x.video_count, reverse=True)
+    theaters = sorted(theaters, key=lambda x: x.ongoing, reverse=True)
     if "theatre" in session:
         if session["theatre"] != "all":
             theatre = db_session.query(Theatre).filter_by(stub=session["theatre"]).first()

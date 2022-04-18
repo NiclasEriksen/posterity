@@ -7,8 +7,8 @@
         <div class="uk-width-1-1">
             <a class="{% if not current_theatre %}theatre-active{% endif %}" href="/set_theatre/-1?redirect={{request.path}}">
             <div class="uk-grid uk-grid-small">
-                <div class="uk-width-1-4">
-                    <img src="/uploaded/all.png" class="{% if not current_theatre %}active-action{% endif %}">
+                <div class="uk-width-1-4 uk-position-relative">
+                    <img src="/uploaded/all.png" class="{% if not current_theatre %}active-action{% endif %} uk-position-absolute uk-position-center">
                 </div>
                 <div class="uk-width-3-4">
                     All
@@ -20,11 +20,12 @@
         <div class="uk-width-1-1">
             <a class="{% if t == current_theatre %}theatre-active{% endif %}" href="/set_theatre/{{t.id}}?redirect={{request.path}}">
             <div class="uk-grid uk-grid-small">
-                <div class="uk-width-1-4">
-                    <img src="/uploaded/{{t.logo_name}}" class="{% if t == current_theatre %}active-action{% endif %}">
+                <div class="uk-width-1-4 uk-position-relative">
+                    <img src="/uploaded/{{t.logo_name}}" class="{% if t == current_theatre %}active-action{% endif %} uk-position-absolute uk-position-center">
                 </div>
                 <div class="uk-width-3-4">
-                    {{t.name}}
+                    {{t.name}}<br>
+                    <span class="uk-text-meta">{{t.video_count}} videos</span>
                 </div>
             </div>
             </a>
