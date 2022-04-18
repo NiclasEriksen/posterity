@@ -1,6 +1,6 @@
 {% for t in v.theatres %}
 <span uk-tooltip="title: {{t.name}}">
-    <img src="/uploaded/{{t.logo_name}}" style="max-height:16px;">
+    <img src="/uploaded/{{t.logo_name}}" style="max-height:16px;border-radius:2px;">
 </span>
 {%endfor%}
 {% for tag in v.tags_by_category %}
