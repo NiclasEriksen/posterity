@@ -284,6 +284,11 @@ def download_from_json_data(metadata: dict, file_name: str):
 
         valid = validate_video_file(vid_save_path, log_path, metadata["frame_rate"], metadata["duration"])
 
+        try:
+            open(log_path, "w").close()
+        except:
+            pass
+
         if not valid:
             metadata["status"] = STATUS_FAILED
 
