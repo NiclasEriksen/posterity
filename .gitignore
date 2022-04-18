@@ -4,6 +4,8 @@ alembic.ini
 *.sql
 app/serve/static/thumbnails/*.png
 app/serve/static/preview/*.png
+app/serve/uploads/*.png
+!app/serve/uploads/all.png
 
 #ffmpeg/youtube
 cookies.txt
