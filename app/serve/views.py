@@ -1021,21 +1021,21 @@ def create_theatre_route():
     if len(logo):
         if "/" in logo:
             return Response("", 400)
-
-    theatre = Theatre()
-    theatre.name = name
-    theatre.ongoing = ongoing
-    theatre.location = location
-    theatre.stub = make_stub(name)
-    theatre.logo_name = logo
-
-    db_session.add(theatre)
-    try:
-        db_session.commit()
-    except IntegrityError:
-        flash(f"That name is either identical to or too similar to an existing theatre.", "error")
-    else:
-        flash(f"Made theatre \"{name}\"", "success")
+    #
+    # theatre = Theatre()
+    # theatre.name = name
+    # theatre.ongoing = ongoing
+    # theatre.location = location
+    # theatre.stub = make_stub(name)
+    # theatre.logo_name = logo
+    #
+    # db_session.add(theatre)
+    # try:
+    #     db_session.commit()
+    # except IntegrityError:
+    #     flash(f"That name is either identical to or too similar to an existing theatre.", "error")
+    # else:
+    #     flash(f"Made theatre \"{name}\"", "success")
 
     return redirect(url_for("serve.dashboard_page"))
 

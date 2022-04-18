@@ -125,8 +125,8 @@ class Video(Base):
     title = Column(String, default="")
     orig_title = Column(String, default="")
     url = Column(String, default="")
-    theatre_id = Column(Integer, ForeignKey("theatres.id"))
-    theatre = relationship("Theatre", back_populates="videos")
+    # theatre_id = Column(Integer, ForeignKey("theatres.id"))
+    # theatre = relationship("Theatre", back_populates="videos")
     status = Column(Integer)
     upload_time = Column(DateTime)
     orig_upload_time = Column(DateTime)
@@ -425,7 +425,7 @@ class Video(Base):
             "format": f"{self.video_format} / {self.audio_format}",
             "processed_format": f"{self.processed_video_format} / {self.processed_audio_format}",
             "width": self.width if self.width else 0,
-            "theatre": self.theatre.stub if self.theatre else "",
+            # "theatre": self.theatre.stub if self.theatre else "",
             "height": self.height if self.height else 0,
             "bit_rate": self.bit_rate if self.bit_rate else 0,
             "frame_rate": self.frame_rate if self.frame_rate else 0.0,
@@ -448,10 +448,10 @@ class Video(Base):
             self.url = d["url"]
         except KeyError:
             pass
-        try:
-            theatre = db_session.query(Theatre).filter_by(stub=d["theatre"]).first()
-            if theatre and not theatre == self.theatre:
-                self.theatre = theatre
+        # try:
+        #     theatre = db_session.query(Theatre).filter_by(stub=d["theatre"]).first()
+        #     if theatre and not theatre == self.theatre:
+        #         self.theatre = theatre
         except KeyError:
             pass
         try:
@@ -637,19 +637,19 @@ video_duplicates = Table(
     Column("video_id", Integer, ForeignKey(Video.id), primary_key=True),
     Column("duplicate_id", Integer, ForeignKey(Video.id), primary_key=True)
 )
-
-
-class Theatre(Base):
-    __tablename__ = "theatres"
-    id = Column(Integer, primary_key=True)
-    name = Column(String, unique=True)
-    stub = Column(String, unique=True)
-    location = Column(String, default="Unknown")
-    from_time = Column(DateTime)
-    to_time = Column(DateTime)
-    ongoing = Column(Boolean, default=True)
-    logo_name = Column(String, default="no_logo.jpg")
-    videos = relationship("Video", back_populates="theatre")
+#
+#
+# class Theatre(Base):
+#     __tablename__ = "theatres"
+#     id = Column(Integer, primary_key=True)
+#     name = Column(String, unique=True)
+#     stub = Column(String, unique=True)
+#     location = Column(String, default="Unknown")
+#     from_time = Column(DateTime)
+#     to_time = Column(DateTime)
+#     ongoing = Column(Boolean, default=True)
+#     logo_name = Column(String, default="no_logo.jpg")
+#     videos = relationship("Video", back_populates="theatre")
 
 
 class RegisterToken(Base):
