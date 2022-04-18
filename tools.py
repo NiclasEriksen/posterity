@@ -85,7 +85,7 @@ if __name__ == "__main__":
     stub = "ukraine_war"
     with session_scope() as session:
         theatre = session.query(Theatre).filter_by(stub=stub).first()
-        ignore_category = session.query(ContentTag).filter_by(name="World News").first()
+        ignore_category = session.query(ContentTag).filter_by(stub="world_news").first()
         if theatre and ignore_category:
             for v in session.query(Video).filter(not_(Video.tags.any(id=ignore_category.id))).all():
                 v.theatres = [theatre]
