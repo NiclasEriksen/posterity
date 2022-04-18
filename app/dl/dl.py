@@ -208,6 +208,7 @@ def download_from_json_data(metadata: dict, file_name: str):
     )
 
     print(f)
+    audio_included = True
 
     video_url = video_links[f]["url"]
 
