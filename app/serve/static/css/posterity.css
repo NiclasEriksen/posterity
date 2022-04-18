@@ -298,8 +298,11 @@ body, html {
 
 .recommended-action {
     box-shadow: 0px 0px 8px rgb(93,196,247,0.75);
-    transition: box-shadow .5s linear;
-    animation: pulse 3s 1;
+    animation-timing-function: ease-in-out!important;
+    transition: box-shadow .5s linear!important;
+    transition: background-color .5s linear!important;
+    transition: color .5s linear;
+    animation: pulse 3s;
     -moz-animation: pulse 3s;
     -webkit-animation: pulse 3s;
     -o-animation: pulse 3s;
@@ -307,6 +310,8 @@ body, html {
 }
 .recommended-action:hover {
     box-shadow: 0px 0px 14px rgb(93,196,247,1.0);
+    color: var(--black)!important;
+    rotation-point:50% 50%;
     animation: none;
     -moz-animation: none;
     -webkit-animation: none;
@@ -315,9 +320,30 @@ body, html {
 }
 
 @-webkit-keyframes pulse {
-    0% { box-shadow: 0px 0px 8px rgb(93,196,247,0.75); }
-    50% { box-shadow: 0px 0px 12px rgb(93,196,247,1.0); }
-    100% { box-shadow: 0px 0px 8px rgb(93,196,247,0.75); }
+    0%, 100% {
+        box-shadow: 0px 0px 8px rgb(93,196,247,0.75);
+    }
+    10% {
+        transform: rotate(0deg);
+    }
+    20% {
+        box-shadow: 0px 0px 16px rgb(93,196,247,1.0);
+        transform: rotate(-10deg);
+    }
+    30% {
+        transform: rotate(10deg);
+    }
+    40% {
+        transform: rotate(-5deg);
+    }
+    50% {
+        transform: rotate(0deg);
+    }
+    70% {
+        box-shadow: 0px 0px 8px rgb(93,196,247,0.75);
+        transform: rotate(0deg);
+    }
+
 }
 
 .video-link:hover {

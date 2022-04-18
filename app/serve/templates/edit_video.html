@@ -67,7 +67,7 @@
                             <a class="uk-input uk-button uk-button-danger" href="/confirm_delete/{{ video.video_id }}"><span uk-icon="icon: trash"></span> Delete</a>
                         </div>
                         <div class="uk-width-1-1 uk-width-1-2@s uk-padding-small">
-                            <a class="uk-input uk-button uk-button-warning {% if video.ready_to_play %}" href="/check_duplicates/{{ video.video_id }}"{% else %}uk-button-disabled"{% endif %}><span uk-icon="icon: copy"></span> Duplicate check</a>
+                            <a class="uk-input uk-button uk-button-warning {% if video.ready_to_play %}" href="/check_duplicates/{{ video.video_id }}"{% else %}uk-button-disabled"{% endif %}><span uk-icon="icon: copy"></span> Manual duplicate check</a>
                         </div>
                         {% endif %}
 
