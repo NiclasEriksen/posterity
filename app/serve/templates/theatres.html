@@ -3,9 +3,15 @@
 {% block content %}
 <div class="uk-grid uk-grid-small uk-flex uk-flex-center">
     {% for theatre in theaters %}
-    <div class="uk-width-1-1 uk-width-1-2@s uk-margin uk-background-secondary">
-        <img src="/uploaded/{{ theatre.logo_name }}">
-        {{theatre.name}} <span class="uk-text-small"><span class="uk-text-muted"><i>{{theatre.location}}{% if theatre.ongoing %} (ongoing){% endif %}</i></span> - {{theatre.video_count}} videos</span>
+    <div class="uk-width-1-1 uk-width-1-2@s uk-margin uk-background-secondary uk-height-small">
+        <div class="uk-grid uk-grid-small">
+            <div class="uk-width-1-4">
+                <img src="/uploaded/{{ theatre.logo_name }}">
+            </div>
+            <div class="uk-width-3-4">
+                {{theatre.name}} <span class="uk-text-small"><span class="uk-text-muted"><i>{{theatre.location}}{% if theatre.ongoing %} (ongoing){% endif %}</i></span> - {{theatre.video_count}} videos</span>
+            </div>
+        </div>
     </div>
     {% endfor %}
 </div>
