@@ -122,7 +122,7 @@ def recommend_videos(video, size=10) -> list:
                         "multi_match": {
                             "query": theatre_query,
                             "fields": "theatre",
-                            "boost": 20,
+                            "boost": 30,
                         }
                     }
                 ]
