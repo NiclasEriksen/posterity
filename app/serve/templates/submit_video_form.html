@@ -67,7 +67,7 @@
                     <button class="uk-button uk-button-default" type="submit" id="submit-button">Save for posterity</button>
                     <div class="uk-flex uk-flex-middle" style="max-width: 104px;">
                         <div class="uk-width-small uk-text-center theatre-dropdown-button theatre-button" style="z-index:1;">
-                            <img id="selected-theatre-image" src="/uploaded/{% if current_theatre %}{{current_theatre.logo_name}}{% else %}all.png{% endif %}">
+                            <img class="uk-animation-scale-up" id="selected-theatre-image" src="/uploaded/{% if current_theatre %}{{current_theatre.logo_name}}{% else %}all.png{% endif %}">
                             <div class="theatre-dropdown-content uk-animation-slide-top-small">
                                 <button class="theatre-button uk-animation-scale-up uk-position-relative" type="button" onclick="selectTheatre('all', 'all.png');" style="margin:4px 2px;width:96px;height:32px;">
                                     <img class="uk-position-absolute uk-position-center" src="/uploaded/all.png">
