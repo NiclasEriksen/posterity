@@ -43,6 +43,6 @@ def downgrade():
     )
     with op.batch_alter_table('videos', schema=None) as batch_op:
         batch_op.add_column(sa.Column('theatre_id', sa.INTEGER(), autoincrement=False, nullable=True))
-        batch_op.create_foreign_key('videos_theatre_id_fkey', 'theatres', ['theatre_id'], ['id'])
+        # batch_op.create_foreign_key('videos_theatre_id_fkey', 'theatres', ['theatre_id'], ['id'])
 
     # ### end Alembic commands ###
