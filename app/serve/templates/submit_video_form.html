@@ -68,9 +68,10 @@
                     <div class="uk-flex uk-flex-middle" style="max-width: 96px;">
                         <div class="uk-width-small uk-text-center theatre-dropdown-button theatre-button" style="z-index:1;">
                             <img id="selected-theatre-image" src="/uploaded/{% if current_theatre %}{{current_theatre.logo_name}}{% else %}all.png{% endif %}">
-                            <div class="theatre-dropdown-content uk-animation-slide-top-small uk-text-center">
+                            <div class="theatre-dropdown-content uk-animation-slide-top-small">
+                                <button class="theatre-button uk-animation-scale-up" type="button" onclick="selectTheatre('all', 'all.png');" style="margin:4px 2px;width:96px;height:32px;"><img src="/uploaded/all.png"></button>
                                 {% for t in available_theaters %}
-                                <button class="theatre-button uk-animation-scale-up" type="button" onclick="selectTheatre('{{t.stub}}', '{{t.logo_name}}');" style="margin:4px 2px;"><img src="/uploaded/{{t.logo_name}}"></button>
+                                <button class="theatre-button uk-animation-scale-up" type="button" onclick="selectTheatre('{{t.stub}}', '{{t.logo_name}}');" style="margin:4px 2px;width:96px;height:32px;"><img src="/uploaded/{{t.logo_name}}"></button>
                                 {% endfor %}
                             </div>
                         </div>
