@@ -157,7 +157,7 @@ def find_duplicate_video_by_url(url: str):
 def get_progress_for_video(video) -> float:
     log_path = os.path.join(tmp_path, f"{video.video_id}_progress.log")
     if not os.path.isfile(log_path) or not video.duration:
-        log.error("Yeah can't do shit here.")
+        log.error(f"No progress to get for {video.video_id}")
         return 0.0
     progress_time = get_last_time_from_log(log_path)
     if progress_time <= 0:

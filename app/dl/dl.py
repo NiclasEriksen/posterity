@@ -515,6 +515,18 @@ def generate_video_images(
         print(e)
 
 
+def generate_logo(
+        orig_path: str, width=96, height=32
+):
+    try:
+        img = Image.open(orig_path)
+    except (PermissionError, FileNotFoundError, UnidentifiedImageError) as e:
+        print(e)
+        return
+
+    img.thumbnail((width, height))
+    img.save(orig_path)
+
 
 def generate_all_images(
     orig_path: str, json_path: str, thumbnail_path: str, preview_path: str, only_new=True

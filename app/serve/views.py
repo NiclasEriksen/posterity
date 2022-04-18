@@ -14,6 +14,7 @@ from redis.exceptions import ConnectionError
 from sqlalchemy.exc import OperationalError, IntegrityError
 from werkzeug.local import LocalProxy
 from sqlalchemy import or_, and_
+from werkzeug.utils import secure_filename
 
 serve = Blueprint(
     'serve', __name__,
@@ -23,15 +24,15 @@ serve = Blueprint(
 )
 logger = LocalProxy(lambda: current_app.logger)
 
-from app.dl import media_path, original_path, json_path, processed_path, \
+from app.dl import media_path, original_path, json_path, processed_path, upload_path, \
     STATUS_COMPLETED, STATUS_COOKIES, STATUS_DOWNLOADING, STATUS_FAILED, STATUS_INVALID, \
     STATUS_PROCESSING, STATUS_PENDING
-from app.dl.dl import get_celery_scheduled, get_celery_active
+from app.dl.dl import get_celery_scheduled, get_celery_active, generate_logo
 from app.dl.metadata import write_metadata_to_disk, get_progress_for_video, load_metadata_from_disk
-from app.dl.helpers import seconds_to_verbose_time, map_range
+from app.dl.helpers import seconds_to_verbose_time, map_range, make_stub
 from app.serve.db import db_session, Video, User, ContentTag, UserReport, Category, \
     init_db, AUTH_LEVEL_ADMIN, AUTH_LEVEL_EDITOR, AUTH_LEVEL_USER, REASON_TEXTS, \
-    RegisterToken, MAX_TOKEN_USES, DeletedVideo
+    RegisterToken, MAX_TOKEN_USES, DeletedVideo, Theatre
 from app import get_environment
 from app.serve.search import search_videos, index_video_data, remove_video_data, remove_video_data_by_id, \
     recommend_videos
@@ -842,6 +843,13 @@ def get_preview_image(video_id=""):
     return serve.send_static_file("no_preview.jpg")
 
 
+@serve.route("/uploaded/<file_name>", methods=["GET"])
+def serve_uploaded_file(file_name: str):
+    if upload_path:
+        return send_from_directory(upload_path, file_name)
+    return Response("", 404)
+
+
 @serve.route("/thumbnail/<video_id>.jpg")
 def get_thumbnail_image(video_id=""):
     try:
@@ -962,6 +970,74 @@ def check_status():
         "scheduled": len(scheduled_tasks) if scheduled_tasks else 0,
         "total_videos": total_videos
     }
+
+
+@serve.route("/upload_logo", methods=["POST"])
+@login_required
+def upload_logo_route():
+    if "files[]" not in request.files:
+        return Response("Error during upload", 400)
+    f = request.files["files[]"]
+
+    n = secure_filename(f.filename)
+    if upload_path:
+        save_path = os.path.join(upload_path, n)
+        f.save(save_path)
+
+        generate_logo(save_path)
+
+    return Response(n, 200)
+
+
+@serve.route("/dashboard/theatres")
+@login_required
+def theatre_route():
+    if not current_user.check_auth(AUTH_LEVEL_EDITOR):
+        flash("You don't have permissions for that.", "error")
+        return redirect(url_for("serve.front_page"))
+    return render_template("theatres.html")
+
+
+@serve.route("/dashboard/create_theatre", methods=["POST"])
+@login_required
+def create_theatre_route():
+
+    if not current_user.check_auth(AUTH_LEVEL_EDITOR):
+        return Response("Not authorized to do that, you sneaky you", 401)
+
+    name = request.form.get("theatre_name", "")
+    location = request.form.get("theatre_location", "")
+    ongoing_value = request.form.get("theatre_ongoing", "off")
+    logo = request.form.get("theatre_logo_name", "")
+
+    if not len(name):
+        return Response("", 400)
+    if not len(location):
+        return Response("", 400)
+    if ongoing_value == "on":
+        ongoing = True
+    else:
+        ongoing = False
+    if len(logo):
+        if "/" in logo:
+            return Response("", 400)
+
+    theatre = Theatre()
+    theatre.name = name
+    theatre.ongoing = ongoing
+    theatre.location = location
+    theatre.stub = make_stub(name)
+    theatre.logo_name = logo
+
+    db_session.add(theatre)
+    try:
+        db_session.commit()
+    except IntegrityError:
+        flash(f"That name is either identical to or too similar to an existing theatre.", "error")
+    else:
+        flash(f"Made theatre \"{name}\"", "success")
+
+    return redirect(url_for("serve.dashboard_page"))
 
 
 @serve.route("/dashboard/create_token", methods=["POST"])

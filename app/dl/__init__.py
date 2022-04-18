@@ -68,6 +68,7 @@ json_path = media_path
 
 thumbnail_path = os.environ.get("THUMBNAIL_FOLDER", "")
 preview_path = os.environ.get("PREVIEW_FOLDER", "")
+upload_path = os.environ.get("UPLOAD_FOLDER", "")
 
 #Logging
 log = logging.getLogger("posterity_dl")

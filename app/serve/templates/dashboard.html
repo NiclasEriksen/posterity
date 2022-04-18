@@ -164,6 +164,40 @@
                 </fieldset>
             </form>
         </div>
+        <div class="uk-width-1-1 uk-width-1-2@m uk-margin">
+            <h2>Add new theatre:</h2>
+            <p><a href="/dashboard/theatres">Theatre overview</a></p>
+            <form class="uk-form" method="POST" id="add_theatre_form" action="/dashboard/create_theatre">
+                <fieldset class="uk-fieldset">
+                    <div class="uk-margin">
+                        <input type="text" class="uk-input" name="theatre_name" id="theatre_name" placeholder="Theatre name">
+                    </div>
+                    <div class="uk-margin">
+                        <input type="text" class="uk-input" name="theatre_location" id="theatre_location" placeholder="Location">
+                    </div>
+                    <div class="uk-margin">
+                        <label>
+                            <input class="uk-checkbox" id="theatre_ongoing" name="theatre_ongoing" type="checkbox" checked> Ongoing?
+                        </label>
+                    </div>
+                    <div class="uk-margin">
+                        <div class="js-upload uk-placeholder uk-text-center">
+                            <img id="theatre_logo_preview" src="" style="max-width: 128px; max-height: 128px;">
+                            <span uk-icon="icon: cloud-upload"></span>
+                            <span class="uk-text-middle" id="theatre_logo_status">Attach image by dropping it here or</span>
+                            <div uk-form-custom>
+                                <input type="file" id="logo" name="logo" accept="image/png">
+                                <span class="uk-link">select one</span>
+                            </div>
+                        </div>
+                        <progress id="js-progressbar" class="uk-progress" value="0" max="100" hidden></progress>
+                    </div>
+                    <button class="uk-button uk-button-primary" type="submit">Submit</button>
+                    <input type="hidden" id="return_url_theatre" name="return_url" value="/dashboard">
+                    <input type="hidden" id="theatre_logo_name" name="theatre_logo_name" value="">
+                </fieldset>
+            </form>
+        </div>
     </div>
 </section>
 <section class="uk-section uk-section-default uk-section-small uk-container">
@@ -237,4 +271,74 @@
     </div>
 </section>
 {% endif %}
+<script>
+
+    var bar = document.getElementById('js-progressbar');
+
+    UIkit.upload('.js-upload', {
+
+        url: '/upload_logo',
+        multiple: true,
+
+        beforeSend: function (environment) {
+            console.log('beforeSend', arguments);
+
+            // The environment object can still be modified here.
+            // var {data, method, headers, xhr, responseType} = environment;
+
+        },
+        beforeAll: function () {
+        },
+        load: function () {
+        },
+        error: function () {
+            console.log('error', arguments);
+        },
+        complete: function () {
+            var resp = arguments['0'].responseText;
+            if (resp) {
+                var preview_img = document.getElementById("theatre_logo_preview");
+                var logo = document.getElementById("theatre_logo_name")
+                if (preview_img) {
+                    preview_img.src = "/uploaded/" + resp;
+                }
+                if (logo) {
+                    logo.value = resp;
+                }
+            }
+            console.log(resp);
+        },
+
+        loadStart: function (e) {
+            bar.removeAttribute('hidden');
+            bar.max = e.total;
+            bar.value = e.loaded;
+        },
+
+        progress: function (e) {
+            bar.max = e.total;
+            bar.value = e.loaded;
+        },
+
+        loadEnd: function (e) {
+            bar.max = e.total;
+            bar.value = e.loaded;
+        },
+
+        completeAll: function () {
+
+            setTimeout(function () {
+                bar.setAttribute('hidden', 'hidden');
+                var status_field = document.getElementById("theatre_logo_status");
+                if (status_field) {
+                    status_field.innerHTML = "Image has been uploaded";
+                }
+            }, 1000);
+
+        }
+
+    });
+
+</script>
+
 {% endblock %}
