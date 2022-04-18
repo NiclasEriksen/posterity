@@ -649,6 +649,9 @@ class Theatre(Base):
     to_time = Column(DateTime)
     ongoing = Column(Boolean, default=True)
     logo_name = Column(String, default="no_logo.jpg")
+
+    def from_time_verbose(self) -> str:
+        return ""
 #     videos = relationship("Video", back_populates="theatre")
 
 
