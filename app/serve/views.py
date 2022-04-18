@@ -13,7 +13,7 @@ from flask_login import login_user, login_required, logout_user, current_user
 from redis.exceptions import ConnectionError
 from sqlalchemy.exc import OperationalError, IntegrityError
 from werkzeug.local import LocalProxy
-from sqlalchemy import or_, and_
+from sqlalchemy import or_, and_, not_
 from werkzeug.utils import secure_filename
 
 serve = Blueprint(

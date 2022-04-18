@@ -79,16 +79,29 @@ def clean_up_media_dir():
 
 
 if __name__ == "__main__":
-    from app.serve.db import session_scope, Video
-    from app.dl.metadata import get_upload_time_from_api
+    from app.serve.db import session_scope, Video, Theatre, ContentTag
+    from sqlalchemy import not_
+    from app.serve.search import index_video_data
+    stub = "ukraine_war"
     with session_scope() as session:
-        videos = session.query(Video).all()
-        print("Starting upload time scraping.")
-        for v in videos:
-            print(f"Scraping video {v.video_id}")
-            d = get_upload_time_from_api(v.url)
-            if d < v.upload_time:
-                print(f"Updating video {v.video_id}")
-                v.orig_upload_time = d
+        theatre = session.query(Theatre).filter_by(stub=stub).first()
+        ignore_category = session.query(ContentTag).filter_by(name="World News").first()
+        if theatre and ignore_category:
+            for v in session.query(Video).filter(not_(Video.tags.any(id=ignore_category.id))).all():
+                v.theatres = [theatre]
                 session.add(v)
+                index_video_data(v)
         session.commit()
+
+    # from app.dl.metadata import get_upload_time_from_api
+    # with session_scope() as session:
+    #     videos = session.query(Video).all()
+    #     print("Starting upload time scraping.")
+    #     for v in videos:
+    #         print(f"Scraping video {v.video_id}")
+    #         d = get_upload_time_from_api(v.url)
+    #         if d < v.upload_time:
+    #             print(f"Updating video {v.video_id}")
+    #             v.orig_upload_time = d
+    #             session.add(v)
+    #     session.commit()
