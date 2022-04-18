@@ -70,7 +70,7 @@
                             <img id="selected-theatre-image" src="/uploaded/{% if current_theatre %}{{current_theatre.logo_name}}{% else %}all.png{% endif %}">
                             <div class="theatre-dropdown-content uk-animation-slide-top-small uk-text-center">
                                 {% for t in available_theaters %}
-                                <button class="theatre-button uk-animation-scale-up" type="button" onclick="selectTheatre('{{t.stub}}', '{{t.logo_name}}');"><img src="/uploaded/{{t.logo_name}}"></button>
+                                <button class="theatre-button uk-animation-scale-up" type="button" onclick="selectTheatre('{{t.stub}}', '{{t.logo_name}}');" style="margin:4px 2px;"><img src="/uploaded/{{t.logo_name}}"></button>
                                 {% endfor %}
                             </div>
                         </div>
