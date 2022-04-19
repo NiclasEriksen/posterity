@@ -50,7 +50,7 @@
             <div class="uk-width-1-2">
                 <a
                     class="uk-input uk-button {% if current_page > 1 %}uk-button-secondary{% else %}disabled_a uk-button-muted{% endif %} uk-button-small"
-                    href="{% if current_page > 1 %}/?p={{ current_page - 1 }}{% else %}#{% endif %}{% if keyword|length %}&q={{ keyword }}{% endif %}{% if search_tag %}&t={{ search_tag.id }}{% endif %}{% if search_category %}&c={{ search_category.id }}{% endif %}"
+                    href="{% if current_page > 1 %}/?p={{ current_page - 1 }}{% else %}#{% endif %}{% if search_theatre %}&th={{search_theatre.id}}{% endif %}{% if keyword|length %}&q={{ keyword }}{% endif %}{% if search_tag %}&t={{ search_tag.id }}{% endif %}{% if search_category %}&c={{ search_category.id }}{% endif %}"
                 >
                     <span uk-icon="icon: chevron-double-left"></span> Previous
                 </a>
@@ -58,7 +58,7 @@
             <div class="uk-width-1-2">
                 <a
                     class="uk-input uk-button {% if current_page < max_page %}uk-button-secondary{% else %}disabled_a uk-button-muted{% endif %} uk-button-small"
-                    href="{% if current_page < max_page %}/?p={{ current_page + 1 }}{% else %}#{% endif %}{% if keyword|length %}&q={{ keyword }}{% endif %}{% if search_tag %}&t={{ search_tag.id }}{% endif %}{% if search_category %}&c={{ search_category.id }}{% endif %}"
+                    href="{% if current_page < max_page %}/?p={{ current_page + 1 }}{% else %}#{% endif %}{% if search_theatre %}&th={{search_theatre.id}}{% endif %}{% if keyword|length %}&q={{ keyword }}{% endif %}{% if search_tag %}&t={{ search_tag.id }}{% endif %}{% if search_category %}&c={{ search_category.id }}{% endif %}"
                 >
                     Next <span uk-icon="icon: chevron-double-right"></span>
                 </a>
@@ -146,7 +146,7 @@
             <div class="uk-width-1-2">
                 <a
                     class="uk-input uk-button {% if current_page > 1 %}uk-button-secondary{% else %}disabled_a uk-button-muted{% endif %} uk-button-small"
-                    href="{% if current_page > 1 %}/?p={{ current_page - 1 }}{% else %}#{% endif %}{% if keyword|length %}&q={{ keyword }}{% endif %}{% if search_tag %}&t={{ search_tag.id }}{% endif %}{% if search_category %}&c={{ search_category.id }}{% endif %}"
+                    href="{% if current_page > 1 %}/?p={{ current_page - 1 }}{% else %}#{% endif %}{% if search_theatre %}&th={{search_theatre.id}}{% endif %}{% if keyword|length %}&q={{ keyword }}{% endif %}{% if search_tag %}&t={{ search_tag.id }}{% endif %}{% if search_category %}&c={{ search_category.id }}{% endif %}"
                 >
                     <span uk-icon="icon: chevron-double-left"></span> Previous
                 </a>
@@ -154,7 +154,7 @@
             <div class="uk-width-1-2">
                 <a
                     class="uk-input uk-button {% if current_page < max_page %}uk-button-secondary{% else %}disabled_a uk-button-muted{% endif %} uk-button-small"
-                    href="{% if current_page < max_page %}/?p={{ current_page + 1 }}{% else %}#{% endif %}{% if keyword|length %}&q={{ keyword }}{% endif %}{% if search_tag %}&t={{ search_tag.id }}{% endif %}{% if search_category %}&c={{ search_category.id }}{% endif %}"
+                    href="{% if current_page < max_page %}/?p={{ current_page + 1 }}{% else %}#{% endif %}{% if search_theatre %}&th={{search_theatre.id}}{% endif %}{% if keyword|length %}&q={{ keyword }}{% endif %}{% if search_tag %}&t={{ search_tag.id }}{% endif %}{% if search_category %}&c={{ search_category.id }}{% endif %}"
                 >
                     Next <span uk-icon="icon: chevron-double-right"></span>
                 </a>
