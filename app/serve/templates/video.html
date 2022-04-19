@@ -260,6 +260,42 @@
                 </table>
             </div>
             {% endif %}
+            {% if current_user.check_auth(AUTH_LEVEL_USER) and video.pending_duplicates|length %}
+            <div class="uk-width-1-1 uk-margin uk-background-muted uk-padding-small">
+                <h3>Possible duplicates:</h3>
+                <table class="uk-table uk-table-small uk-table-striped">
+                    <thead>
+                        <tr>
+                            <td class="uk-table-expand">Video</td>
+                            <td class="uk-table-shrink">Content tags</td>
+                            <td class="uk-table-shrink uk-visible@m">Video type</td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for v in video.pending_duplicates %}
+                        <tr>
+                            <td style="min-height: 64px;">
+                                <div class="list-thumbnail uk-position-relative" style="display: table-cell;">
+                                    <a href="/{{ v.video_id }}">
+                                        <img src="/thumbnail/{{ v.video_id }}.jpg" loading="lazy" class="thumbnail-rounded uk-position-absolute uk-position-center">
+                                    </a>
+                                </div>
+                                <div style="display: table-cell;">
+                                    <a href="/{{ v.video_id }}">{{ v.title }}</a>
+                                </div>
+                            </td>
+                            <td>
+                                {% include "content_tag_list.html" %}
+                            </td>
+                            <td class="uk-visible@m">
+                                {% include "category_tag_list.html" %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% endif %}
             {% if recommended|length %}
             <div class="uk-container">
                 <div class="uk-width-1-1 uk-text-center">
@@ -303,42 +339,7 @@
                 </div>
             </div>
             {% endif %}
-                    {% if current_user.check_auth(AUTH_LEVEL_EDITOR) and video.pending_duplicates|length %}
-                    <div class="uk-width-1-1 uk-margin uk-background-muted uk-padding-small">
-                        <h3>Possible duplicates:</h3>
-                        <table class="uk-table uk-table-small uk-table-striped">
-                            <thead>
-                                <tr>
-                                    <td class="uk-table-expand">Video</td>
-                                    <td class="uk-table-shrink">Content tags</td>
-                                    <td class="uk-table-shrink uk-visible@m">Video type</td>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for v in video.pending_duplicates %}
-                                <tr>
-                                    <td style="min-height: 64px;">
-                                        <div class="list-thumbnail uk-position-relative" style="display: table-cell;">
-                                            <a href="/{{ v.video_id }}">
-                                                <img src="/thumbnail/{{ v.video_id }}.jpg" loading="lazy" class="thumbnail-rounded uk-position-absolute uk-position-center">
-                                            </a>
-                                        </div>
-                                        <div style="display: table-cell;">
-                                            <a href="/{{ v.video_id }}">{{ v.title }}</a>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        {% include "content_tag_list.html" %}
-                                    </td>
-                                    <td class="uk-visible@m">
-                                        {% include "category_tag_list.html" %}
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                    {% endif %}
+
             <div class="uk-height-small"></div>
         </div>
 
