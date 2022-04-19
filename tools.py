@@ -25,7 +25,7 @@ reddit = praw.Reddit(
     username=os.environ.get("REDDIT_USER", ""),
     password=os.environ.get("REDDIT_PW", "")
 )
-parrot = Parrot()
+parrot = Parrot(model_tag="prithivida/parrot_paraphraser_on_T5")
 dur1 = time() - start
 print(f"{dur1:.2f} seconds to load parrot")
 start = time()
@@ -42,7 +42,7 @@ def parse_subreddit_for_links(sr: str, limit: int = 1000) -> list:
 
 
 def paraphrase_text(s: str) -> str:
-    results = parrot.augment(input_phrase=s)
+    results = parrot.augment(input_phrase=s, use_gpu=False)
     if not results or not len(results):
         return s
 
