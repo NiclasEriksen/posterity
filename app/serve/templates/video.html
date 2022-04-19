@@ -281,7 +281,13 @@
                                     </a>
                                 </div>
                                 <div style="display: table-cell;">
-                                    <a href="/{{ v.video_id }}">{{ v.title }}</a>
+                                    <a href="/{{ v.video_id }}">{{ v.title }}</a><br>
+                                    <a class="uk-text-danger"
+                                       href="/clear_duplicate?v1={{ video.video_id }}&v2={{ v.video_id }}"
+                                       onclick="return confirm('Flag this as a false positive?');"
+                                    >
+                                        False positive <span uk-icon="warning"></span>
+                                    </a>
                                 </div>
                             </td>
                             <td>
