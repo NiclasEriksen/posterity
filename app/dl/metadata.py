@@ -135,6 +135,7 @@ def check_duplicate_for_video(video_id: str) -> int:
             return len(duplicates)
     return 0
 
+
 def write_metadata(video_id: str, md: dict):
     write_metadata_to_disk(video_id, md)
     write_metadata_to_db(video_id, md)
@@ -621,21 +622,6 @@ def add_technical_info_to_metadata(metadata: dict, video_path: str, post_process
 def get_metadata_from_api(url: str) -> str:
     from dotenv import load_dotenv
     load_dotenv()
-    {
-        'data': {
-            'id': '1514966521952583691',
-            'text': 'This Russian abbot opened his monastery in Germany to Ukrainians against the will of the Russian Orthodox Church. https://t.co/RnViPxWMQR',
-            'created_at': '2022-04-15T13:59:00.000Z'
-        }
-    }
-    ['STR_FIELD', '__class__', '__delattr__', '__dict__', '__dir__', '__doc__', '__eq__', '__format__', '__ge__',
-     '__getattr__', '__getattribute__', '__gt__', '__hash__', '__init__', '__init_subclass__', '__le__', '__lt__',
-     '__module__', '__ne__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__setattr__', '__sizeof__',
-     '__str__', '__subclasshook__', '__weakref__', '_chunk', '_comments_by_id', '_fetch', '_fetch_data', '_fetch_info',
-     '_fetched', '_kind', '_reddit', '_reset_attributes', '_safely_add_arguments', '_url_parts', '_vote', 'award',
-     'clear_vote', 'comment_limit', 'comment_sort', 'comments', 'crosspost', 'delete', 'disable_inbox_replies',
-     'downvote', 'duplicates', 'edit', 'enable_inbox_replies', 'flair', 'fullname', 'gild', 'hide', 'id', 'id_from_url',
-     'mark_visited', 'mod', 'parse', 'reply', 'report', 'save', 'shortlink', 'unhide', 'unsave', 'upvote']
 
     metadata = {
         "title": "",

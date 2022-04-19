@@ -1,9 +1,56 @@
+import os
+import praw
+import dotenv
+dotenv.load_dotenv()
+from prawcore.exceptions import ResponseException
+
 SUBREDDITS = [
     "ukraine", "combatfootage", "yemenvoice"
 ]
+UKRAINE_KEYWORDS = ["ukraine", "putin", "russia", "russian", "ukrainian", "slava"]
+
+reddit = praw.Reddit(
+    client_id=os.environ.get("REDDIT_CLIENT_ID", ""),
+    client_secret=os.environ.get("REDDIT_CLIENT_SECRET", ""),
+    user_agent="Posterity title fetcher",
+    username=os.environ.get("REDDIT_USER", ""),
+    password=os.environ.get("REDDIT_PW", "")
+)
 
 
-def parse_sites_for_links():
+def parse_subreddit_for_links(sr: str, limit: int = 1000) -> list:
+    subreddit = reddit.subreddit(sr)
+    videos = {}
+    for submission in subreddit.new(limit=10):
+        if submission.is_video:
+            print(submission.title)
+
+    pass
+
+
+def paraphrase_text(s: str) -> str:
+    from transformers import PegasusTokenizerFast, PegasusForConditionalGeneration
+    model = PegasusForConditionalGeneration.from_pretrained("tuner007/pegasus_paraphrase")
+    tokenizer = PegasusTokenizerFast.from_pretrained("tuner007/pegasus_paraphrase")
+
+    sentences = get_paraphrased_sentences(model, tokenizer, s)
+    return sentences
+
+
+def get_paraphrased_sentences(model, tokenizer, sentence, num_return_sequences=5, num_beams=5):
+    # tokenize the text to be form of a list of token IDs
+    inputs = tokenizer([sentence], truncation=True, padding="longest", return_tensors="pt")
+    # generate the paraphrased sentences
+    outputs = model.generate(
+        **inputs,
+        num_beams=num_beams,
+        num_return_sequences=num_return_sequences,
+    )
+    # decode the generated sentences using the tokenizer to get them back to text
+    return tokenizer.batch_decode(outputs, skip_special_tokens=True)
+
+
+def parse_twitter_list_for_links(twl: str, limit: int = 1000) -> list:
     pass
 
 
@@ -87,19 +134,21 @@ def clean_up_media_dir():
 
 
 if __name__ == "__main__":
-    from app.serve.db import session_scope, Video, Theatre, ContentTag
-    from sqlalchemy import not_
-    from app.serve.search import index_video_data
-    stub = "ukraine_war"
-    with session_scope() as session:
-        theatre = session.query(Theatre).filter_by(stub=stub).first()
-        ignore_category = session.query(ContentTag).filter_by(stub="world_news").first()
-        if theatre and ignore_category:
-            for v in session.query(Video).filter(not_(Video.tags.any(id=ignore_category.id))).all():
-                v.theatres = [theatre]
-                session.add(v)
-                index_video_data(v)
-        session.commit()
+    # parse_subreddit_for_links("ukraine")
+    paraphrase_text("RU propagandist Andrey Rudenko posted a video of alleged vote in Rozovsky district of Zaporizhzhya region during which «inhabitants chose to join the DPR». RU occupants now do not even bother staging fake referendums—fake votes in what looks like a school hall suffice")
+    # from app.serve.db import session_scope, Video, Theatre, ContentTag
+    # from sqlalchemy import not_
+    # from app.serve.search import index_video_data
+    # stub = "ukraine_war"
+    # with session_scope() as session:
+    #     theatre = session.query(Theatre).filter_by(stub=stub).first()
+    #     ignore_category = session.query(ContentTag).filter_by(stub="world_news").first()
+    #     if theatre and ignore_category:
+    #         for v in session.query(Video).filter(not_(Video.tags.any(id=ignore_category.id))).all():
+    #             v.theatres = [theatre]
+    #             session.add(v)
+    #             index_video_data(v)
+    #     session.commit()
 
     # from app.dl.metadata import get_upload_time_from_api
     # with session_scope() as session:
@@ -113,3 +162,63 @@ if __name__ == "__main__":
     #             v.orig_upload_time = d
     #             session.add(v)
     #     session.commit()
+
+    #
+    # metadata = {
+    #     "title": "",
+    #     "desc": "",
+    #     "upload_time": datetime.now()
+    # }
+    #
+    # u = urlparse(url)
+    # headers = {
+    #     'Accept-Encoding': 'identity',
+    #     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.75 Safari/537.36',
+    # }
+    # if u.netloc in API_SITES:
+    #
+    #     if API_SITES[u.netloc] == "twitter":
+    #         try:
+    #             tweet_id = int(u.path.split("/")[-1])
+    #         except (ValueError, IndexError, TypeError):
+    #             tweet_id = 0
+    #
+    #         token = os.environ.get("TWITTER_BEARER_TOKEN", "")
+    #         if not len(token) or not tweet_id:
+    #             return metadata
+    #
+    #         headers["Authorization"] = f"Bearer {token}"
+    #         req_url = f"https://api.twitter.com/2/tweets/{tweet_id}?tweet.fields=text,created_at"
+    #         try:
+    #             r = requests.get(req_url, headers=headers)
+    #         except Exception as e:
+    #             print(e)
+    #             print("Error during API request, returning blank")
+    #             return metadata
+    #
+    #         data = r.json()
+    #         try:
+    #             tweet = data["data"]["text"]
+    #         except KeyError as e:
+    #             tweet = ""
+    #         try:
+    #             d = data["data"]["created_at"]
+    #             metadata["upload_time"] = parser.parse(d).replace(tzinfo=None)
+    #         except (KeyError, ParserError) as e:
+    #             metadata["upload_time"] = datetime.now()
+    #
+    #         metadata["desc"] = remove_links(tweet).lstrip().rstrip().strip("\t")[:1024]
+    #         metadata["title"] = remove_emoji(remove_links(tweet.split("\n")[0]))[:256].lstrip().rstrip().strip("\t")
+    #
+    #     elif API_SITES[u.netloc] == "reddit":
+    #         try:
+    #             page = reddit.submission(url=url)
+    #             if page:
+    #                 d = page.created_utc
+    #                 metadata["upload_time"] = datetime.utcfromtimestamp(d)
+    #                 metadata["desc"] = remove_links(page.selftext)
+    #                 metadata["title"] = remove_emoji(page.title)
+    #         except Exception as e:
+    #             log.error(e)
+    #
+    # return metadata
