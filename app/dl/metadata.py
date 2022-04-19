@@ -174,16 +174,19 @@ def find_existing_video_by_url(url: str):
 
 
 def find_duplicate_video_by_url(url: str):
-    from app.serve.db import Video, db_session
+    from app.serve.db import Video, DeletedVideo, db_session
 
     try:
         video = db_session.query(Video).filter(Video.url.contains(url)).first()
         if video:
-            return video
+            return True
+        video = db_session.query(DeletedVideo).filter_by(duplicate=True).filter(Video.url.contains(url)).first()
+        if video:
+            return True
 
     except Exception as e:
         log.error(e)
-    return None
+    return False
 
 
 def get_progress_for_video(video) -> float:

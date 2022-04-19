@@ -206,7 +206,6 @@ class Video(Base):
             return True
         return False
 
-
     @property
     def has_duplicates(self) -> bool:
         if not len(self.duplicates):
@@ -806,6 +805,7 @@ class DeletedVideo(Base):
     title = Column(String, default="")
     orig_title = Column(String, default="")
     source = Column(String, default="Unknown")
+    duplicate = Column(Boolean, default=False)
     tags = relationship("ContentTag", secondary=tag_deleted_association_table)
     categories = relationship("Category", secondary=category_deleted_association_table)
 

@@ -4,7 +4,7 @@ import requests
 from time import time, sleep
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
-from app.dl.helpers import remove_links, remove_tags, remove_emoji
+from app.dl.helpers import remove_links, remove_tags, remove_emoji, minimize_url
 from app.dl.metadata import strip_useless
 
 start = time()
@@ -42,13 +42,19 @@ def parse_subreddit_for_links(sr: str, limit: int = 10) -> list:
             videos.append({
                 "title": submission.title,
                 "desc": submission.selftext,
-                "url": submission.permalink
+                "url": submission.url
             })
     return videos
 
 
 def clean_up_api_results(videos: list) -> list:
+    session = requests.Session()  # so connections are recycled
     for video in videos:
+        try:
+            resp = session.head(minimize_url(video["url"]), allow_redirects=True)
+            video["url"] = resp.url
+        except Exception as e:
+            print(e)
         orig_title = video["title"]
         cleaned = clean_up_text(video["title"])
         video["title"] = paraphrase_text(cleaned)
@@ -71,8 +77,8 @@ def post_video_to_posterity(video: dict) -> bool:
         "token": "1234abcd",
         "download_now": False
     }
-    # r = requests.post("https://posterity.no/api/v1/core/post_link", json=data)
-    r = requests.post("http://posterity.test:5050/api/v1/core/post_link", json=data, verify=False)
+    r = requests.post("https://posterity.no/api/v1/core/post_link", json=data, verify=False)
+    # r = requests.post("http://posterity.test:5050/api/v1/core/post_link", json=data, verify=False)
     if r.status_code == 202 or r.status_code == 200:
         print("Link posted!")
         print(r.text)
@@ -93,18 +99,24 @@ def clean_up_text(data: str) -> str:
 
 
 def paraphrase_text(s: str) -> str:
-    results = parrot.augment(input_phrase=s, use_gpu=False, do_diverse=True)
+    results = parrot.augment(s, use_gpu=False, do_diverse=True, max_length=256, fluency_threshold=0.75, adequacy_threshold=0.75)
     if not results or not len(results):
         return s
 
-    biggest = None
-    biggest_score = 0
-    for txt, score in results:
-        if score > biggest_score:
-            biggest = txt
-            biggest_score = score
+    if isinstance(results, str):
+        return results
+    elif isinstance(results, list) and len(results):
+        biggest = ""
+        biggest_score = 0
+        for txt, score in results:
+            if score > biggest_score:
+                biggest = txt
+                biggest_score = score
+        return biggest if biggest else results[0][0]
 
-    return biggest if biggest else results[0][0]
+    return s
+
+    # return biggest if biggest else results[0][0]
 
 
 def parse_twitter_list_for_links(twl: str, limit: int = 1000) -> list:
@@ -191,13 +203,16 @@ def clean_up_media_dir():
 
 
 if __name__ == "__main__":
-    videos = parse_subreddit_for_links("ukraine", limit=30)
+    videos = parse_subreddit_for_links("ukraine", limit=1000)
     videos = clean_up_api_results(videos)
     failed = []
     for video in videos:
         success = post_video_to_posterity(video)
         if not success:
             failed.append(video)
+
+    print("________________________")
+    print("FAILED:")
     for f in failed:
         print("======")
         print(f["title"])
