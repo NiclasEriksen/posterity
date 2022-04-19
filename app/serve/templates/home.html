@@ -38,7 +38,7 @@
                 </div>
             </div>
             <div class="uk-container uk-width-1-1 uk-width-1-2@l uk-height-1-1">
-                <form class="uk-form uk-width-1-1" id="search_form" name="search_form" action="/" method="POST">
+                <form class="uk-form uk-width-1-1" id="search_form" name="search_form" action="/?q=''{% if search_theatre %}&th={{search_theatre.id}}{% endif %}{% if search_tag %}&t={{ search_tag.id }}{% endif %}{% if search_category %}&c={{ search_category.id }}{% endif %}" method="POST">
                     <div class="uk-margin-remove uk-padding-small">
                         <div class="uk-inline uk-width-1-1">
                             <a class="uk-form-icon uk-form-icon-flip" href="" onclick="document.search_form.submit();return false;" uk-icon="icon: search"></a>

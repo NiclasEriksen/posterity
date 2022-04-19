@@ -226,7 +226,21 @@ def front_page_search():
     # pp = request.args.get("pp", type=int, default=MAX_RESULT_PER_PAGE)
     kw = request.form.get("keyword", default="")
 
-    return redirect(url_for("serve.front_page", p=page, q=kw, t=t, c=t, th=th))
+    args = dict(q=kw)
+    if c >= 0:
+        print("category")
+        args["c"] = c
+    print(t)
+    if t >= 0:
+        args["t"] = t
+    if th >= 0:
+        print("th")
+        args["th"] = th
+    if page > 1:
+        print("page")
+        args["p"] = page
+
+    return redirect(url_for("serve.front_page", **args))
 
 
 @serve.route("/<video_id>", methods=["GET"])
