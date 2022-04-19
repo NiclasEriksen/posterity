@@ -1,6 +1,7 @@
 import os
 import praw
-from time import time
+import requests
+from time import time, sleep
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
@@ -31,14 +32,58 @@ print(f"{dur1:.2f} seconds to load parrot")
 start = time()
 
 
-def parse_subreddit_for_links(sr: str, limit: int = 1000) -> list:
+def parse_subreddit_for_links(sr: str, limit: int = 10) -> list:
     subreddit = reddit.subreddit(sr)
-    videos = {}
-    for submission in subreddit.new(limit=10):
+    videos = []
+    for submission in subreddit.new(limit=limit):
         if submission.is_video:
-            print(submission.title)
+            videos.append({
+                "title": submission.title,
+                "desc": submission.selftext,
+                "url": submission.permalink
+            })
+    return videos
 
-    pass
+
+def clean_up_api_results(videos: list) -> list:
+    for video in videos:
+        orig_title = video["title"]
+        cleaned = clean_up_text(video["title"])
+        video["title"] = paraphrase_text(cleaned)
+        print("========================")
+        print("Original:")
+        print(orig_title)
+        print("Cleaned:")
+        print(cleaned)
+        print("Paraphrased:")
+        print(video["title"])
+        print("========================")
+    return videos
+
+
+def post_video_to_posterity(video: dict) -> bool:
+    data = {
+        "url": video["url"],
+        "title": video["title"],
+        "source": "fredspipa",
+        "token": "1234abcd"
+    }
+    r = requests.post("https://www.posterity.no/api/v1/core/post_link", json=data)
+    if r.status_code == 202:
+        print("Link posted!")
+        sleep(1)
+        return True
+    elif r.status_code > 400:
+        print(r.text)
+    else:
+        print(f"Unknown response: {r.status_code}")
+
+    sleep(1)
+    return False
+
+
+def clean_up_text(data: str) -> str:
+    return strip_useless(remove_emoji(remove_links(remove_tags(data))))
 
 
 def paraphrase_text(s: str) -> str:
@@ -140,73 +185,10 @@ def clean_up_media_dir():
 
 
 if __name__ == "__main__":
-    # parse_subreddit_for_links("ukraine")
-    # txt = paraphrase_text("Carmaker Stellantis said it was suspending production at its Russian plant due to logistical difficulties and sanctions imposed on Moscow")
-    from app.dl.helpers import remove_links, remove_emoji, remove_tags
-    from app.dl.metadata import strip_useless
-
-    start = time()
-
-      # 'defensiemin and i expressed our support in a phone call with zelenskyyua today as russia begins a renewed offensive'
-    s = "📞: In a call with @ZelenskyyUa the @DefensieMin and I expressed our support as Russia begins a renewed offensive. 🇳🇱 will be sending heavier materiel to 🇺🇦, including armoured vehicles. Along with allies, we are looking into supplying additional heavy materiel."
-    s = remove_tags(s)
-    s = remove_links(s)
-    s = remove_emoji(s)
-    s = strip_useless(s)
-    txt = paraphrase_text(s)
-    print(txt)
-    #   'ukrainian authorities are still exhuming the bodies of civilians killed by russian forces from the mass graves around kyiv'
-    s = "Ukrainian authorities continue to exhume the bodies of civilians killed by Russian troops from the mass graves in the towns and villages around Kyiv."
-    s = remove_tags(s)
-    s = remove_links(s)
-    s = remove_emoji(s)
-    s = strip_useless(s)
-    txt = paraphrase_text(s)
-    print(txt)
-    #   'RU propagandist Andrey Rudenko posted a video of alleged vote in Rozovsky district of Zaporizhzhya region during which «inhabitants chose to join the DPR». RU occupants now do not even bother staging fake referendums—fake votes in what looks like a school hall suffice StopRussia'
-    s = "RU propagandist Andrey Rudenko posted a video of alleged vote in Rozovsky district of Zaporizhzhya region during which «inhabitants chose to join the DPR». RU occupants now do not even bother staging fake referendums—fake votes in what looks like a school hall suffice #StopRussia"
-    s = remove_tags(s)
-    s = remove_links(s)
-    s = remove_emoji(s)
-    s = strip_useless(s)
-    txt = paraphrase_text(s)
-    print(txt)
-    s = """القلعه الملعونه في الهند .. وسر الأميره الجميله ضحية اللعنه🥺
-حلقه جديده علي قناة أسرار غامضه🔥
-لينك الحلقه👇
-https://youtu.be/OG2P0hQzCaM
-#السيسي_بيسلم_مصر #السيسى #نجلاء_عبدالعزيز #السنغال"""
-    s = remove_tags(s)
-    s = remove_links(s)
-    s = remove_emoji(s)
-    s = strip_useless(s)
-    txt = paraphrase_text(s)
-    print(txt)
-    s = """Питання: Чи є повідомлення від українських військових чи уряду про те, що північнокорейські технічні радники допомагали російським військовим на Донбасі чи на російській території з питань балістичних ракет, націлюючись на Україну чи то як спостерігачі, чи як учасники?"""
-    s = remove_tags(s)
-    s = remove_links(s)
-    s = remove_emoji(s)
-    s = strip_useless(s)
-    txt = paraphrase_text(s)
-    print(txt)
-    s = """Hey, 
-@twittersafety
-
-
-@Twitter
-
-
-@TwitterSupport
-, once again Ukrainian volunteer was banned for no reason which looks like a Russian bots attack. 
-@slon_hh
- is a military volunteer and did not violate any rules. Please, unban her asap, Ukraine need her."""
-    s = remove_links(s)
-    s = remove_emoji(s)
-    s = strip_useless(s)
-    txt = paraphrase_text(s)
-    print(txt)
-    dur1 = time() - start
-    print(f"{dur1:.2f} to run paraphrasing.")
+    videos = parse_subreddit_for_links("ukraine", limit=10)
+    videos = clean_up_api_results(videos)
+    for video in videos:
+        post_video_to_posterity(video)
 
 
     # from app.serve.db import session_scope, Video, Theatre, ContentTag

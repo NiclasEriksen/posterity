@@ -227,6 +227,9 @@ def post_link():
             print("PRIVATE!!!!!")
 
         data["source"] = current_user.username
+    elif "token" in data and os.environ.get("API_TOKEN", ""):
+        if not data["token"] == os.environ.get("API_TOKEN"):
+            data["source"] = "Anonymous"
     else:
         data["source"] = "Anonymous"
 
