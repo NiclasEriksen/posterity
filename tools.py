@@ -1,5 +1,8 @@
 import os
 import praw
+import warnings
+warnings.simplefilter(action='ignore', category=FutureWarning)
+from parrot import Parrot
 import dotenv
 dotenv.load_dotenv()
 from prawcore.exceptions import ResponseException
@@ -16,6 +19,7 @@ reddit = praw.Reddit(
     username=os.environ.get("REDDIT_USER", ""),
     password=os.environ.get("REDDIT_PW", "")
 )
+parrot = Parrot()
 
 
 def parse_subreddit_for_links(sr: str, limit: int = 1000) -> list:
@@ -29,8 +33,6 @@ def parse_subreddit_for_links(sr: str, limit: int = 1000) -> list:
 
 
 def paraphrase_text(s: str) -> str:
-    from parrot import Parrot
-    parrot = Parrot()
     results = parrot.augment(input_phrase=s)
     return results[0] if len(results) else s
 
@@ -121,6 +123,8 @@ def clean_up_media_dir():
 if __name__ == "__main__":
     # parse_subreddit_for_links("ukraine")
     # txt = paraphrase_text("Carmaker Stellantis said it was suspending production at its Russian plant due to logistical difficulties and sanctions imposed on Moscow")
+    txt = paraphrase_text("Ukrainian authorities continue to exhume the bodies of civilians killed by Russian troops from the mass graves in the towns and villages around Kyiv.")
+    print(txt)
     txt = paraphrase_text("Ukrainian authorities continue to exhume the bodies of civilians killed by Russian troops from the mass graves in the towns and villages around Kyiv.")
     print(txt)
     # from app.serve.db import session_scope, Video, Theatre, ContentTag
