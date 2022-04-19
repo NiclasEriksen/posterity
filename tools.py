@@ -135,7 +135,8 @@ def clean_up_media_dir():
 
 if __name__ == "__main__":
     # parse_subreddit_for_links("ukraine")
-    paraphrase_text("RU propagandist Andrey Rudenko posted a video of alleged vote in Rozovsky district of Zaporizhzhya region during which «inhabitants chose to join the DPR». RU occupants now do not even bother staging fake referendums—fake votes in what looks like a school hall suffice")
+    txt = paraphrase_text("RU propagandist Andrey Rudenko posted a video of alleged vote in Rozovsky district of Zaporizhzhya region during which «inhabitants chose to join the DPR». RU occupants now do not even bother staging fake referendums—fake votes in what looks like a school hall suffice")
+    print(txt)
     # from app.serve.db import session_scope, Video, Theatre, ContentTag
     # from sqlalchemy import not_
     # from app.serve.search import index_video_data
