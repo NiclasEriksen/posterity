@@ -1,3 +1,11 @@
+SUBREDDITS = [
+    "ukraine", "combatfootage", "yemenvoice"
+]
+
+
+def parse_sites_for_links():
+    pass
+
 
 def clean_up_media_dir():
     from app.serve.db import Video, session_scope

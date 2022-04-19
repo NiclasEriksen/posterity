@@ -69,13 +69,17 @@
                         <div class="uk-width-small uk-text-center theatre-dropdown-button theatre-button" style="z-index:1;">
                             <img class="uk-animation-scale-up" id="selected-theatre-image" src="/uploaded/{% if current_theatre %}{{current_theatre.logo_name}}{% else %}all.png{% endif %}">
                             <div id="theatre_dropdown_content" class="theatre-dropdown-content" uk-dropdown="animation: uk-animation-slide-bottom-small; duration: 333;delay-hide: 333;mode: click;pos: top-center;" style="min-width:104px;">
-                                <button class="theatre-button uk-animation-scale-up uk-position-relative" type="button" onclick="selectTheatre('all', 'all.png');" style="margin:4px 2px;width:96px;height:32px;">
-                                    <img class="uk-position-absolute uk-position-center" src="/uploaded/all.png">
-                                </button>
+                                <span uk-tooltip="title: No theater; pos: left">
+                                    <button class="theatre-button uk-animation-scale-up uk-position-relative" type="button" onclick="selectTheatre('all', 'all.png');" style="margin:4px 2px;width:96px;height:32px;">
+                                        <img class="uk-position-absolute uk-position-center" src="/uploaded/all.png">
+                                    </button>
+                                </span>
                                 {% for t in available_theaters %}
+                                <span uk-tooltip="title: {{t.name}}; pos: left">
                                 <button class="theatre-button uk-animation-scale-up uk-position-relative" type="button" onclick="selectTheatre('{{t.stub}}', '{{t.logo_name}}');" style="margin:4px 2px;width:96px;height:32px;">
                                     <img class="uk-position-absolute uk-position-center" src="/uploaded/{{t.logo_name}}">
                                 </button>
+                                </span>
                                 {% endfor %}
                             </div>
                         </div>
