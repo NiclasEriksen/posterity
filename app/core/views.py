@@ -230,6 +230,9 @@ def post_link():
     elif "token" in data and os.environ.get("API_TOKEN", ""):
         if not data["token"] == os.environ.get("API_TOKEN"):
             data["source"] = "Anonymous"
+        else:
+            if "download_now" in data and isinstance(data["download_now"], bool):
+                download_now = data["download_now"]
     else:
         data["source"] = "Anonymous"
 
