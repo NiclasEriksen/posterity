@@ -330,8 +330,8 @@ body, html {
     color: var(--primary);
 }
 .theatre-dropdown-content {
-  display: none;
-  position: absolute;
+/*  display: none;
+  position: absolute;*/
   background: rgba(0.2, 0.2, 0.2, 0.33);
   text-align: center;
   padding: 5px;
@@ -346,7 +346,7 @@ body, html {
   display: block;
 }
 
-.theatre-dropdown-button:hover .theatre-dropdown-content {display: block;}
+/*.theatre-dropdown-button:hover .theatre-dropdown-content {display: block;}*/
 
 img.active-action{
     animation: pulse 3s;

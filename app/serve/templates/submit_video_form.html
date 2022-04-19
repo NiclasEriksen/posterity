@@ -68,7 +68,7 @@
                     <div class="uk-flex uk-flex-middle" style="max-width: 104px;">
                         <div class="uk-width-small uk-text-center theatre-dropdown-button theatre-button" style="z-index:1;">
                             <img class="uk-animation-scale-up" id="selected-theatre-image" src="/uploaded/{% if current_theatre %}{{current_theatre.logo_name}}{% else %}all.png{% endif %}">
-                            <div class="theatre-dropdown-content uk-animation-slide-top-small">
+                            <div id="theatre_dropdown_content" class="theatre-dropdown-content" uk-dropdown="animation: uk-animation-slide-bottom-small; duration: 333;delay-hide: 333;mode: click;pos: top-center;" style="min-width:104px;">
                                 <button class="theatre-button uk-animation-scale-up uk-position-relative" type="button" onclick="selectTheatre('all', 'all.png');" style="margin:4px 2px;width:96px;height:32px;">
                                     <img class="uk-position-absolute uk-position-center" src="/uploaded/all.png">
                                 </button>
@@ -98,12 +98,16 @@
         <script>
             function selectTheatre (theatre_stub, theatre_logo) {
                 var theatre_field = document.getElementById("theatre");
+                var theatre_dropdown = document.getElementById("theatre_dropdown_content");
                 var theatre_image = document.getElementById("selected-theatre-image");
                 if (theatre_field) {
                     theatre_field.value = theatre_stub;
                 }
                 if (theatre_image) {
                     theatre_image.src = '/uploaded/' + theatre_logo;
+                }
+                if (theatre_dropdown) {
+                    UIkit.dropdown(theatre_dropdown).hide(0);
                 }
             }
         </script>
