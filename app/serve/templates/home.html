@@ -10,7 +10,7 @@
         class="uk-width-1-1 uk-width-1-4@l uk-dark uk-background-secondary uk-height-1-1 uk-margin uk-padding-remove"
         style="border: 1px dashed #CCC;border-top: 0;"
     >
-        {% if keyword|length or current_page > 1 or search_tag or search_category %}{% set hide_first = True %}{% else %}{% set hide_first = False %}{% endif %}
+        {% if keyword|length or current_page > 1 or search_tag or search_category or (search_theatre and search_theatre != current_theatre) %}{% set hide_first = True %}{% else %}{% set hide_first = False %}{% endif %}
         {% include "submit_video_form.html" %}
     </div>
     <div class="uk-width-1-1 uk-width-3-4@l uk-padding-small">
