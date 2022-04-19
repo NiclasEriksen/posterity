@@ -164,6 +164,13 @@ def make_stub(name) -> str:
     ).lower()
 
 
+def remove_tags(data: str) -> str:
+    out = re.findall(r"@(\w+)", data)
+    for o in out:
+        data = data.replace(o, "")
+    return data
+
+
 def remove_emoji(data: str):
     emoj = re.compile("["
                       u"\U0001F600-\U0001F64F"  # emoticons
