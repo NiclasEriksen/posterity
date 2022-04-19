@@ -42,7 +42,7 @@ def parse_subreddit_for_links(sr: str, limit: int = 1000) -> list:
 
 
 def paraphrase_text(s: str) -> str:
-    results = parrot.augment(input_phrase=s, use_gpu=False, do_diverse=True, max_return_phrases=10)
+    results = parrot.augment(input_phrase=s, use_gpu=False, do_diverse=True)
     if not results or not len(results):
         return s
 
