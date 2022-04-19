@@ -1,10 +1,16 @@
 import os
 import praw
+from time import time
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
+
+start = time()
+
 from parrot import Parrot
 import dotenv
 dotenv.load_dotenv()
+
+
 from prawcore.exceptions import ResponseException
 
 SUBREDDITS = [
@@ -20,6 +26,9 @@ reddit = praw.Reddit(
     password=os.environ.get("REDDIT_PW", "")
 )
 parrot = Parrot()
+dur1 = time() - start
+print(f"{dur1 / 1000:.2f} seconds to load parrot")
+start = time()
 
 
 def parse_subreddit_for_links(sr: str, limit: int = 1000) -> list:
@@ -125,6 +134,9 @@ if __name__ == "__main__":
     # txt = paraphrase_text("Carmaker Stellantis said it was suspending production at its Russian plant due to logistical difficulties and sanctions imposed on Moscow")
     from app.dl.helpers import remove_links, remove_emoji
     from app.dl.metadata import strip_useless
+
+    start = time()
+
     s = "📞: In a call with @ZelenskyyUa the @DefensieMin and I expressed our support as Russia begins a renewed offensive. 🇳🇱 will be sending heavier materiel to 🇺🇦, including armoured vehicles. Along with allies, we are looking into supplying additional heavy materiel."
     s = remove_links(s)
     s = remove_emoji(s)
@@ -175,6 +187,9 @@ https://youtu.be/OG2P0hQzCaM
     s = strip_useless(s)
     txt = paraphrase_text(s)
     print(txt)
+    dur1 = time() - start
+    print(f"{dur1 / 1000:.2f} to run paraphrasing.")
+
 
     # from app.serve.db import session_scope, Video, Theatre, ContentTag
     # from sqlalchemy import not_
