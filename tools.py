@@ -37,7 +37,7 @@ def paraphrase_text(s: str) -> str:
     return sentences
 
 
-def get_paraphrased_sentences(model, tokenizer, sentence, num_return_sequences=5, num_beams=5):
+def get_paraphrased_sentences(model, tokenizer, sentence, num_return_sequences=1, num_beams=10):
     # tokenize the text to be form of a list of token IDs
     inputs = tokenizer([sentence], truncation=True, padding="longest", return_tensors="pt")
     # generate the paraphrased sentences
