@@ -29,26 +29,10 @@ def parse_subreddit_for_links(sr: str, limit: int = 1000) -> list:
 
 
 def paraphrase_text(s: str) -> str:
-    from transformers import PegasusTokenizerFast, PegasusForConditionalGeneration
-    model = PegasusForConditionalGeneration.from_pretrained("tuner007/pegasus_paraphrase")
-    tokenizer = PegasusTokenizerFast.from_pretrained("tuner007/pegasus_paraphrase")
-
-    sentences = get_paraphrased_sentences(model, tokenizer, s)
-    return sentences
-
-
-def get_paraphrased_sentences(model, tokenizer, sentence, num_return_sequences=5, num_beams=10):
-    # tokenize the text to be form of a list of token IDs
-    inputs = tokenizer([sentence], truncation=True, padding="longest", return_tensors="pt")
-    # generate the paraphrased sentences
-    print("Generating model...")
-    outputs = model.generate(
-        **inputs,
-        num_beams=num_beams,
-        num_return_sequences=num_return_sequences,
-    )
-    # decode the generated sentences using the tokenizer to get them back to text
-    return tokenizer.batch_decode(outputs, skip_special_tokens=True)
+    from parrot import Parrot
+    parrot = Parrot()
+    results = parrot.augment(input_phrase=s)
+    return results[0] if len(results) else s
 
 
 def parse_twitter_list_for_links(twl: str, limit: int = 1000) -> list:
@@ -136,9 +120,9 @@ def clean_up_media_dir():
 
 if __name__ == "__main__":
     # parse_subreddit_for_links("ukraine")
-    txt = paraphrase_text("Carmaker Stellantis said it was suspending production at its Russian plant due to logistical difficulties and sanctions imposed on Moscow")
-    for t in txt:
-        print(t)
+    # txt = paraphrase_text("Carmaker Stellantis said it was suspending production at its Russian plant due to logistical difficulties and sanctions imposed on Moscow")
+    txt = paraphrase_text("Ukrainian authorities continue to exhume the bodies of civilians killed by Russian troops from the mass graves in the towns and villages around Kyiv.")
+    print(txt)
     # from app.serve.db import session_scope, Video, Theatre, ContentTag
     # from sqlalchemy import not_
     # from app.serve.search import index_video_data
