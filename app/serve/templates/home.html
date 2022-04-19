@@ -28,7 +28,7 @@
                             </p>
                         </span>
                         {% endif %}
-                        {% if keyword|length or search_tag or search_category %}<p class="uk-margin-small"><a href="/">Clear filter</a></p>{% endif %}
+                        {% if keyword|length or search_tag or search_category or search_theatre %}<p class="uk-margin-small"><a href="/">Clear filter</a></p>{% endif %}
                         {% if total_results > 0 %}
                             Showing {{ result_offset + 1 }} to {{ result_offset + total_results }} of {{ total }} (page {{ current_page }} of {{ max_page }})
                         {% else %}
