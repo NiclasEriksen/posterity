@@ -817,14 +817,18 @@ def strip_useless(s: str):
     for o in out_2:
         if o.lower() in IGNORED:
             s = s.replace(o, "")
+    s = s.replace("\n", " ")
     s = s.replace("\t", " ")
+    s = s.replace("@", "")
     s = s.replace("#", "")
+    s = s.replace("&amp;", "&")
+    s = s.replace("Facebook", "").replace("Twitter", "").replace("Instagram", "")
+    s = s.replace("     ", " ")
     s = s.replace("    ", " ")
     s = s.replace("   ", " ")
     s = s.replace("  ", " ")
-    s = s.replace("&amp;", "&")
     s = s.replace("\t", " ")
-    s = s.replace("Facebook", "").replace("Twitter", "").replace("Instagram", "")
+    s = s.replace("  ", " ")
     return s.lstrip().rstrip()
 
 
