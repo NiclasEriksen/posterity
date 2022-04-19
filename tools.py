@@ -123,10 +123,59 @@ def clean_up_media_dir():
 if __name__ == "__main__":
     # parse_subreddit_for_links("ukraine")
     # txt = paraphrase_text("Carmaker Stellantis said it was suspending production at its Russian plant due to logistical difficulties and sanctions imposed on Moscow")
-    txt = paraphrase_text("Ukrainian authorities continue to exhume the bodies of civilians killed by Russian troops from the mass graves in the towns and villages around Kyiv.")
+    from app.dl.helpers import remove_links, remove_emoji
+    from app.dl.metadata import strip_useless
+    s = "📞: In a call with @ZelenskyyUa the @DefensieMin and I expressed our support as Russia begins a renewed offensive. 🇳🇱 will be sending heavier materiel to 🇺🇦, including armoured vehicles. Along with allies, we are looking into supplying additional heavy materiel."
+    s = remove_links(s)
+    s = remove_emoji(s)
+    s = strip_useless(s)
+    txt = paraphrase_text(s)
     print(txt)
-    txt = paraphrase_text("📞: In a call with @ZelenskyyUa the @DefensieMin and I expressed our support as Russia begins a renewed offensive. 🇳🇱 will be sending heavier materiel to 🇺🇦, including armoured vehicles. Along with allies, we are looking into supplying additional heavy materiel.")
+    s = "Ukrainian authorities continue to exhume the bodies of civilians killed by Russian troops from the mass graves in the towns and villages around Kyiv."
+    s = remove_links(s)
+    s = remove_emoji(s)
+    s = strip_useless(s)
+    txt = paraphrase_text(s)
     print(txt)
+    s = "RU propagandist Andrey Rudenko posted a video of alleged vote in Rozovsky district of Zaporizhzhya region during which «inhabitants chose to join the DPR». RU occupants now do not even bother staging fake referendums—fake votes in what looks like a school hall suffice #StopRussia"
+    s = remove_links(s)
+    s = remove_emoji(s)
+    s = strip_useless(s)
+    txt = paraphrase_text(s)
+    print(txt)
+    s = """القلعه الملعونه في الهند .. وسر الأميره الجميله ضحية اللعنه🥺
+حلقه جديده علي قناة أسرار غامضه🔥
+لينك الحلقه👇
+https://youtu.be/OG2P0hQzCaM
+#السيسي_بيسلم_مصر #السيسى #نجلاء_عبدالعزيز #السنغال"""
+    s = remove_links(s)
+    s = remove_emoji(s)
+    s = strip_useless(s)
+    txt = paraphrase_text(s)
+    print(txt)
+    s = """Питання: Чи є повідомлення від українських військових чи уряду про те, що північнокорейські технічні радники допомагали російським військовим на Донбасі чи на російській території з питань балістичних ракет, націлюючись на Україну чи то як спостерігачі, чи як учасники?"""
+    s = remove_links(s)
+    s = remove_emoji(s)
+    s = strip_useless(s)
+    txt = paraphrase_text(s)
+    print(txt)
+    s = """Hey, 
+@twittersafety
+
+
+@Twitter
+
+
+@TwitterSupport
+, once again Ukrainian volunteer was banned for no reason which looks like a Russian bots attack. 
+@slon_hh
+ is a military volunteer and did not violate any rules. Please, unban her asap, Ukraine need her."""
+    s = remove_links(s)
+    s = remove_emoji(s)
+    s = strip_useless(s)
+    txt = paraphrase_text(s)
+    print(txt)
+
     # from app.serve.db import session_scope, Video, Theatre, ContentTag
     # from sqlalchemy import not_
     # from app.serve.search import index_video_data
