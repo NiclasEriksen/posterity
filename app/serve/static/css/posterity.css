@@ -339,6 +339,13 @@ body, html {
   box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
   z-index: 1;
 }
+.theatre-dropdown-menu {
+  background: var(--black);
+  border-radius: 6px;
+  box-shadow: 0px 12px 26px rgba(0,0,0,0.75);
+  z-index: 1;
+}
+
 
 /* Links inside the dropdown */
 .theatre-dropdown-content button {
