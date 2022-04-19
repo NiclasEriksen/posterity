@@ -126,6 +126,7 @@ def front_page():
     kw = request.args.get("q", type=str, default="")
     t = request.args.get("t", type=int, default=-1)
     c = request.args.get("c", type=int, default=-1)
+    th = request.args.get("th", type=int, default=-1)
 
     tag = None
     if t >= 0:
@@ -134,16 +135,19 @@ def front_page():
     if c >= 0:
         category = db_session.query(Category).filter_by(id=c).first()
 
-    offset = max(0, page - 1) * pp
-
-    try:
-        theatre_stub = session["theatre"]
-    except KeyError:
-        theatre_stub = "all"
-    if theatre_stub != "all":
-        theatre = db_session.query(Theatre).filter_by(stub=theatre_stub).first()
+    if th >= 0:
+        theatre = db_session.query(Theatre).filter_by(id=th).first()
     else:
-        theatre = None
+        try:
+            theatre_stub = session["theatre"]
+        except KeyError:
+            theatre_stub = "all"
+        if theatre_stub != "all":
+            theatre = db_session.query(Theatre).filter_by(stub=theatre_stub).first()
+        else:
+            theatre = None
+
+    offset = max(0, page - 1) * pp
 
     if len(kw):
         logger.info(f"Searching for {kw}.")
@@ -207,6 +211,7 @@ def front_page():
         keyword=kw,
         search_tag=tag,
         search_category=category,
+        search_theatre=theatre,
         tags=available_tags,
         categories=available_categories
     )
@@ -215,10 +220,13 @@ def front_page():
 @serve.route("/", methods=["POST"])
 def front_page_search():
     page = request.args.get("p", type=int, default=1)
+    c = request.args.get("c", type=int, default=-1)
+    t = request.args.get("t", type=int, default=-1)
+    th = request.args.get("th", type=int, default=-1)
     # pp = request.args.get("pp", type=int, default=MAX_RESULT_PER_PAGE)
     kw = request.form.get("keyword", default="")
 
-    return redirect(url_for("serve.front_page", p=page, q=kw))
+    return redirect(url_for("serve.front_page", p=page, q=kw, t=t, c=t, th=th))
 
 
 @serve.route("/<video_id>", methods=["GET"])

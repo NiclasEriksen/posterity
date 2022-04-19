@@ -1,8 +1,8 @@
 {% for t in v.theatres %}
 <span uk-tooltip="title: {{t.name}}">
-    <a href="/set_theatre/{{t.id}}"><img src="/uploaded/{{t.logo_name}}" style="max-height:16px;border-radius:2px;"></a>
+    <a href="/?th={{t.id}}{% if search_tag %}&t={{ search_tag.id }}{% endif %}{% if search_category %}&c={{ search_category.id }}{% endif %}{% if keyword|length %}&q={{ keyword }}{% endif %}"><img src="/uploaded/{{t.logo_name}}" style="max-height:16px;border-radius:2px;"></a>
 </span>
-{%endfor%}
+{% endfor %}
 {% for tag in v.tags_by_category %}
-<a href="/?t={{ tag.id }}{% if search_category %}&c={{ search_category.id }}{% endif %}{% if keyword|length %}&q={{ keyword }}{% endif %}"><span class="uk-label label-small {% if tag.category > 1 %}uk-label-danger{% elif tag.category == 1 %}uk-label-warning{% endif %}">{{ tag.name }}</span></a>
+<a href="/?t={{ tag.id }}{% if search_theatre %}&th={{search_theatre.id}}{% endif %}{% if search_category %}&c={{ search_category.id }}{% endif %}{% if keyword|length %}&q={{ keyword }}{% endif %}"><span class="uk-label label-small {% if tag.category > 1 %}uk-label-danger{% elif tag.category == 1 %}uk-label-warning{% endif %}">{{ tag.name }}</span></a>
 {% endfor %}
