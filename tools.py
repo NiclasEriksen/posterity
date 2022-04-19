@@ -27,7 +27,7 @@ reddit = praw.Reddit(
 )
 parrot = Parrot()
 dur1 = time() - start
-print(f"{dur1 / 1000:.2f} seconds to load parrot")
+print(f"{dur1:.2f} seconds to load parrot")
 start = time()
 
 
@@ -43,7 +43,17 @@ def parse_subreddit_for_links(sr: str, limit: int = 1000) -> list:
 
 def paraphrase_text(s: str) -> str:
     results = parrot.augment(input_phrase=s)
-    return results[0] if len(results) else s
+    if not results or not len(results):
+        return s
+
+    biggest = None
+    biggest_score = 0
+    for txt, score in results:
+        if score > biggest_score:
+            biggest = txt
+            biggest_score = score
+
+    return biggest if biggest else results[0][0]
 
 
 def parse_twitter_list_for_links(twl: str, limit: int = 1000) -> list:
@@ -137,18 +147,21 @@ if __name__ == "__main__":
 
     start = time()
 
+      # 'defensiemin and i expressed our support in a phone call with zelenskyyua today as russia begins a renewed offensive'
     s = "📞: In a call with @ZelenskyyUa the @DefensieMin and I expressed our support as Russia begins a renewed offensive. 🇳🇱 will be sending heavier materiel to 🇺🇦, including armoured vehicles. Along with allies, we are looking into supplying additional heavy materiel."
     s = remove_links(s)
     s = remove_emoji(s)
     s = strip_useless(s)
     txt = paraphrase_text(s)
     print(txt)
+    #   'ukrainian authorities are still exhuming the bodies of civilians killed by russian forces from the mass graves around kyiv'
     s = "Ukrainian authorities continue to exhume the bodies of civilians killed by Russian troops from the mass graves in the towns and villages around Kyiv."
     s = remove_links(s)
     s = remove_emoji(s)
     s = strip_useless(s)
     txt = paraphrase_text(s)
     print(txt)
+    #   'RU propagandist Andrey Rudenko posted a video of alleged vote in Rozovsky district of Zaporizhzhya region during which «inhabitants chose to join the DPR». RU occupants now do not even bother staging fake referendums—fake votes in what looks like a school hall suffice StopRussia'
     s = "RU propagandist Andrey Rudenko posted a video of alleged vote in Rozovsky district of Zaporizhzhya region during which «inhabitants chose to join the DPR». RU occupants now do not even bother staging fake referendums—fake votes in what looks like a school hall suffice #StopRussia"
     s = remove_links(s)
     s = remove_emoji(s)
@@ -188,7 +201,7 @@ https://youtu.be/OG2P0hQzCaM
     txt = paraphrase_text(s)
     print(txt)
     dur1 = time() - start
-    print(f"{dur1 / 1000:.2f} to run paraphrasing.")
+    print(f"{dur1:.2f} to run paraphrasing.")
 
 
     # from app.serve.db import session_scope, Video, Theatre, ContentTag
@@ -277,3 +290,4 @@ https://youtu.be/OG2P0hQzCaM
     #             log.error(e)
     #
     # return metadata
+
