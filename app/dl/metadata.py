@@ -179,7 +179,7 @@ def find_duplicate_video_by_url(url: str):
         video = db_session.query(Video).filter(Video.url.contains(url)).first()
         if video:
             return True
-        video = db_session.query(DeletedVideo).filter_by(duplicate=True).filter(Video.url.contains(url)).first()
+        video = db_session.query(DeletedVideo).filter_by(duplicate=True).filter(DeletedVideo.url.contains(url)).first()
         if video:
             return True
 
