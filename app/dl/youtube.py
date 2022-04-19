@@ -86,7 +86,7 @@ class AgeRestrictedError(Exception):
 
 def get_content_info(url: str) -> dict:
     log.info(f"Attempting to gather content info for {url}")
-    if url.lower().endswith(".mp4"):
+    if url.lower().endswith(".mp4") or url.lower().endswith(".mov"):
         log.debug(f"It's a direct mp4 link, that's nice.")
         return {
             "video_formats": {"source": {"url": url, "dimensions": (0, 0), "audio": True}},
