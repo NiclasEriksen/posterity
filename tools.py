@@ -37,7 +37,7 @@ def paraphrase_text(s: str) -> str:
     return sentences
 
 
-def get_paraphrased_sentences(model, tokenizer, sentence, num_return_sequences=1, num_beams=10):
+def get_paraphrased_sentences(model, tokenizer, sentence, num_return_sequences=10, num_beams=5):
     # tokenize the text to be form of a list of token IDs
     inputs = tokenizer([sentence], truncation=True, padding="longest", return_tensors="pt")
     # generate the paraphrased sentences
@@ -135,8 +135,9 @@ def clean_up_media_dir():
 
 if __name__ == "__main__":
     # parse_subreddit_for_links("ukraine")
-    txt = paraphrase_text("RU propagandist Andrey Rudenko posted a video of alleged vote in Rozovsky district of Zaporizhzhya region during which «inhabitants chose to join the DPR». RU occupants now do not even bother staging fake referendums—fake votes in what looks like a school hall suffice")
-    print(txt)
+    txt = paraphrase_text("Carmaker Stellantis said it was suspending production at its Russian plant due to logistical difficulties and sanctions imposed on Moscow")
+    for t in txt:
+        print(t)
     # from app.serve.db import session_scope, Video, Theatre, ContentTag
     # from sqlalchemy import not_
     # from app.serve.search import index_video_data
