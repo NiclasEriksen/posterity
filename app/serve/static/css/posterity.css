@@ -307,6 +307,9 @@ body, html {
     filter: drop-shadow(0px 0px 4px rgb(0,0,0,0.5));
     color: var(--grey);
 }
+.theatre-button:hover {
+    cursor: pointer;
+}
 .theatre-button > img:hover {
     -webkit-filter: 0px 0px 4px rgb(93,196,247,0.75);
     filter: drop-shadow(0px 0px 4px rgb(93,196,247,0.75));
