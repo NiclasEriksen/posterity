@@ -125,7 +125,7 @@ if __name__ == "__main__":
     # txt = paraphrase_text("Carmaker Stellantis said it was suspending production at its Russian plant due to logistical difficulties and sanctions imposed on Moscow")
     txt = paraphrase_text("Ukrainian authorities continue to exhume the bodies of civilians killed by Russian troops from the mass graves in the towns and villages around Kyiv.")
     print(txt)
-    txt = paraphrase_text("Ukrainian authorities continue to exhume the bodies of civilians killed by Russian troops from the mass graves in the towns and villages around Kyiv.")
+    txt = paraphrase_text("📞: In a call with @ZelenskyyUa the @DefensieMin and I expressed our support as Russia begins a renewed offensive. 🇳🇱 will be sending heavier materiel to 🇺🇦, including armoured vehicles. Along with allies, we are looking into supplying additional heavy materiel.")
     print(txt)
     # from app.serve.db import session_scope, Video, Theatre, ContentTag
     # from sqlalchemy import not_
