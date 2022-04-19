@@ -4,6 +4,8 @@ import requests
 from time import time, sleep
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
+from app.dl.helpers import remove_links, remove_tags, remove_emoji
+from app.dl.metadata import strip_useless
 
 start = time()
 
@@ -64,18 +66,22 @@ def clean_up_api_results(videos: list) -> list:
 def post_video_to_posterity(video: dict) -> bool:
     data = {
         "url": video["url"],
-        "title": video["title"],
+        "title": video["title"].capitalize(),
         "source": "fredspipa",
-        "token": "1234abcd"
+        "token": "1234abcd",
+        "download_now": False
     }
-    r = requests.post("https://www.posterity.no/api/v1/core/post_link", json=data)
-    if r.status_code == 202:
+    # r = requests.post("https://posterity.no/api/v1/core/post_link", json=data)
+    r = requests.post("http://posterity.test:5050/api/v1/core/post_link", json=data, verify=False)
+    if r.status_code == 202 or r.status_code == 200:
         print("Link posted!")
+        print(r.text)
         sleep(1)
         return True
     elif r.status_code > 400:
         print(r.text)
     else:
+        print(r.text)
         print(f"Unknown response: {r.status_code}")
 
     sleep(1)
@@ -185,10 +191,18 @@ def clean_up_media_dir():
 
 
 if __name__ == "__main__":
-    videos = parse_subreddit_for_links("ukraine", limit=10)
+    videos = parse_subreddit_for_links("ukraine", limit=30)
     videos = clean_up_api_results(videos)
+    failed = []
     for video in videos:
-        post_video_to_posterity(video)
+        success = post_video_to_posterity(video)
+        if not success:
+            failed.append(video)
+    for f in failed:
+        print("======")
+        print(f["title"])
+        print(f["url"])
+        print("======")
 
 
     # from app.serve.db import session_scope, Video, Theatre, ContentTag

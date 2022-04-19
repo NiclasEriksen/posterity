@@ -236,9 +236,7 @@ def post_link():
     else:
         data["source"] = "Anonymous"
 
-    print(data)
     data = parse_input_data(data)
-    print(data)
 
     if data and len(data.keys()):
         if "title" not in data:
