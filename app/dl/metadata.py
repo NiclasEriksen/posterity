@@ -829,6 +829,8 @@ def strip_useless(s: str):
     s = s.replace("  ", " ")
     s = s.replace("\t", " ")
     s = s.replace("  ", " ")
+    if s.startswith(":") or s.startswith(".") or s.startswith(";") or s.startswith("_"):
+        s = s[1:]
     return s.lstrip().rstrip()
 
 
