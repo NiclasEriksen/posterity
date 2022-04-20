@@ -22,7 +22,9 @@
                             {% if v.source_site_name|length %}
                             <span class="uk-icon-link" uk-icon="icon: {{ v.source_site_name }}; ratio: 0.75"></span>
                             {% endif %}
-                            <span class="uk-text-small">{{ v.url[:128] }}</span>
+                            <span class="uk-text-small">{{ v.url[:128] }}</span><br>
+                            {% set video = v %}
+                            {% include "video_status_icons.html" %}
                         </a>
                     </div>
                 </td>
@@ -46,13 +48,6 @@
                     >
                     </a>
                     </span>
-                    {% endif %}
-                    {% if v.pending_duplicates|length %}
-                    <div>
-                        <span uk-tooltip="title: Video has {{ v.duplicates|length }} possible duplicates;pos: top-left;">
-                            <span class="uk-text-warning" uk-icon="icon: copy; ratio: 1.3"></span>
-                        </span>
-                    </div>
                     {% endif %}
                 </td>
             </tr>
