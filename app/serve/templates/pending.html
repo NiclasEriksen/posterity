@@ -25,10 +25,20 @@
                             <span class="uk-text-small">{{ v.url[:128] }}</span><br>
                             {% set video = v %}
                             {% include "video_status_icons.html" %}
+                            {% if v.tags|length or v.categories|length or v.theatres|length %}
+                                <br>
+                                {% include "content_tag_list.html" %}
+                                {% include "category_tag_list.html" %}
+                            {% endif %}
                         </a>
                     </div>
                 </td>
                 <td>
+                    {% if video.user_can_edit(current_user) %}
+                    <span uk-tooltip="title: Edit video info">
+                        <a href="/edit_video/{{ v.video_id }}" class="uk-icon-button" uk-icon="icon: pencil; ratio: 1.5"></a>
+                    </span>
+                    {% endif %}
                     {% if not v.ready_to_play and v.can_be_changed %}
                     <span uk-tooltip="title: Start archiving process" id="pending-{{v.video_id}}">
                     <a
