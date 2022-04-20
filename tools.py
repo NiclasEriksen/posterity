@@ -210,7 +210,7 @@ def clean_up_media_dir():
 
 if __name__ == "__main__":
     # ukraine_videos = parse_subreddit_for_links("ukraine", limit=300)
-    yemen_videos = parse_subreddit_for_links("YemenVoice", limit=20)
+    yemen_videos = parse_subreddit_for_links("YemenVoice", limit=100)
     # cf_videos = parse_subreddit_for_links("CombatFootage", limit=300)
     # ukraine_videos = clean_up_api_results(ukraine_videos)
     yemen_videos = clean_up_api_results(yemen_videos)
