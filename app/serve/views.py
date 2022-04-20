@@ -1220,7 +1220,6 @@ def delete_video_by_id(video_id: str) -> bool:
     write_metadata_to_disk(v.video_id, v.to_json())
 
     dv = DeletedVideo(v, deleted_by=current_user.username)
-    dv.duplicate = v.has_duplicates
     db_session.add(dv)
 
     # Delete from database

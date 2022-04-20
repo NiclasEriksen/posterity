@@ -806,6 +806,7 @@ class DeletedVideo(Base):
     orig_title = Column(String, default="")
     source = Column(String, default="Unknown")
     duplicate = Column(Boolean, default=False)
+    duplicate_id = Column(String, default="")
     tags = relationship("ContentTag", secondary=tag_deleted_association_table)
     categories = relationship("Category", secondary=category_deleted_association_table)
 
@@ -818,6 +819,8 @@ class DeletedVideo(Base):
         self.source = video.source
         self.deleted_by = deleted_by
         self.delete_time = datetime.now()
+        self.duplicate = video.has_duplicates
+        self.duplicate_id = video.video_id if self.duplicate else ""
         for t in video.tags:
             self.tags.append(t)
         for t in video.categories:
