@@ -76,7 +76,7 @@ def cancel_task(task_id: str):
         return Response("Unknown error during task cancellation.")
 
 
-@core.route("/check_if_exists")
+@core.route("/check_if_exists", methods=["POST"])
 def check_if_exists_route():
     data = request.get_json()
     if data and len(data.keys()):
