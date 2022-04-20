@@ -225,7 +225,7 @@ function startDownload(video_id, btn_id="start-download-button", remove_btn=fals
         dl_old_text = dl_btn.innerHTML
         dl_btn.innerHTML = "<div uk-spinner='ratio: 0.75'></div> Starting task..."
     } else if (dl_btn && remove_btn) {
-        dl_btn.style.display = "none";
+        dl_btn.style.display = "none!important";
     }
     if (status_field) {
         status_field.textContent = "";
