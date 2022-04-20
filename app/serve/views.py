@@ -700,7 +700,7 @@ def pending_videos():
             Video.status!=STATUS_COMPLETED,
             Video.verified!=True
         )
-    ).order_by(Video.upload_time.asc()).all()
+    ).filter_by(private=False).order_by(Video.upload_time.asc()).all()
     pending_videos = [d for d in pending_videos if d.user_can_see(current_user)]
     return render_template("pending.html", pending_videos=pending_videos)
 
