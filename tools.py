@@ -48,13 +48,7 @@ def parse_subreddit_for_links(sr: str, limit: int = 10) -> list:
 
 
 def clean_up_api_results(videos: list) -> list:
-    session = requests.Session()  # so connections are recycled
     for video in videos:
-        try:
-            resp = session.head(minimize_url(video["url"]), allow_redirects=True)
-            video["url"] = resp.url
-        except Exception as e:
-            print(e)
         orig_title = video["title"]
         cleaned = clean_up_text(video["title"])
         sentences = [s.rstrip().lstrip() for s in cleaned.split(".")]
@@ -75,10 +69,30 @@ def clean_up_api_results(videos: list) -> list:
 
 
 def check_if_video_is_posted(url: str) -> bool:
-    r = requests.post("https://posterity.no/api/v1/core/check_if_exists", json={"url": url})
-    if r.status_code == 200:
-        data = r.json()
-        print(data)
+    try:
+        r = requests.post("https://posterity.no/api/v1/core/check_if_exists", json={"url": url})
+        if r.status_code == 200:
+            data = r.json()
+            if data and "result" in data.keys():
+                if data["result"] == True:
+                    print("Video was already posted, skipping.")
+                return data["result"]
+    except Exception as e:
+        print(e)
+
+    return False
+
+
+def resolve_urls(videos: list) -> list:
+    session = requests.Session()  # so connections are recycled
+    for video in videos:
+        try:
+            resp = session.head(minimize_url(video["url"]), allow_redirects=True)
+            video["url"] = resp.url
+        except Exception as e:
+            print(e)
+
+    return videos
 
 
 def post_video_to_posterity(video: dict, theatre="all") -> bool:
@@ -90,7 +104,7 @@ def post_video_to_posterity(video: dict, theatre="all") -> bool:
         "theatre": theatre,
         "download_now": False
     }
-    r = requests.post("https://posterity.no/api/v1/core/post_link", json=data, verify=False)
+    r = requests.post("https://posterity.no/api/v1/core/post_link", json=data)
     # r = requests.post("http://posterity.test:5050/api/v1/core/post_link", json=data, verify=False)
     if r.status_code == 202 or r.status_code == 200:
         print("Link posted!")
@@ -216,12 +230,62 @@ def clean_up_media_dir():
 
 
 if __name__ == "__main__":
-    ukraine_videos = parse_subreddit_for_links("ukraine", limit=300)
-    yemen_videos = parse_subreddit_for_links("YemenVoice", limit=1000)
-    cf_videos = parse_subreddit_for_links("CombatFootage", limit=500)
+    print("Parsing subreddits...")
+
+    reddit_ukraine_videos = parse_subreddit_for_links("ukraine", limit=300)
+    reddit_yemen_videos = parse_subreddit_for_links("YemenVoice", limit=300)
+    reddit_israel_videos = parse_subreddit_for_links("IsraelCrimes", limit=300)
+    reddit_israel_videos += parse_subreddit_for_links("Palestine", limit=300)
+    reddit_cf_videos = parse_subreddit_for_links("CombatFootage", limit=300)
+
+    print("Resolving URLs")
+
+    reddit_ukraine_videos = resolve_urls(reddit_ukraine_videos)
+    reddit_yemen_videos = resolve_urls(reddit_yemen_videos)
+    reddit_israel_videos = resolve_urls(reddit_israel_videos)
+    reddit_cf_videos = resolve_urls(reddit_cf_videos)
+
+    print("Checking if links are posted...")
+
+    ukraine_videos = []
+    yemen_videos = []
+    israel_videos = []
+    cf_videos = []
+    for v in reddit_ukraine_videos:
+        if check_if_video_is_posted(v["url"]):
+            print(f"Skipping \"{v['title']}\"")
+            continue
+        ukraine_videos.append(v)
+    for v in reddit_yemen_videos:
+        if check_if_video_is_posted(v["url"]):
+            print(f"Skipping \"{v['title']}\"")
+            continue
+        yemen_videos.append(v)
+    for v in reddit_israel_videos:
+        if check_if_video_is_posted(v["url"]):
+            print(f"Skipping \"{v['title']}\"")
+            continue
+        israel_videos.append(v)
+    for v in reddit_cf_videos:
+        if check_if_video_is_posted(v["url"]):
+            print(f"Skipping \"{v['title']}\"")
+            continue
+        cf_videos.append(v)
+
+    # ukraine_videos = [v for v in ukraine_videos if not check_if_video_is_posted(v["url"])]
+    # yemen_videos = [v for v in yemen_videos if not check_if_video_is_posted(v["url"])]
+    # israel_videos = [v for v in israel_videos if not check_if_video_is_posted(v["url"])]
+    # cf_videos = [v for v in cf_videos if not check_if_video_is_posted(v["url"])]
+
+    print("Cleaning up results...")
+
     ukraine_videos = clean_up_api_results(ukraine_videos)
     yemen_videos = clean_up_api_results(yemen_videos)
+    israel_videos = clean_up_api_results(israel_videos)
     cf_videos = clean_up_api_results(cf_videos)
+
+    print("Done cleaning, posting links...")
+
     failed = []
     for video in ukraine_videos:
         success = post_video_to_posterity(video, theatre="ukraine_war")
@@ -229,6 +293,10 @@ if __name__ == "__main__":
             failed.append(video)
     for video in yemen_videos:
         success = post_video_to_posterity(video, theatre="yemeni_civil_war")
+        if not success:
+            failed.append(video)
+    for video in israel_videos:
+        success = post_video_to_posterity(video, theatre="palestine")
         if not success:
             failed.append(video)
     for video in cf_videos:

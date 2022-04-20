@@ -88,7 +88,6 @@ def check_if_exists_route():
     return jsonify({"result": True})
 
 
-
 @core.route("/desc_from_source/<video_id>")
 @login_required
 @limiter.limit("10/minute", override_defaults=False, exempt_when=lambda: current_user.is_editor)

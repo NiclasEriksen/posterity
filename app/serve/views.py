@@ -140,6 +140,7 @@ def front_page():
     t = request.args.get("t", type=int, default=-1)
     c = request.args.get("c", type=int, default=-1)
     th = request.args.get("th", type=int, default=-1)
+    no_theatre = request.args.get("unspecified", type=int, default=0)
 
     tag = None
     if t >= 0:
@@ -148,9 +149,10 @@ def front_page():
     if c >= 0:
         category = db_session.query(Category).filter_by(id=c).first()
 
+    theatre = None
     if th >= 0:
         theatre = db_session.query(Theatre).filter_by(id=th).first()
-    else:
+    elif not no_theatre:
         try:
             theatre_stub = session["theatre"]
         except KeyError:
@@ -191,10 +193,10 @@ def front_page():
         total -= removed
 
     else:
-
         vq = db_session.query(Video).filter(Video.status!=STATUS_PENDING)
-
-        if theatre:
+        if no_theatre:
+            vq = vq.filter(not_(Video.theatres.any()))
+        elif theatre:
             vq = vq.filter(Video.theatres.any(id=theatre.id))
         if category:
             vq = vq.filter(Video.categories.any(id=category.id))
@@ -206,7 +208,10 @@ def front_page():
         )
         all_videos = [v for v in vq.all() if v.user_can_see(current_user)]
         total = len(all_videos)
-        videos = all_videos[offset: offset + MAX_RESULT_PER_PAGE]
+        if no_theatre:
+            videos = all_videos
+        else:
+            videos = all_videos[offset: offset + MAX_RESULT_PER_PAGE]
 
     total_pages = total // pp + (1 if total % pp else 0)
 
