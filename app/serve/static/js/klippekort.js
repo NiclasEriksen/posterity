@@ -216,14 +216,16 @@ function suggestDescription(video_id) {
 }
 
 
-function startDownload(video_id) {
-    var dl_btn = document.getElementById("start-download-button");
+function startDownload(video_id, btn_id="start-download-button", remove_btn=false, redir=true) {
+    var dl_btn = document.getElementById(btn_id);
     var status_field = document.getElementById("video-download-status");
     var dl_old_text = "";
-    if (dl_btn) {
+    if (dl_btn && !remove_btn)  {
         dl_btn.disabled = true;
         dl_old_text = dl_btn.innerHTML
         dl_btn.innerHTML = "<div uk-spinner='ratio: 0.75'></div> Starting task..."
+    } else if (dl_btn && remove_btn) {
+        dl_btn.style.display = "none";
     }
     if (status_field) {
         status_field.textContent = "";
@@ -234,16 +236,28 @@ function startDownload(video_id) {
     request.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
     request.onload = function() {
         if (this.status == 201) {
-            window.location.href = '/' + video_id;
+            if (redir) {
+                window.location.href = '/' + video_id;
+            } else {
+                return;
+            }
         } else if (this.status >= 400 && this.status < 500) {
-            dl_btn.disabled = false;
-            dl_btn.innerHTML = dl_old_text;
+            if (dl_btn && !remove_btn) {
+                dl_btn.disabled = false;
+                dl_btn.innerHTML = dl_old_text;
+            } else if (dl_btn && remove_btn) {
+                dl_btn.style.display = "block";
+            }
             if (status_field && this.response.length < 1000) {
                 status_field.innerHTML = '<span class="uk-text-danger">' + this.response + '</span>';
             }
         } else {
-            dl_btn.disabled = false;
-            dl_btn.innerHTML = dl_old_text;
+            if (dl_btn && !remove_btn) {
+                dl_btn.disabled = false;
+                dl_btn.innerHTML = dl_old_text;
+            } else if (dl_btn && remove_btn) {
+                dl_btn.style.display = "block";
+            }
             if (status_field) {
                 status_field.innerHTML = '<span class="uk-text-warning">Unknown server error :(</span>';
             }
@@ -252,8 +266,12 @@ function startDownload(video_id) {
     }
     request.onerror = function(err) {
         console.error(err);
-        dl_btn.disabled = false;
-        dl_btn.innerHTML = dl_old_text;
+        if (dl_btn && !remove_btn) {
+            dl_btn.disabled = false;
+            dl_btn.innerHTML = dl_old_text;
+        } else if (dl_btn && remove_btn) {
+            dl_btn.style.display = "block";
+        }
         if (status_field) {
             status_field.innerHTML = '<span class="uk-text-danger">Unknown error when contacting server.</span>';
         }

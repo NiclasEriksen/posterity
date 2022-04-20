@@ -51,8 +51,8 @@
                 <div class="uk-text-small uk-text-muted uk-container uk-height-1-1">
                     <div class="uk-grid uk-grid-small uk-height-1-1">
                         <div class="uk-width-expand">
-                            <div class="uk-navbar-center uk-height-1-1 uk-text-center uk-flex uk-flex-center" style="width:100%;">
-                                <ul class="uk-iconnav">
+                            <div class="uk-navbar-center uk-height-1-1 uk-text-center uk-flex uk-flex-center" style="width:100%; min-width:200px;">
+                                <ul class="uk-iconnav" style="white-space: nowrap; flex-wrap: nowrap;">
                                     <li{% if request.path == "/about" %} class="uk-active"{% endif %}>
                                         <a href="/about" uk-icon="icon: info">About </a>
                                     </li>
@@ -71,6 +71,14 @@
                 </div>
             </div>
             <div class="uk-width-1-3 uk-padding-remove uk-height-1-1 uk-position-relative">
+                {% if pending_count > 0 %}
+                <div class="uk-position-absolute" style="right:150px; top: 25%;">
+                    <a href="/pending">
+                        <span class="uk-text-warning" uk-icon="icon: clock; ratio: 0.9"></span>
+                        <sup><b>{{ pending_count }}</b></sup>
+                    </a>
+                </div>
+                {% endif %}
                 <span class="uk-position-center-right uk-align-right uk-text-small uk-text-muted uk-visible@s">
                     {% if current_user.is_authenticated %}
                     <span class="uk-visible@m">Editor: {{ current_user.username }} </span><a href="/logout?next={{ request.path }}" uk-icon="icon: sign-out;" class="uk-text-muted uk-icon-link uk-icon-button"></a>

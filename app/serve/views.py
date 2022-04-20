@@ -75,6 +75,14 @@ def before_request_func():
 
 
 @serve.context_processor
+def inject_pending_count():
+    if current_user.check_auth(AUTH_LEVEL_EDITOR):
+        pending = db_session.query(Video).filter_by(status=STATUS_PENDING).count()
+        return dict(pending_count=pending)
+    return dict(pending_count=0)
+
+
+@serve.context_processor
 def inject_theatre_object():
     theaters = db_session.query(Theatre).all()
     theaters = sorted(theaters, key=lambda x: x.video_count, reverse=True)
@@ -179,7 +187,7 @@ def front_page():
 
     else:
 
-        vq = db_session.query(Video)
+        vq = db_session.query(Video).filter(Video.status!=STATUS_PENDING)
 
         if theatre:
             vq = vq.filter(Video.theatres.any(id=theatre.id))
@@ -665,6 +673,17 @@ def confirm_delete_route(video_id: str):
         action_description=f"Delete video with id \"{video_id}\""
     )
 
+
+@serve.route("/pending")
+@login_required
+def pending_videos():
+    if not current_user.check_auth(AUTH_LEVEL_EDITOR):
+        flash("You don't have permission to view pending videos, sorry.", "error")
+        return redirect(url_for("serve.front_page"))
+
+    pending_videos = db_session.query(Video).filter_by(status=STATUS_PENDING).order_by(Video.upload_time.desc()).all()
+    pending_videos = [d for d in pending_videos if d.user_can_see(current_user)]
+    return render_template("pending.html", pending_videos=pending_videos)
 
 
 @serve.route("/restore/<video_id>")
