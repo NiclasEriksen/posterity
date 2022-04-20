@@ -22,7 +22,7 @@
                             {% if v.source_site_name|length %}
                             <span class="uk-icon-link" uk-icon="icon: {{ v.source_site_name }}; ratio: 0.75"></span>
                             {% endif %}
-                            {{ v.url[:128] }}
+                            <span class="uk-text-small">{{ v.url[:128] }}</span>
                         </a>
                     </div>
                 </td>
