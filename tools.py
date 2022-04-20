@@ -57,7 +57,12 @@ def clean_up_api_results(videos: list) -> list:
             print(e)
         orig_title = video["title"]
         cleaned = clean_up_text(video["title"])
-        video["title"] = paraphrase_text(cleaned)
+        sentences = [s.rstrip().lstrip() for s in cleaned.split(".")]
+        paraphrased = []
+        for s in sentences:
+            paraphrased.append(paraphrase_text(s))
+        title = ". ".join([s for s in paraphrased if len(s)])
+        video["title"] = title
         print("========================")
         print("Original:")
         print(orig_title)
@@ -69,12 +74,13 @@ def clean_up_api_results(videos: list) -> list:
     return videos
 
 
-def post_video_to_posterity(video: dict) -> bool:
+def post_video_to_posterity(video: dict, theatre="all") -> bool:
     data = {
         "url": video["url"],
         "title": video["title"].capitalize(),
         "source": "fredspipa",
         "token": "1234abcd",
+        "theatre": theatre,
         "download_now": False
     }
     r = requests.post("https://posterity.no/api/v1/core/post_link", json=data, verify=False)
@@ -203,13 +209,25 @@ def clean_up_media_dir():
 
 
 if __name__ == "__main__":
-    videos = parse_subreddit_for_links("ukraine", limit=1000)
-    videos = clean_up_api_results(videos)
+    # ukraine_videos = parse_subreddit_for_links("ukraine", limit=300)
+    yemen_videos = parse_subreddit_for_links("YemenVoice", limit=20)
+    # cf_videos = parse_subreddit_for_links("CombatFootage", limit=300)
+    # ukraine_videos = clean_up_api_results(ukraine_videos)
+    yemen_videos = clean_up_api_results(yemen_videos)
+    # cf_videos = clean_up_api_results(cf_videos)
     failed = []
-    for video in videos:
-        success = post_video_to_posterity(video)
+    # for video in ukraine_videos:
+    #     success = post_video_to_posterity(video, theatre="ukraine_war")
+    #     if not success:
+    #         failed.append(video)
+    for video in yemen_videos:
+        success = post_video_to_posterity(video, theatre="yemeni_civil_war")
         if not success:
             failed.append(video)
+    # for video in cf_videos:
+    #     success = post_video_to_posterity(video)
+    #     if not success:
+    #         failed.append(video)
 
     print("________________________")
     print("FAILED:")
