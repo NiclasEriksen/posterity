@@ -77,7 +77,12 @@ def before_request_func():
 @serve.context_processor
 def inject_pending_count():
     if current_user.check_auth(AUTH_LEVEL_EDITOR):
-        pending = db_session.query(Video).filter_by(status=STATUS_PENDING).count()
+        pending = db_session.query(Video).filter(
+            or_(
+                Video.status!=STATUS_COMPLETED,
+                Video.verified!=True
+            )
+        ).filter_by(private=False).count()
         return dict(pending_count=pending)
     return dict(pending_count=0)
 
@@ -258,8 +263,17 @@ def serve_video(video_id):
     video = Video.query.filter_by(video_id=video_id).first()
 
     if not video:
-        logger.error("Video was not found.")
-        return render_template("not_found.html")
+        dv = DeletedVideo.query.filter_by(duplicate=True).filter_by(video_id=video_id).first()
+        if not dv:
+            logger.error("Video was not found.")
+            return render_template("not_found.html")
+        video = Video.query.filter_by(video_id=dv.duplicate_id).first()
+        if not video:
+            logger.error("Video was not found.")
+            return render_template("not_found.html")
+        else:
+            flash("That video was a duplicate, redirecting to the other version.")
+            return redirect(url_for("serve.serve_video", video_id=video.video_id))
 
     try:
         results = recommend_videos(video, size=MAX_RELATED_VIDEOS * 2)
@@ -681,7 +695,12 @@ def pending_videos():
         flash("You don't have permission to view pending videos, sorry.", "error")
         return redirect(url_for("serve.front_page"))
 
-    pending_videos = db_session.query(Video).filter_by(status=STATUS_PENDING).order_by(Video.upload_time.desc()).all()
+    pending_videos = db_session.query(Video).filter(
+        or_(
+            Video.status!=STATUS_COMPLETED,
+            Video.verified!=True
+        )
+    ).order_by(Video.upload_time.desc()).all()
     pending_videos = [d for d in pending_videos if d.user_can_see(current_user)]
     return render_template("pending.html", pending_videos=pending_videos)
 

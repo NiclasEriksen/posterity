@@ -27,15 +27,31 @@
                     </div>
                 </td>
                 <td>
-                    <span uk-tooltip="title: Start archiving process">
+                    {% if not v.ready_to_play and v.can_be_changed %}
+                    <span uk-tooltip="title: Start archiving process" id="pending-{{v.video_id}}">
                     <a
                         class="uk-icon-button uk-text-success"
                         uk-icon="icon: cloud-download; ratio: 1.3"
-                        onclick="startDownload('{{ v.video_id }}', remove_btn=true, btn_id='pending-{{v.video_id}}', redir=false)"
-                        id="pending-{{v.video_id}}"
+                        onclick="startDownload('{{ v.video_id }}', btn_id='pending-{{v.video_id}}', remove_btn=true, redir=false)"
                     >
                     </a>
                     </span>
+                    {% endif %}
+                    {% if v.status == STATUS_COMPLETED and v.user_can_edit(current_user) and not v.post_processed %}
+                    <span uk-tooltip="title: Post-process video" id="process-{{v.video_id}}">
+                    <a
+                        class="uk-icon-button {% if v.recommend_post_process %}uk-text-success recommended-action{% else %}uk-text-secondary{% endif %}"
+                        uk-icon="icon: move; ratio: 1.3"
+                        onclick="startProcessing('{{ v.video_id }}', btn_id='process-{{v.video_id}}', remove_btn=true, redir=false);"
+                    >
+                    </a>
+                    </span>
+                    {% endif %}
+                    {% if v.pending_duplicates|length %}
+                    <span uk-tooltip="title: Video has {{ v.duplicates|length }} possible duplicates;pos: top-left;">
+                        <span class="uk-text-warning" uk-icon="icon: copy; ratio: 1.3"></span>
+                    </span>
+                    {% endif %}
                 </td>
             </tr>
             {% endfor %}
