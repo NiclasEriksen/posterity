@@ -74,6 +74,13 @@ def clean_up_api_results(videos: list) -> list:
     return videos
 
 
+def check_if_video_is_posted(url: str) -> bool:
+    r = requests.post("https://posterity.no/api/v1/core/check_if_exists", json={"url": url})
+    if r.status_code == 200:
+        data = r.json()
+        print(data)
+
+
 def post_video_to_posterity(video: dict, theatre="all") -> bool:
     data = {
         "url": video["url"],
@@ -209,25 +216,25 @@ def clean_up_media_dir():
 
 
 if __name__ == "__main__":
-    # ukraine_videos = parse_subreddit_for_links("ukraine", limit=300)
-    yemen_videos = parse_subreddit_for_links("YemenVoice", limit=100)
-    # cf_videos = parse_subreddit_for_links("CombatFootage", limit=300)
-    # ukraine_videos = clean_up_api_results(ukraine_videos)
+    ukraine_videos = parse_subreddit_for_links("ukraine", limit=300)
+    yemen_videos = parse_subreddit_for_links("YemenVoice", limit=1000)
+    cf_videos = parse_subreddit_for_links("CombatFootage", limit=500)
+    ukraine_videos = clean_up_api_results(ukraine_videos)
     yemen_videos = clean_up_api_results(yemen_videos)
-    # cf_videos = clean_up_api_results(cf_videos)
+    cf_videos = clean_up_api_results(cf_videos)
     failed = []
-    # for video in ukraine_videos:
-    #     success = post_video_to_posterity(video, theatre="ukraine_war")
-    #     if not success:
-    #         failed.append(video)
+    for video in ukraine_videos:
+        success = post_video_to_posterity(video, theatre="ukraine_war")
+        if not success:
+            failed.append(video)
     for video in yemen_videos:
         success = post_video_to_posterity(video, theatre="yemeni_civil_war")
         if not success:
             failed.append(video)
-    # for video in cf_videos:
-    #     success = post_video_to_posterity(video)
-    #     if not success:
-    #         failed.append(video)
+    for video in cf_videos:
+        success = post_video_to_posterity(video)
+        if not success:
+            failed.append(video)
 
     print("________________________")
     print("FAILED:")

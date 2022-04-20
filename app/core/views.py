@@ -2,7 +2,7 @@ import os
 import signal
 import requests
 import redis
-from flask import Blueprint, current_app, request, abort, Response
+from flask import Blueprint, current_app, request, abort, Response, jsonify
 from flask_login import current_user, login_required
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
@@ -74,6 +74,19 @@ def cancel_task(task_id: str):
     except Exception as e:
         logger.error(e)
         return Response("Unknown error during task cancellation.")
+
+
+@core.route("/check_if_exists")
+def check_if_exists_route():
+    data = request.get_json()
+    if data and len(data.keys()):
+        if "url" in data:
+            url = minimize_url(data["url"])
+            if find_duplicate_video_by_url(url):
+                return jsonify({"result": True})
+            return jsonify({"result": False})
+    return jsonify({"result": True})
+
 
 
 @core.route("/desc_from_source/<video_id>")
