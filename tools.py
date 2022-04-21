@@ -236,14 +236,14 @@ if __name__ == "__main__":
     reddit_yemen_videos = parse_subreddit_for_links("YemenVoice", limit=300)
     reddit_israel_videos = parse_subreddit_for_links("IsraelCrimes", limit=300)
     reddit_israel_videos += parse_subreddit_for_links("Palestine", limit=300)
-    reddit_cf_videos = parse_subreddit_for_links("CombatFootage", limit=300)
+    # reddit_cf_videos = parse_subreddit_for_links("CombatFootage", limit=300)
 
     print("Resolving URLs")
 
     reddit_ukraine_videos = resolve_urls(reddit_ukraine_videos)
     reddit_yemen_videos = resolve_urls(reddit_yemen_videos)
     reddit_israel_videos = resolve_urls(reddit_israel_videos)
-    reddit_cf_videos = resolve_urls(reddit_cf_videos)
+    # reddit_cf_videos = resolve_urls(reddit_cf_videos)
 
     print("Checking if links are posted...")
 
@@ -266,11 +266,11 @@ if __name__ == "__main__":
             print(f"Skipping \"{v['title']}\"")
             continue
         israel_videos.append(v)
-    for v in reddit_cf_videos:
-        if check_if_video_is_posted(v["url"]):
-            print(f"Skipping \"{v['title']}\"")
-            continue
-        cf_videos.append(v)
+    # for v in reddit_cf_videos:
+    #     if check_if_video_is_posted(v["url"]):
+    #         print(f"Skipping \"{v['title']}\"")
+    #         continue
+    #     cf_videos.append(v)
 
     # ukraine_videos = [v for v in ukraine_videos if not check_if_video_is_posted(v["url"])]
     # yemen_videos = [v for v in yemen_videos if not check_if_video_is_posted(v["url"])]
@@ -282,7 +282,7 @@ if __name__ == "__main__":
     ukraine_videos = clean_up_api_results(ukraine_videos)
     yemen_videos = clean_up_api_results(yemen_videos)
     israel_videos = clean_up_api_results(israel_videos)
-    cf_videos = clean_up_api_results(cf_videos)
+    # cf_videos = clean_up_api_results(cf_videos)
 
     print("Done cleaning, posting links...")
 
@@ -299,10 +299,10 @@ if __name__ == "__main__":
         success = post_video_to_posterity(video, theatre="palestine")
         if not success:
             failed.append(video)
-    for video in cf_videos:
-        success = post_video_to_posterity(video)
-        if not success:
-            failed.append(video)
+    # for video in cf_videos:
+    #     success = post_video_to_posterity(video)
+    #     if not success:
+    #         failed.append(video)
 
     print("________________________")
     print("FAILED:")
