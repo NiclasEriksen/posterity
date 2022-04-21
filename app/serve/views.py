@@ -340,6 +340,7 @@ def edit_video_page(video_id: str):
     available_tags = ContentTag.query.order_by(ContentTag.category.desc(), ContentTag.name).all()
     available_categories = Category.query.order_by(Category.name).all()
     available_theatres = Theatre.query.order_by(Theatre.id).all()
+    available_theatres = sorted(available_theatres, key=lambda x: x.video_count)
 
     for at in available_tags:
         if at in video.tags:
