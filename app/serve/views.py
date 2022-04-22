@@ -814,7 +814,9 @@ def clear_report_route(report_id):
 @login_required
 def handle_duplicate_route(video_id1, video_id2):
     if not current_user.check_auth(AUTH_LEVEL_EDITOR):
-        return render_template("not_found.html")
+        flash("You don't have permissions to handle deleting duplicates!", "error")
+        return redirect(url_for("serve.front_page"))
+
     video1 = db_session.query(Video).filter_by(video_id=video_id1).first()
     video2 = db_session.query(Video).filter_by(video_id=video_id2).first()
     if not video1 or not video2:

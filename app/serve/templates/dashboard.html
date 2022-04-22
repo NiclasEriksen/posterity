@@ -88,11 +88,13 @@
                             >
                                 False positive <span uk-icon="icon: warning; ratio: 0.75;"></span>
                             </a><br>
+                            {% if current_user.check_auth(AUTH_LEVEL_EDITOR) %}
                             <a class="uk-text-danger"
                                href="/handle_duplicates/{{ v1.video_id }}/{{ v2.video_id }}"
                             >
                                 Handle duplicates <span uk-icon="icon: copy; ratio: 0.75"></span>
                             </a>
+                            {% endif %}
                         </td>
                         <td>
                             <div class="list-thumbnail uk-position-relative" style="display: table-cell;">
