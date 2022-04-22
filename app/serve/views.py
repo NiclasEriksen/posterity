@@ -658,6 +658,7 @@ def about_us_page():
 def remove_video_route(video_id):
     video = db_session.query(Video).filter_by(video_id=video_id).first()
 
+
     if video:
         if not video.user_can_edit(current_user):
             flash("You don't have permission to remove that video.", "error")
@@ -690,7 +691,7 @@ def confirm_delete_route(video_id: str):
     return render_template(
         "confirm_action.html",
         video=video,
-        action_description=f"Delete video with id \"{video_id}\""
+        action_description=f"Delete video with id \"{video_id}\"",
     )
 
 

@@ -1,6 +1,7 @@
 import os
 import praw
 import requests
+import socket
 from time import time, sleep
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
@@ -13,7 +14,7 @@ start = time()
 import dotenv
 dotenv.load_dotenv()
 
-
+socket.setdefaulttimeout(10)
 from prawcore.exceptions import ResponseException
 
 SUBREDDITS = [
@@ -71,27 +72,33 @@ def clean_up_api_results(videos: list) -> list:
     return videos
 
 
-def check_if_video_is_posted(url: str) -> bool:
+def remove_posted_videos(videos: list) -> list:
+    result = {}
     try:
-        r = requests.post("https://posterity.no/api/v1/core/check_if_exists", json={"url": url}, timeout=30, verify=False)
+        r = requests.post("https://posterity.no/api/v1/core/check_if_exists", json={"videos": videos}, timeout=30)
         if r.status_code == 200:
             data = r.json()
-            if data and "result" in data.keys():
-                if data["result"] == True:
-                    return True
-                return False
+            if data and len(data.keys()):
+                result = data
     except Exception as e:
         print(e)
+        return videos
 
-    return False
+    ok_videos = []
+    for v in videos:
+        if v.url in result:
+            if result[v.url]:
+                continue
+        ok_videos.append(v)
+    return ok_videos
 
 
 def resolve_urls(videos: list) -> list:
-    for video in videos:
+    for v in videos:
         session = requests.Session()  # so connections are recycled
         try:
-            resp = session.head(minimize_url(video["url"]), allow_redirects=True, timeout=20)
-            video["url"] = resp.url
+            resp = session.head(minimize_url(v["url"]), allow_redirects=True, timeout=20)
+            v["url"] = resp.url
         except Exception as e:
             print(e)
 
@@ -243,37 +250,38 @@ if __name__ == "__main__":
     }
     videos = all_videos.copy()
 
-    all_videos["ukraine_war"] += parse_subreddit_for_links("ukraine", limit=100)
+    #all_videos["ukraine_war"] += parse_subreddit_for_links("ukraine", limit=100)
     all_videos["ukraine_war"] += parse_subreddit_for_links("UkraineWarVideoReport", limit=100)
-    all_videos["yemeni_civil_war"] += parse_subreddit_for_links("YemenVoice", limit=100)
-    all_videos["palestine"] += parse_subreddit_for_links("IsraelCrimes", limit=100)
-    all_videos["palestine"] += parse_subreddit_for_links("Palestine", limit=100)
-    all_videos["kurdish-turkish_conflict"] = parse_subreddit_for_links("kurdistan", limit=200)
+    all_videos["yemeni_civil_war"] += parse_subreddit_for_links("YemenVoice", limit=50)
+    all_videos["palestine"] += parse_subreddit_for_links("IsraelCrimes", limit=50)
+    #all_videos["palestine"] += parse_subreddit_for_links("Palestine", limit=50)
+    all_videos["kurdish-turkish_conflict"] = parse_subreddit_for_links("kurdistan", limit=10)
 
     print("Resolving URLs")
 
     for stub, video_list in all_videos.items():
+        print(f"Resolving urls for '{stub}'")
         all_videos[stub] = resolve_urls(video_list)
 
     print("Checking if links are posted...")
     for stub, video_list in all_videos.items():
-        for v in video_list:
-            if check_if_video_is_posted(v["url"]):
-                print(f"Skipping \"{v['title']}\"")
-                continue
-            videos[stub].append(v)
+        videos[stub] = remove_posted_videos(video_list)
 
     print("Cleaning up results...")
     for k, v in videos.items():
         videos[k] = clean_up_api_results(v)
 
     print("Done cleaning, posting links...")
+    print("==========================")
 
     failed = []
-    for stub, video in videos.items():
-        success = post_video_to_posterity(video, theatre=stub)
-        if not success:
-            failed.append(video)
+    for stub, video_list in videos.items():
+        for v in video_list:
+            print("-------------------------")
+            print(f"Posting {v.title}")
+            success = post_video_to_posterity(v, theatre=stub)
+            if not success:
+                failed.append(v)
 
     print("________________________")
     print("FAILED:")

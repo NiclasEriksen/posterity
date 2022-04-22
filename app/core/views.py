@@ -79,13 +79,18 @@ def cancel_task(task_id: str):
 @core.route("/check_if_exists", methods=["POST"])
 def check_if_exists_route():
     data = request.get_json()
+    urls = {}
     if data and len(data.keys()):
-        if "url" in data:
-            url = minimize_url(data["url"])
-            if find_duplicate_video_by_url(url):
-                return jsonify({"result": True})
-            return jsonify({"result": False})
-    return jsonify({"result": True})
+        if "videos" in data:
+            urls = {v["url"]: False for v in data["videos"]}
+        elif "url" in data:
+            urls = {data["url"]: False}
+
+        for url, _v in urls.items():
+            urlm = minimize_url(url)
+            urls[url] = find_duplicate_video_by_url(urlm)
+
+    return jsonify(urls)
 
 
 @core.route("/desc_from_source/<video_id>")
