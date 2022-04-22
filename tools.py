@@ -9,7 +9,7 @@ from app.dl.metadata import strip_useless
 
 start = time()
 
-from parrot import Parrot
+# from parrot import Parrot
 import dotenv
 dotenv.load_dotenv()
 
@@ -28,7 +28,7 @@ reddit = praw.Reddit(
     username=os.environ.get("REDDIT_USER", ""),
     password=os.environ.get("REDDIT_PW", "")
 )
-parrot = Parrot(model_tag="prithivida/parrot_paraphraser_on_T5")
+# parrot = Parrot(model_tag="prithivida/parrot_paraphraser_on_T5")
 dur1 = time() - start
 print(f"{dur1:.2f} seconds to load parrot")
 start = time()
@@ -50,12 +50,12 @@ def parse_subreddit_for_links(sr: str, limit: int = 10) -> list:
 def clean_up_api_results(videos: list) -> list:
     for video in videos:
         orig_title = video["title"]
-        cleaned = clean_up_text(video["title"])
-        sentences = [s.rstrip().lstrip() for s in cleaned.split(".")]
-        paraphrased = []
-        for s in sentences:
-            paraphrased.append(paraphrase_text(s))
-        title = ". ".join([s for s in paraphrased if len(s)])
+        title = clean_up_text(video["title"])
+        # sentences = [s.rstrip().lstrip() for s in cleaned.split(".")]
+        # paraphrased = []
+        # for s in sentences:
+        #     paraphrased.append(paraphrase_text(s))
+        # title = ". ".join([s for s in paraphrased if len(s)])
         if len(title):
             video["title"] = title
         else:
@@ -64,9 +64,9 @@ def clean_up_api_results(videos: list) -> list:
         print("Original:")
         print(orig_title)
         print("Cleaned:")
-        print(cleaned)
-        print("Paraphrased:")
-        print(video["title"])
+        print(title)
+        # print("Paraphrased:")
+        # print(video["title"])
         print("========================")
     return videos
 
@@ -128,23 +128,23 @@ def clean_up_text(data: str) -> str:
     return strip_useless(remove_emoji(remove_links(remove_tags(data))))
 
 
-def paraphrase_text(s: str) -> str:
-    results = parrot.augment(s, use_gpu=False, do_diverse=True, max_length=256, fluency_threshold=0.75, adequacy_threshold=0.75)
-    if not results or not len(results):
-        return s
-
-    if isinstance(results, str):
-        return results
-    elif isinstance(results, list) and len(results):
-        biggest = ""
-        biggest_score = 0
-        for txt, score in results:
-            if score > biggest_score:
-                biggest = txt
-                biggest_score = score
-        return biggest if biggest else results[0][0]
-
-    return s
+# def paraphrase_text(s: str) -> str:
+#     results = parrot.augment(s, use_gpu=False, do_diverse=True, max_length=256, fluency_threshold=0.75, adequacy_threshold=0.75)
+#     if not results or not len(results):
+#         return s
+#
+#     if isinstance(results, str):
+#         return results
+#     elif isinstance(results, list) and len(results):
+#         biggest = ""
+#         biggest_score = 0
+#         for txt, score in results:
+#             if score > biggest_score:
+#                 biggest = txt
+#                 biggest_score = score
+#         return biggest if biggest else results[0][0]
+#
+#     return s
 
     # return biggest if biggest else results[0][0]
 
@@ -235,77 +235,45 @@ def clean_up_media_dir():
 if __name__ == "__main__":
     print("Parsing subreddits...")
 
-    reddit_ukraine_videos = parse_subreddit_for_links("ukraine", limit=300)
-    reddit_yemen_videos = parse_subreddit_for_links("YemenVoice", limit=100)
-    reddit_israel_videos = parse_subreddit_for_links("IsraelCrimes", limit=100)
-    reddit_israel_videos += parse_subreddit_for_links("Palestine", limit=100)
-    # reddit_cf_videos = parse_subreddit_for_links("CombatFootage", limit=300)
+    all_videos = {
+        "ukraine_war": [],
+        "yemeni_civil_war": [],
+        "palestine": [],
+        "kurdish-turkish_conflict": []
+    }
+    videos = all_videos.copy()
+
+    all_videos["ukraine_war"] += parse_subreddit_for_links("ukraine", limit=200)
+    all_videos["ukraine_war"] += parse_subreddit_for_links("UkraineWarVideoReport", limit=200)
+    all_videos["yemeni_civil_war"] += parse_subreddit_for_links("YemenVoice", limit=100)
+    all_videos["palestine"] += parse_subreddit_for_links("IsraelCrimes", limit=100)
+    all_videos["palestine"] += parse_subreddit_for_links("Palestine", limit=100)
+    all_videos["kurdish-turkish_conflict"] = parse_subreddit_for_links("kurdistan", limit=200)
 
     print("Resolving URLs")
 
-    reddit_ukraine_videos = resolve_urls(reddit_ukraine_videos)
-    reddit_yemen_videos = resolve_urls(reddit_yemen_videos)
-    reddit_israel_videos = resolve_urls(reddit_israel_videos)
-    # reddit_cf_videos = resolve_urls(reddit_cf_videos)
+    for stub, video_list in all_videos.items():
+        all_videos[stub] = resolve_urls(video_list)
 
     print("Checking if links are posted...")
-
-    ukraine_videos = []
-    yemen_videos = []
-    israel_videos = []
-    cf_videos = []
-    for v in reddit_ukraine_videos:
-        if check_if_video_is_posted(v["url"]):
-            print(f"Skipping \"{v['title']}\"")
-            continue
-        ukraine_videos.append(v)
-    for v in reddit_yemen_videos:
-        if check_if_video_is_posted(v["url"]):
-            print(f"Skipping \"{v['title']}\"")
-            continue
-        yemen_videos.append(v)
-    for v in reddit_israel_videos:
-        if check_if_video_is_posted(v["url"]):
-            print(f"Skipping \"{v['title']}\"")
-            continue
-        israel_videos.append(v)
-    # for v in reddit_cf_videos:
-    #     if check_if_video_is_posted(v["url"]):
-    #         print(f"Skipping \"{v['title']}\"")
-    #         continue
-    #     cf_videos.append(v)
-
-    # ukraine_videos = [v for v in ukraine_videos if not check_if_video_is_posted(v["url"])]
-    # yemen_videos = [v for v in yemen_videos if not check_if_video_is_posted(v["url"])]
-    # israel_videos = [v for v in israel_videos if not check_if_video_is_posted(v["url"])]
-    # cf_videos = [v for v in cf_videos if not check_if_video_is_posted(v["url"])]
+    for stub, video_list in all_videos.items():
+        for v in video_list:
+            if check_if_video_is_posted(v["url"]):
+                print(f"Skipping \"{v['title']}\"")
+                continue
+            videos[stub].append(v)
 
     print("Cleaning up results...")
-
-    ukraine_videos = clean_up_api_results(ukraine_videos)
-    yemen_videos = clean_up_api_results(yemen_videos)
-    israel_videos = clean_up_api_results(israel_videos)
-    # cf_videos = clean_up_api_results(cf_videos)
+    for k, v in videos.items():
+        videos[k] = clean_up_api_results(v)
 
     print("Done cleaning, posting links...")
 
     failed = []
-    for video in ukraine_videos:
-        success = post_video_to_posterity(video, theatre="ukraine_war")
+    for stub, video in videos.items():
+        success = post_video_to_posterity(video, theatre=stub)
         if not success:
             failed.append(video)
-    for video in yemen_videos:
-        success = post_video_to_posterity(video, theatre="yemeni_civil_war")
-        if not success:
-            failed.append(video)
-    for video in israel_videos:
-        success = post_video_to_posterity(video, theatre="palestine")
-        if not success:
-            failed.append(video)
-    # for video in cf_videos:
-    #     success = post_video_to_posterity(video)
-    #     if not success:
-    #         failed.append(video)
 
     print("________________________")
     print("FAILED:")

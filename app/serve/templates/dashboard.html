@@ -14,51 +14,6 @@
 </section>
 <section class="uk-section uk-section-default uk-section-small">
     <div class="uk-container uk-margin-small">
-        <div class="uk-container uk-margin">
-            <h2>Current tasks:</h2>
-            <table class="uk-table uk-table-small uk-table-striped">
-                <thead>
-                    <tr>
-                        <td>Title</td>
-                        <td>Uploader/Status</td>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for v in tasks %}
-                    <tr>
-                        <td>
-                            <div class="list-thumbnail uk-position-relative" style="display: table-cell;">
-                                <a href="/{{ v.video_id }}">
-                                    <img src="/thumbnail/{{ v.video_id }}.jpg" loading="lazy" class="thumbnail-rounded uk-position-absolute uk-position-center">
-                                </a>
-                            </div>
-                            <div style="display: table-cell;">
-                                <a href="/{{ v.video_id }}">{{ v.title }}</a>
-                            </div>
-                        </td>
-                        <td>
-                            <span class="uk-text-meta">{{ v.source }}</span><br>
-                            <span class="uk-text-small">
-                            {% if v.status != STATUS_COMPLETED and not v.user_reports|length %}
-                            {{ v.status_str.capitalize() }}
-                            {% if not v.can_be_changed %}
-                                {{ v.progress }}
-                                {% if v.pid > 0 and v.user_can_edit(current_user) and current_user.check_auth(AUTH_LEVEL_EDITOR) %}
-                                <br><a href="/api/v1/core/cancel_task/{{ v.task_id }}" class="uk-text-danger">
-                                    <span class="uk-link-icon" uk-icon="icon: close; ratio: 0.8;"></span> Cancel
-                                </a>
-                                {% endif %}
-                            {% endif %}
-                            {% else %}
-                            Reports pending
-                            {% endif %}
-                            </span>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
         {% if duplicates|length %}
         <div class="uk-container uk-margin expandable-duplicates" hidden>
             <h2>Possible duplicates:</h2>
@@ -116,6 +71,51 @@
             </a>
         </div>
         {% endif %}
+        <div class="uk-container uk-margin">
+            <h2>Current tasks:</h2>
+            <table class="uk-table uk-table-small uk-table-striped">
+                <thead>
+                    <tr>
+                        <td>Title</td>
+                        <td>Uploader/Status</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for v in tasks %}
+                    <tr>
+                        <td>
+                            <div class="list-thumbnail uk-position-relative" style="display: table-cell;">
+                                <a href="/{{ v.video_id }}">
+                                    <img src="/thumbnail/{{ v.video_id }}.jpg" loading="lazy" class="thumbnail-rounded uk-position-absolute uk-position-center">
+                                </a>
+                            </div>
+                            <div style="display: table-cell;">
+                                <a href="/{{ v.video_id }}">{{ v.title }}</a>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="uk-text-meta">{{ v.source }}</span><br>
+                            <span class="uk-text-small">
+                            {% if v.status != STATUS_COMPLETED and not v.user_reports|length %}
+                            {{ v.status_str.capitalize() }}
+                            {% if not v.can_be_changed %}
+                                {{ v.progress }}
+                                {% if v.pid > 0 and v.user_can_edit(current_user) and current_user.check_auth(AUTH_LEVEL_EDITOR) %}
+                                <br><a href="/api/v1/core/cancel_task/{{ v.task_id }}" class="uk-text-danger">
+                                    <span class="uk-link-icon" uk-icon="icon: close; ratio: 0.8;"></span> Cancel
+                                </a>
+                                {% endif %}
+                            {% endif %}
+                            {% else %}
+                            Reports pending
+                            {% endif %}
+                            </span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
 </section>
 {% if current_user.check_auth(AUTH_LEVEL_EDITOR) %}
