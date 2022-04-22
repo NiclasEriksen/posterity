@@ -809,6 +809,109 @@ def clear_report_route(report_id):
     return redirect(url_for("serve.serve_video", video_id=video.video_id))
 
 
+@serve.route("/handle_duplicates/<video_id1>/<video_id2>", methods=["GET", "POST"])
+@login_required
+def handle_duplicate_route(video_id1, video_id2):
+    if not current_user.check_auth(AUTH_LEVEL_EDITOR):
+        return render_template("not_found.html")
+    video1 = db_session.query(Video).filter_by(video_id=video_id1).first()
+    video2 = db_session.query(Video).filter_by(video_id=video_id2).first()
+    if not video1 or not video2:
+        flash("Video not found", "warning")
+        return render_template("not_found.html")
+
+    if request.method == "POST":
+        video1_data = {
+            "title": request.form.get("video1_title", default=video1.title),
+            "orig_title": request.form.get("video1_description", default=video1.orig_title),
+            "tags": request.form.getlist("video1_tags_select"),
+            "categories": request.form.getlist("video1_categories_select"),
+            "theatres": request.form.getlist("video1_theatre_select"),
+            "keep": request.form.get("video1_keep_checkbox")
+        }
+        video2_data = {
+            "title": request.form.get("video2_title", default=video2.title),
+            "orig_title": request.form.get("video2_description", default=video2.orig_title),
+            "tags": request.form.getlist("video2_tags_select"),
+            "categories": request.form.getlist("video2_categories_select"),
+            "theatres": request.form.getlist("video2_theatre_select"),
+            "keep": request.form.get("video2_keep_checkbox")
+        }
+
+        for video, data in [(video1, video1_data), (video2, video2_data)]:
+            if not data["keep"] == "on":
+                continue
+            video.tags = []
+            for tag_id in data["tags"]:
+                try:
+                    tag_id = int(tag_id)
+                except (TypeError, ValueError):
+                    logger.error("Invalid tag value in form?")
+                    continue
+                else:
+                    tag = ContentTag.query.filter_by(id=tag_id).first()
+                    if tag and tag not in video.tags:
+                        video.tags.append(tag)
+
+            video.categories = []
+            for category_id in data["categories"]:
+                try:
+                    category_id = int(category_id)
+                except (TypeError, ValueError):
+                    logger.error("Invalid category value in form?")
+                    continue
+                else:
+                    cat = Category.query.filter_by(id=category_id).first()
+                    if cat and cat not in video.categories:
+                        video.categories.append(cat)
+            video.theatres = []
+            for theatre_id in data["theatres"]:
+                try:
+                    theatre_id = int(theatre_id)
+                except (TypeError, ValueError):
+                    logger.error("Invalid theatre value in form?")
+                    continue
+                else:
+                    theatre = Theatre.query.filter_by(id=theatre_id).first()
+                    if theatre and theatre not in video.theatres:
+                        video.theatres.append(theatre)
+
+            if video.status != STATUS_DOWNLOADING:
+                video.title = data["title"]
+                video.orig_title = data["orig_title"]
+
+            db_session.add(video)
+
+        db_session.commit()
+
+        keep_video1 = True if video1_data["keep"] == "on" else False
+        keep_video2 = True if video2_data["keep"] == "on" else False
+
+        if (keep_video1 or keep_video2) and not (not keep_video1 and not keep_video2):
+            if keep_video1 and not keep_video2:
+                return redirect(url_for("serve.confirm_delete_route", video_id=video2.video_id))
+            elif keep_video2 and not keep_video1:
+                return redirect(url_for("serve.confirm_delete_route", video_id=video1.video_id))
+        else:
+            flash("No video was deleted, as no (or both) videos was marked with 'keep'", "warning")
+            return redirect(url_for("serve.serve_video", video_id=video1.video_id))
+
+    else:
+        available_tags = ContentTag.query.order_by(ContentTag.category.desc(), ContentTag.name).all()
+        available_categories = Category.query.order_by(Category.name).all()
+        available_theatres = Theatre.query.order_by(Theatre.id).all()
+        available_theatres = sorted(available_theatres, key=lambda x: x.video_count, reverse=True)
+
+        return render_template(
+            "handle_duplicates.html",
+            video1=video1,
+            video2=video2,
+            tags=available_tags,
+            categories=available_categories,
+            theatres=available_theatres
+        )
+
+
 @serve.route("/clear_duplicate", methods=["GET"])
 @login_required
 def clear_duplicate_route():

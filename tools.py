@@ -73,13 +73,13 @@ def clean_up_api_results(videos: list) -> list:
 
 def check_if_video_is_posted(url: str) -> bool:
     try:
-        r = requests.post("https://posterity.no/api/v1/core/check_if_exists", json={"url": url})
+        r = requests.post("https://posterity.no/api/v1/core/check_if_exists", json={"url": url}, timeout=30, verify=False)
         if r.status_code == 200:
             data = r.json()
             if data and "result" in data.keys():
                 if data["result"] == True:
-                    print("Video was already posted, skipping.")
-                return data["result"]
+                    return True
+                return False
     except Exception as e:
         print(e)
 
@@ -87,10 +87,10 @@ def check_if_video_is_posted(url: str) -> bool:
 
 
 def resolve_urls(videos: list) -> list:
-    session = requests.Session()  # so connections are recycled
     for video in videos:
+        session = requests.Session()  # so connections are recycled
         try:
-            resp = session.head(minimize_url(video["url"]), allow_redirects=True)
+            resp = session.head(minimize_url(video["url"]), allow_redirects=True, timeout=20)
             video["url"] = resp.url
         except Exception as e:
             print(e)
@@ -107,7 +107,7 @@ def post_video_to_posterity(video: dict, theatre="all") -> bool:
         "theatre": theatre,
         "download_now": False
     }
-    r = requests.post("https://posterity.no/api/v1/core/post_link", json=data)
+    r = requests.post("https://posterity.no/api/v1/core/post_link", json=data, timeout=60)
     # r = requests.post("http://posterity.test:5050/api/v1/core/post_link", json=data, verify=False)
     if r.status_code == 202 or r.status_code == 200:
         print("Link posted!")
@@ -243,8 +243,8 @@ if __name__ == "__main__":
     }
     videos = all_videos.copy()
 
-    all_videos["ukraine_war"] += parse_subreddit_for_links("ukraine", limit=200)
-    all_videos["ukraine_war"] += parse_subreddit_for_links("UkraineWarVideoReport", limit=200)
+    all_videos["ukraine_war"] += parse_subreddit_for_links("ukraine", limit=100)
+    all_videos["ukraine_war"] += parse_subreddit_for_links("UkraineWarVideoReport", limit=100)
     all_videos["yemeni_civil_war"] += parse_subreddit_for_links("YemenVoice", limit=100)
     all_videos["palestine"] += parse_subreddit_for_links("IsraelCrimes", limit=100)
     all_videos["palestine"] += parse_subreddit_for_links("Palestine", limit=100)

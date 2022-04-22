@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% block title %}Handle duplucates{% endblock %}
+{% block content %}
+<section class="uk-section uk-padding-remove-top">
+    <form class="uk-form-stacked" method="POST" action="/handle_duplicates/{{ video1.video_id }}/{{ video2.video_id }}">
+        <div class="uk-child-width-expand@s" style="margin-left:0;" uk-grid>
+            <div class="uk-card uk-card-default uk-card-body">
+                <h4>Video 1:</h4>
+                <fieldset>
+                    <div class="uk-margin">
+                        <label class="uk-form-label uk-text-bold uk-text-large uk-text-center">Keep this one:</label>
+                        <div class="uk-form-controls uk-width-1-1 uk-flex uk-flex-center">
+                            <input class="uk-form-large uk-checkbox" name="video1_keep_checkbox" style="width:64px;height:64px;" type="checkbox" checked>
+                        </div>
+                    </div>
+                    <div class="uk-margin">
+                        <label class="uk-form-label">Title</label>
+                        <div class="uk-form-controls">
+                            <input type="text" class="uk-input" id="video1_title" name="video1_title" value="{{ video1.title }}">
+                        </div>
+                    </div>
+                    <div class="uk-margin">
+                        <label class="uk-form-label">Description</label>
+                        <div class="uk-form-controls">
+                            <input type="text" class="uk-input" id="video1_description" name="video1_description" value="{{ video1.orig_title }}">
+                        </div>
+                    </div>
+                   <div class="uk-margin">
+                        <div class="uk-form-label">Theatre:</div>
+                        <select class="uk-select uk-height-small" multiple id="video1_theatre_select" name="video1_theatre_select">
+                            {% for t in theatres %}
+                            <option value="{{ t.id }}" {% if t in video1.theatres %} selected{% endif %}>{{ t.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="uk-margin">
+                        <div class="uk-form-label">Content tags</div>
+                        <select class="uk-select uk-height-small" multiple id="video1_tags_select" name="video1_tags_select">
+                            {% for tag in tags %}
+                            <option value="{{ tag.id }}" class="content-tag-option-{{ tag.category }}"{% if tag in video1.tags %} selected{% endif %}>{{ tag.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="uk-margin">
+                        <div class="uk-form-label">Categories</div>
+                        <select class="uk-select uk-height-small" multiple id="video1_categories_select" name="video1_categories_select">
+                            {% for c in categories %}
+                            <option value="{{ c.id }}" class="category-option" {% if c in video1.categories %}selected{% endif %}>{{ c.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </fieldset>
+            </div>
+            <div class="uk-card uk-card-default uk-card-body">
+                <h4>Video 2:</h4>
+                <fieldset>
+                    <div class="uk-margin">
+                        <label class="uk-form-label uk-text-bold uk-text-large uk-text-center">Keep this one:</label>
+                        <div class="uk-form-controls uk-width-1-1 uk-flex uk-flex-center">
+                            <input class="uk-form-large uk-checkbox" name="video2_keep_checkbox" style="width:64px;height:64px;" type="checkbox">
+                        </div>
+                    </div>
+                    <div class="uk-margin">
+                        <label class="uk-form-label">Title</label>
+                        <div class="uk-form-controls">
+                            <input type="text" class="uk-input" id="video2_title" name="video2_title" value="{{ video2.title }}">
+                        </div>
+                    </div>
+                    <div class="uk-margin">
+                        <label class="uk-form-label">Description</label>
+                        <div class="uk-form-controls">
+                            <input type="text" class="uk-input" id="video2_description" name="video2_description" value="{{ video2.orig_title }}">
+                        </div>
+                    </div>
+                   <div class="uk-margin">
+                        <div class="uk-form-label">Theatre:</div>
+                        <select class="uk-select uk-height-small" multiple id="video2_theatre_select" name="video2_theatre_select">
+                            {% for t in theatres %}
+                            <option value="{{ t.id }}" {% if t in video2.theatres %} selected{% endif %}>{{ t.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="uk-margin">
+                        <div class="uk-form-label">Content tags</div>
+                        <select class="uk-select uk-height-small" multiple id="video2_tags_select" name="video2_tags_select">
+                            {% for tag in tags %}
+                            <option value="{{ tag.id }}" class="content-tag-option-{{ tag.category }}"{% if tag in video2.tags %} selected{% endif %}>{{ tag.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="uk-margin">
+                        <div class="uk-form-label">Categories</div>
+                        <select class="uk-select uk-height-small" multiple id="video2_categories_select" name="video2_categories_select">
+                            {% for c in categories %}
+                            <option value="{{ c.id }}" class="category-option" {% if c in video2.categories %}selected{% endif %}>{{ c.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </fieldset>
+            </div>
+        </div>
+        <div class="uk-child-width-expand" uk-grid>
+            <div class="uk-width-1-1 uk-width-1-2@s uk-padding-small">
+                <a class="uk-input uk-button uk-button-muted" href="/{{ video1.video_id }}"><span uk-icon="icon: close"></span> Cancel</a>
+            </div>
+            <div class="uk-width-1-1 uk-width-1-2@s uk-padding-small">
+                <button class="uk-input uk-button uk-button-danger" type="submit"><span uk-icon="icon: check"></span> Confirm and delete</button>
+            </div>
+        </div>
+    </form>
+</section>
+{% endblock %}
