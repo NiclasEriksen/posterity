@@ -109,10 +109,10 @@ def post_video_to_posterity(video: dict, theatre="all") -> bool:
     data = {
         "url": video["url"],
         "title": video["title"].capitalize(),
-        "source": "fredspipa",
+        "source": "Anonymous",
         "token": "1234abcd",
         "theatre": theatre,
-        "download_now": False
+        "download_now": True
     }
     r = requests.post("https://posterity.no/api/v1/core/post_link", json=data, timeout=60)
     # r = requests.post("http://posterity.test:5050/api/v1/core/post_link", json=data, verify=False)
