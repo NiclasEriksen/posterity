@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Handle duplucates{% endblock %}
+{% block page_title %}Handle duplicates{% endblock %}
 {% block content %}
 <section class="uk-section uk-padding-remove-top">
     <form class="uk-form-stacked" method="POST" action="/handle_duplicates/{{ video1.video_id }}/{{ video2.video_id }}">
