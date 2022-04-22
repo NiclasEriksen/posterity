@@ -126,9 +126,13 @@ def check_duplicate_for_video(video_id: str) -> int:
             for vd in video.duplicates:
                 if vd not in duplicates:
                     video.duplicates.remove(vd)
+                    if video in vd.duplicates:
+                        vd.duplicates.remove(video)
             for d in duplicates:
                 if d not in video.duplicates:
                     video.duplicates.append(d)
+                    d.duplicates.append(video)
+                    tmp_session.add(d)
 
             tmp_session.add(video)
             tmp_session.commit()
