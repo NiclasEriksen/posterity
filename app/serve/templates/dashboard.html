@@ -245,9 +245,10 @@
         </div>
     </div>
 </section>
+{% endif %}
+{% if other_users|length %}
 <section class="uk-section uk-section-default uk-section-small">
     <div class="uk-container uk-margin-small">
-        {% if other_users|length %}
         <div class="uk-grid-small" uk-grid>
             <h2 class="uk-width-1-1">Other users:</h2>
             {% for u in other_users %}
@@ -259,7 +260,6 @@
             </div>
             {% endfor %}
         </div>
-        {% endif %}
     </div>
 </section>
 {% endif %}
