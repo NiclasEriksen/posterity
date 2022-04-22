@@ -86,8 +86,8 @@ def remove_posted_videos(videos: list) -> list:
 
     ok_videos = []
     for v in videos:
-        if v.url in result:
-            if result[v.url]:
+        if v["url"] in result:
+            if result[v["url"]]:
                 continue
         ok_videos.append(v)
     return ok_videos
@@ -250,12 +250,12 @@ if __name__ == "__main__":
     }
     videos = all_videos.copy()
 
-    #all_videos["ukraine_war"] += parse_subreddit_for_links("ukraine", limit=100)
+    all_videos["ukraine_war"] += parse_subreddit_for_links("ukraine", limit=100)
     all_videos["ukraine_war"] += parse_subreddit_for_links("UkraineWarVideoReport", limit=100)
     all_videos["yemeni_civil_war"] += parse_subreddit_for_links("YemenVoice", limit=50)
     all_videos["palestine"] += parse_subreddit_for_links("IsraelCrimes", limit=50)
-    #all_videos["palestine"] += parse_subreddit_for_links("Palestine", limit=50)
-    all_videos["kurdish-turkish_conflict"] = parse_subreddit_for_links("kurdistan", limit=10)
+    all_videos["palestine"] += parse_subreddit_for_links("Palestine", limit=50)
+    all_videos["kurdish–turkish_conflict"] = parse_subreddit_for_links("kurdistan", limit=50)
 
     print("Resolving URLs")
 
@@ -278,7 +278,7 @@ if __name__ == "__main__":
     for stub, video_list in videos.items():
         for v in video_list:
             print("-------------------------")
-            print(f"Posting {v.title}")
+            print(f"Posting {v['title']}")
             success = post_video_to_posterity(v, theatre=stub)
             if not success:
                 failed.append(v)

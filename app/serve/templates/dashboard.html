@@ -13,71 +13,10 @@
     </div>
 </section>
 <section class="uk-section uk-section-default uk-section-small">
-    <div class="uk-container uk-margin-small">
-        {% if duplicates|length %}
-        <div class="uk-container uk-margin expandable-duplicates" hidden>
-            <h2>Possible duplicates:</h2>
-            <table class="uk-table uk-table-small uk-table-striped uk-table-responsive">
-                <thead>
-                    <tr>
-                        <td class="uk-width-2-5 uk-text-center">Video 1</td>
-                        <td class="uk-width-2-5 uk-text-center">Video 2</td>
-                        <td class="uk-width-1-5 uk-text-center"></td>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for v1, v2 in duplicates %}
-                    <tr>
-                        <td>
-                            <div class="list-thumbnail uk-position-relative" style="display: table-cell;">
-                                <a href="/{{ v1.video_id }}">
-                                    <img src="/thumbnail/{{ v1.video_id }}.jpg" loading="lazy" class="thumbnail-rounded uk-position-absolute uk-position-center">
-                                </a>
-                            </div>
-                            <div style="display: table-cell;">
-                                <a href="/{{ v1.video_id }}">{{ v1.title }}</a>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="list-thumbnail uk-position-relative" style="display: table-cell;">
-                                <a href="/{{ v2.video_id }}">
-                                    <img src="/thumbnail/{{ v2.video_id }}.jpg" loading="lazy" class="thumbnail-rounded uk-position-absolute uk-position-center">
-                                </a>
-                            </div>
-                            <div style="display: table-cell;">
-                                <a href="/{{ v2.video_id }}">{{ v2.title }}</a>
-                            </div>
-                        </td>
-                        <td>
-                            <a class="uk-text-danger"
-                               href="/clear_duplicate?v1={{ v1.video_id }}&v2={{ v2.video_id }}"
-                               onclick="return confirm('Flag this as a false positive?');"
-                            >
-                                False positive <span uk-icon="warning"></span>
-                            </a><br>
-                            <a class="uk-text-danger"
-                               href="/handle_duplicates/{{ v1.video_id }}/{{ v2.video_id }}"
-                            >
-                                Handle duplicates <span uk-icon="copy"></span>
-                            </a>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        <div class="uk-width-1-1 uk-position-relative" style="height: 48px;">
-            <a
-                class="uk-button uk-button-secondary uk-position-center"
-                uk-toggle="target: .expandable-duplicates; animation: uk-animation-fade"
-            >
-                <span class="expandable-duplicates">Show duplicates ({{ duplicates|length }})</span>
-                <span class="expandable-duplicates" hidden>Hide duplicates</span>
-            </a>
-        </div>
-        {% endif %}
-        <div class="uk-container uk-margin">
-            <h2>Current tasks:</h2>
+    <div class="uk-child-width-expand@s" uk-grid>
+
+        <div class="uk-card uk-card-default uk-overflow-auto uk-height-large uk-width-1-1 uk-width-1-2@s">
+            <h3 class="uk-text-center">Current tasks</h3>
             <table class="uk-table uk-table-small uk-table-striped">
                 <thead>
                     <tr>
@@ -89,12 +28,7 @@
                     {% for v in tasks %}
                     <tr>
                         <td>
-                            <div class="list-thumbnail uk-position-relative" style="display: table-cell;">
-                                <a href="/{{ v.video_id }}">
-                                    <img src="/thumbnail/{{ v.video_id }}.jpg" loading="lazy" class="thumbnail-rounded uk-position-absolute uk-position-center">
-                                </a>
-                            </div>
-                            <div style="display: table-cell;">
+                            <div class="uk-text-small" style="display: table-cell;">
                                 <a href="/{{ v.video_id }}">{{ v.title }}</a>
                             </div>
                         </td>
@@ -121,6 +55,59 @@
                 </tbody>
             </table>
         </div>
+        <div class="uk-card uk-card-default uk-overflow-auto uk-height-large uk-width-1-1 uk-width-1-2@s uk-padding-remove-horizontal">
+            <h3 class="uk-text-center">Possible duplicates</h3>
+            <table class="uk-table uk-table-small uk-table-striped uk-width-1-1">
+                <thead>
+                    <tr>
+                        <td class="uk-width-2-5 uk-text-center">Video 1</td>
+                        <td class="uk-width-1-5 uk-text-center"></td>
+                        <td class="uk-width-2-5 uk-text-center">Video 2</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for v1, v2 in duplicates %}
+                    <tr>
+                        <td>
+                            <div class="uk-position-relative">
+                                <div class="list-thumbnail uk-position-right" style="display: table-cell;">
+                                    <a href="/{{ v1.video_id }}">
+                                        <img src="/thumbnail/{{ v1.video_id }}.jpg" loading="lazy" class="thumbnail-rounded uk-position-absolute uk-position-center">
+                                    </a>
+                                </div>
+
+                            </div>
+                            <div class="uk-text-small" style="overflow: hidden; text-overflow: ellipsis; padding-right:56px;">
+                                <a href="/{{ v1.video_id }}">{{ v1.title }}</a>
+                            </div>
+                        </td>
+                        <td class="uk-text-small uk-text-center">
+                            <a class="uk-text-warning"
+                               href="/clear_duplicate?v1={{ v1.video_id }}&v2={{ v2.video_id }}"
+                               onclick="return confirm('Flag this as a false positive?');"
+                            >
+                                False positive <span uk-icon="icon: warning; ratio: 0.75;"></span>
+                            </a><br>
+                            <a class="uk-text-danger"
+                               href="/handle_duplicates/{{ v1.video_id }}/{{ v2.video_id }}"
+                            >
+                                Handle duplicates <span uk-icon="icon: copy; ratio: 0.75"></span>
+                            </a>
+                        </td>
+                        <td>
+                            <div class="list-thumbnail uk-position-relative" style="display: table-cell;">
+                                <a href="/{{ v2.video_id }}">
+                                    <img src="/thumbnail/{{ v2.video_id }}.jpg" loading="lazy" class="thumbnail-rounded uk-position-absolute uk-position-center">
+                                </a>
+                            </div>
+                            <div class="uk-text-small" style="overflow: hidden; text-overflow: ellipsis;">
+                                <a href="/{{ v2.video_id }}">{{ v2.title }}</a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
     </div>
 </section>
 {% if current_user.check_auth(AUTH_LEVEL_EDITOR) %}
