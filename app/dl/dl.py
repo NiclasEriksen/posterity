@@ -25,7 +25,7 @@ from . import FONT_SIZE_SMALL, FONT_SIZE_MEDIUM, FONT_SIZE_LARGE, CRF, CRF_LOW, 
     GRAPHIC_COLOR, GRAPHIC_GS, GRAPHIC_STROKE_COLOR, GRAPHIC_STROKE_GS, \
     EMOTIONAL_COLOR, EMOTIONAL_GS, EMOTIONAL_STROKE_COLOR, EMOTIONAL_STROKE_GS, \
     FONT_COLOR, FONT_GS, FONT_STROKE_COLOR, FONT_STROKE_GS, \
-    STROKE_SMALL, STROKE_MEDIUM, STROKE_LARGE, TEXT_PADDING, TEXT_MARGIN, STATUS_CHECKING
+    STROKE_SMALL, STROKE_MEDIUM, STROKE_LARGE, TEXT_PADDING, TEXT_MARGIN, STATUS_CHECKING, GRAPHIC_TAGS, EMOTIONAL_TAGS
 
 # log = LocalProxy(lambda: current_app.logger)
 log = logging.getLogger("posterity_dl.dl")
@@ -36,19 +36,22 @@ if celery:
 overlay_font_small = ImageFont.truetype(
     os.path.join(
         os.path.dirname(os.path.realpath(__file__)),
-        "Faustina-SemiBold.ttf"
+        "LibreBaskerville-Bold.ttf"
+        #"Faustina-SemiBold.ttf"
     ), FONT_SIZE_SMALL
 )
 overlay_font_medium = ImageFont.truetype(
     os.path.join(
         os.path.dirname(os.path.realpath(__file__)),
-        "Faustina-SemiBold.ttf"
+        "LibreBaskerville-Bold.ttf"
+        # "Faustina-SemiBold.ttf"
     ), FONT_SIZE_MEDIUM
 )
 overlay_font_large = ImageFont.truetype(
     os.path.join(
         os.path.dirname(os.path.realpath(__file__)),
-        "Faustina-SemiBold.ttf"
+        "LibreBaskerville-Bold.ttf"
+        # "Faustina-SemiBold.ttf"
     ), FONT_SIZE_LARGE
 )
 
@@ -436,13 +439,9 @@ def get_celery_active():
 
 
 def get_color_for_tag(tag: str, gs: bool = False) -> tuple:
-    if tag.lower() in [
-        "death", "graphic", "violence", "gore", "nudity", "corpses", "blood"
-    ]:
+    if tag.lower() in GRAPHIC_TAGS:
         c = tuple([GRAPHIC_GS]) if gs else GRAPHIC_COLOR
-    elif tag.lower() in [
-        "distress", "animals", "children", "sexual", "shock", "emotional"
-    ]:
+    elif tag.lower() in EMOTIONAL_TAGS:
         c = tuple([EMOTIONAL_GS]) if gs else EMOTIONAL_COLOR
     else:
         c = tuple([FONT_GS]) if gs else FONT_COLOR
@@ -450,13 +449,9 @@ def get_color_for_tag(tag: str, gs: bool = False) -> tuple:
 
 
 def get_stroke_for_tag(tag: str, gs: bool = False) -> tuple:
-    if tag.lower() in [
-        "death", "graphic", "violence", "gore", "nudity", "corpses", "blood"
-    ]:
+    if tag.lower() in GRAPHIC_TAGS:
         c = tuple([GRAPHIC_STROKE_GS]) if gs else GRAPHIC_STROKE_COLOR
-    elif tag.lower() in [
-        "distress", "animals", "children", "sexual", "shock", "emotional"
-    ]:
+    elif tag.lower() in EMOTIONAL_TAGS:
         c = tuple([EMOTIONAL_STROKE_GS]) if gs else EMOTIONAL_STROKE_COLOR
     else:
         c = tuple([FONT_STROKE_GS]) if gs else FONT_STROKE_COLOR
@@ -559,8 +554,8 @@ def generate_video_images(
     # thumb_blurred = thumb_blurred.convert("P", palette=palette, colors=64)
 
     try:
-        preview.save(preview_out_path, optimize=True, quality=75)
-        preview_blurred.save(blurred_preview_path, optimize=True, quality=75)
+        preview.save(preview_out_path, optimize=True, quality=90)
+        preview_blurred.save(blurred_preview_path, optimize=True, quality=85)
         thumb.save(thumb_out_path, optimize=True, quality=60)
         thumb_blurred.save(blurred_thumb_path, optimize=True, quality=60)
     except (PermissionError, IOError, FileExistsError) as e:
