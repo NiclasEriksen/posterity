@@ -277,7 +277,7 @@ def serve_video(video_id):
     video = Video.query.filter_by(video_id=video_id).first()
 
     if not video:
-        dv = DeletedVideo.query.filter_by(duplicate=True).filter_by(video_id=video_id).first()
+        dv = db_session.query(DeletedVideo).filter_by(duplicate=True).filter_by(video_id=video_id).first()
         if not dv:
             logger.error("Video was not found.")
             return render_template("not_found.html")
@@ -286,7 +286,7 @@ def serve_video(video_id):
             logger.error("Video was not found.")
             return render_template("not_found.html")
         else:
-            flash("That video was a duplicate, redirecting to the other version.")
+            flash("That video was a duplicate, redirecting to the other version.", "warning")
             return redirect(url_for("serve.serve_video", video_id=video.video_id))
 
     try:
@@ -1379,12 +1379,12 @@ def delete_video_by_id(video_id: str) -> bool:
         logger.error(f"Unable to delete video {video_id} as it's not in the database")
         return False
 
+    dv = DeletedVideo(v, deleted_by=current_user.username)
+    db_session.add(dv)
+
     # Remove search engine index
     remove_video_data(v)
     write_metadata_to_disk(v.video_id, v.to_json())
-
-    dv = DeletedVideo(v, deleted_by=current_user.username)
-    db_session.add(dv)
 
     # Delete from database
     db_session.delete(v)
