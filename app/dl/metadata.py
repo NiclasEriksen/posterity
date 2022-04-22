@@ -173,13 +173,17 @@ def find_existing_video_by_url(url: str):
         return None
 
 
-def find_duplicate_video_by_url(url: str):
+def find_duplicate_video_by_url(url: str, include_deleted: bool = False):
     from app.serve.db import Video, DeletedVideo, db_session
     try:
         video = db_session.query(Video).filter(Video.url.contains(url)).first()
         if video:
             return True
-        video = db_session.query(DeletedVideo).filter_by(duplicate=True).filter(DeletedVideo.url.contains(url)).first()
+
+        q = db_session.query(DeletedVideo)
+        if not include_deleted:
+            q = q.filter_by(duplicate=True)
+        video = q.filter(DeletedVideo.url.contains(url)).first()
         if video:
             return True
 

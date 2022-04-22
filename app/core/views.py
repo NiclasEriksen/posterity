@@ -88,7 +88,7 @@ def check_if_exists_route():
 
         for url, _v in urls.items():
             urlm = minimize_url(url)
-            urls[url] = find_duplicate_video_by_url(urlm)
+            urls[url] = find_duplicate_video_by_url(urlm, include_deleted=True)
 
     return jsonify(urls)
 
