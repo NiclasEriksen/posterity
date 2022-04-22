@@ -56,7 +56,10 @@ def clean_up_api_results(videos: list) -> list:
         for s in sentences:
             paraphrased.append(paraphrase_text(s))
         title = ". ".join([s for s in paraphrased if len(s)])
-        video["title"] = title
+        if len(title):
+            video["title"] = title
+        else:
+            video["title"] = "NOTITLE"
         print("========================")
         print("Original:")
         print(orig_title)
@@ -233,9 +236,9 @@ if __name__ == "__main__":
     print("Parsing subreddits...")
 
     reddit_ukraine_videos = parse_subreddit_for_links("ukraine", limit=300)
-    reddit_yemen_videos = parse_subreddit_for_links("YemenVoice", limit=300)
-    reddit_israel_videos = parse_subreddit_for_links("IsraelCrimes", limit=300)
-    reddit_israel_videos += parse_subreddit_for_links("Palestine", limit=300)
+    reddit_yemen_videos = parse_subreddit_for_links("YemenVoice", limit=100)
+    reddit_israel_videos = parse_subreddit_for_links("IsraelCrimes", limit=100)
+    reddit_israel_videos += parse_subreddit_for_links("Palestine", limit=100)
     # reddit_cf_videos = parse_subreddit_for_links("CombatFootage", limit=300)
 
     print("Resolving URLs")
