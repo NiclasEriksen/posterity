@@ -54,6 +54,11 @@
                                onclick="return confirm('Flag this as a false positive?');"
                             >
                                 False positive <span uk-icon="warning"></span>
+                            </a><br>
+                            <a class="uk-text-danger"
+                               href="/handle_duplicates/{{ v1.video_id }}/{{ v2.video_id }}"
+                            >
+                                Handle duplicates <span uk-icon="copy"></span>
                             </a>
                         </td>
                     </tr>
