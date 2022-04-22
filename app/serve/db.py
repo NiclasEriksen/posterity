@@ -206,6 +206,19 @@ class Video(Base):
             return True
         return False
 
+    def user_can_claim(self, user: User) -> bool:
+        if self.user_can_edit(user):
+            return True
+        elif self.source == "Anonymous" and user.check_auth(AUTH_LEVEL_USER):
+            return True
+        return False
+
+    @property
+    def is_claimed(self) -> bool:
+        if self.source != "Anonymous":
+            return True
+        return False
+
     @property
     def has_duplicates(self) -> bool:
         if not len(self.duplicates):

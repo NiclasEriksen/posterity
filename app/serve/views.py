@@ -76,13 +76,22 @@ def before_request_func():
 
 @serve.context_processor
 def inject_pending_count():
-    if current_user.check_auth(AUTH_LEVEL_EDITOR):
-        pending = db_session.query(Video).filter(
+    if current_user.check_auth(AUTH_LEVEL_USER):
+        q = db_session.query(Video).filter(
             or_(
                 Video.status!=STATUS_COMPLETED,
                 Video.verified!=True
             )
-        ).filter_by(private=False).count()
+        )
+        if not current_user.check_auth(AUTH_LEVEL_EDITOR):
+            q = q.filter(
+                or_(
+                    Video.source=="Anonymous",
+                    Video.source==current_user.username
+                )
+            )
+
+        pending = q.filter_by(private=False).count()
         return dict(pending_count=pending)
     return dict(pending_count=0)
 
@@ -321,6 +330,30 @@ def serve_video(video_id):
         recommended=recommended,
         stream_path=f"/view/{video_id}.mp4" + ("?orig=0" if video.post_processed else ""),
     )
+
+
+@serve.route("/claim_video/<video_id>", methods=["GET"])
+@login_required
+def claim_video_route(video_id: str):
+    video: Video = Video.query.filter_by(video_id=video_id).first()
+    if not video:
+        return render_template("not_found.html")
+
+    if video.is_claimed:
+        flash("That video is already claimed.", "warning")
+        return redirect(url_for("serve.serve_video", video_id=video_id))
+    elif not video.user_can_claim(current_user):
+        flash("Lacking permissions to claim that video.", "error")
+        return redirect(url_for("serve.serve_video", video_id=video_id))
+    else:
+        try:
+            video.source = current_user.username
+            db_session.add(video)
+            db_session.commit()
+        except Exception as e:
+            logger.error(e)
+            flash("Something bad happened during claim, it didn't go through.", "error")
+        return redirect(url_for("serve.edit_video_page", video_id=video_id))
 
 
 @serve.route("/edit_video/<video_id>", methods=["GET"])
@@ -698,7 +731,7 @@ def confirm_delete_route(video_id: str):
 @serve.route("/pending")
 @login_required
 def pending_videos():
-    if not current_user.check_auth(AUTH_LEVEL_EDITOR):
+    if not current_user.check_auth(AUTH_LEVEL_USER):
         flash("You don't have permission to view pending videos, sorry.", "error")
         return redirect(url_for("serve.front_page"))
 
@@ -708,7 +741,7 @@ def pending_videos():
             Video.verified!=True
         )
     ).filter_by(private=False).order_by(Video.upload_time.asc()).all()
-    pending_videos = [d for d in pending_videos if d.user_can_see(current_user)]
+    pending_videos = [d for d in pending_videos if d.user_can_claim(current_user)]
     return render_template("pending.html", pending_videos=pending_videos)
 
 
