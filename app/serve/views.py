@@ -33,7 +33,7 @@ from app.dl.metadata import write_metadata_to_disk, get_progress_for_video, load
 from app.dl.helpers import seconds_to_verbose_time, map_range, make_stub
 from app.serve.db import db_session, Video, User, ContentTag, UserReport, Category, Theatre, \
     init_db, AUTH_LEVEL_ADMIN, AUTH_LEVEL_EDITOR, AUTH_LEVEL_USER, REASON_TEXTS, \
-    RegisterToken, MAX_TOKEN_USES, DeletedVideo, session_scope
+    RegisterToken, MAX_TOKEN_USES, DeletedVideo, session_scope, REASON_DUPLICATE
 from app import get_environment
 from app.serve.search import search_videos, index_video_data, remove_video_data, remove_video_data_by_id, \
     recommend_videos
@@ -802,6 +802,7 @@ def report_video_post(video_id):
         return render_template("private.html")
 
     text = request.form.get("report_text", "")
+    link = request.form.get("report_link", "")
     reason = request.form.get("report_reason")
 
     try:
@@ -813,6 +814,23 @@ def report_video_post(video_id):
 
     user_report = UserReport(video, reason, text, current_user.username)
     db_session.add(user_report)
+
+    if len(link) and reason == REASON_DUPLICATE:
+        other_id = link.split("/")[-1].strip()
+        other_video = db_session.query(Video).filter_by(video_id=other_id).first()
+        if other_video:
+            if other_video not in video.duplicates:
+                video.duplicates.append(other_video)
+            if video not in other_video.duplicates:
+                other_video.duplicates.append(video)
+            if other_video in video.false_positives:
+                video.false_positives.remove(other_video)
+            if video in other_video.false_positives:
+                other_video.false_positives.remove(video)
+
+            db_session.add(video)
+            db_session.add(other_video)
+
     db_session.commit()
 
     flash("Video has been reported to the editors. Thank you!", "success")

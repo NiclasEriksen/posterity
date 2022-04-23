@@ -2,6 +2,7 @@ import os
 import praw
 import requests
 import socket
+from datetime import datetime
 from time import time, sleep
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
@@ -17,10 +18,11 @@ dotenv.load_dotenv()
 socket.setdefaulttimeout(10)
 from prawcore.exceptions import ResponseException
 
+MIN_REDDIT_AGE = 900.0
+MIN_REDDIT_SCORE = 5
 SUBREDDITS = [
     "ukraine", "combatfootage", "yemenvoice"
 ]
-UKRAINE_KEYWORDS = ["ukraine", "putin", "russia", "russian", "ukrainian", "slava"]
 
 reddit = praw.Reddit(
     client_id=os.environ.get("REDDIT_CLIENT_ID", ""),
@@ -35,16 +37,17 @@ print(f"{dur1:.2f} seconds to load parrot")
 start = time()
 
 
-def parse_subreddit_for_links(sr: str, limit: int = 10) -> list:
+def parse_subreddit_for_links(sr: str, limit: int = 30) -> list:
     subreddit = reddit.subreddit(sr)
     videos = []
     for submission in subreddit.new(limit=limit):
-        if submission.is_video:
-            videos.append({
-                "title": submission.title,
-                "desc": submission.selftext,
-                "url": submission.url
-            })
+        if submission.is_video and submission.score > MIN_REDDIT_SCORE:
+            if submission.created_utc < datetime.now().timestamp() - MIN_REDDIT_AGE: #15 mins
+                videos.append({
+                    "title": submission.title,
+                    "desc": submission.selftext,
+                    "url": submission.url
+                })
     return videos
 
 
@@ -250,12 +253,12 @@ if __name__ == "__main__":
     }
     videos = all_videos.copy()
 
-    all_videos["ukraine_war"] += parse_subreddit_for_links("ukraine", limit=100)
+    all_videos["ukraine_war"] += parse_subreddit_for_links("ukraine", limit=200)
     all_videos["ukraine_war"] += parse_subreddit_for_links("UkraineWarVideoReport", limit=100)
-    all_videos["yemeni_civil_war"] += parse_subreddit_for_links("YemenVoice", limit=50)
-    all_videos["palestine"] += parse_subreddit_for_links("IsraelCrimes", limit=50)
-    all_videos["palestine"] += parse_subreddit_for_links("Palestine", limit=50)
-    all_videos["kurdish–turkish_conflict"] = parse_subreddit_for_links("kurdistan", limit=50)
+    # all_videos["yemeni_civil_war"] += parse_subreddit_for_links("YemenVoice", limit=50)
+    # all_videos["palestine"] += parse_subreddit_for_links("IsraelCrimes", limit=50)
+    # all_videos["palestine"] += parse_subreddit_for_links("Palestine", limit=50)
+    # all_videos["kurdish–turkish_conflict"] = parse_subreddit_for_links("kurdistan", limit=50)
 
     print("Resolving URLs")
 
@@ -290,92 +293,3 @@ if __name__ == "__main__":
         print(f["title"])
         print(f["url"])
         print("======")
-
-
-    # from app.serve.db import session_scope, Video, Theatre, ContentTag
-    # from sqlalchemy import not_
-    # from app.serve.search import index_video_data
-    # stub = "ukraine_war"
-    # with session_scope() as session:
-    #     theatre = session.query(Theatre).filter_by(stub=stub).first()
-    #     ignore_category = session.query(ContentTag).filter_by(stub="world_news").first()
-    #     if theatre and ignore_category:
-    #         for v in session.query(Video).filter(not_(Video.tags.any(id=ignore_category.id))).all():
-    #             v.theatres = [theatre]
-    #             session.add(v)
-    #             index_video_data(v)
-    #     session.commit()
-
-    # from app.dl.metadata import get_upload_time_from_api
-    # with session_scope() as session:
-    #     videos = session.query(Video).all()
-    #     print("Starting upload time scraping.")
-    #     for v in videos:
-    #         print(f"Scraping video {v.video_id}")
-    #         d = get_upload_time_from_api(v.url)
-    #         if d < v.upload_time:
-    #             print(f"Updating video {v.video_id}")
-    #             v.orig_upload_time = d
-    #             session.add(v)
-    #     session.commit()
-
-    #
-    # metadata = {
-    #     "title": "",
-    #     "desc": "",
-    #     "upload_time": datetime.now()
-    # }
-    #
-    # u = urlparse(url)
-    # headers = {
-    #     'Accept-Encoding': 'identity',
-    #     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.75 Safari/537.36',
-    # }
-    # if u.netloc in API_SITES:
-    #
-    #     if API_SITES[u.netloc] == "twitter":
-    #         try:
-    #             tweet_id = int(u.path.split("/")[-1])
-    #         except (ValueError, IndexError, TypeError):
-    #             tweet_id = 0
-    #
-    #         token = os.environ.get("TWITTER_BEARER_TOKEN", "")
-    #         if not len(token) or not tweet_id:
-    #             return metadata
-    #
-    #         headers["Authorization"] = f"Bearer {token}"
-    #         req_url = f"https://api.twitter.com/2/tweets/{tweet_id}?tweet.fields=text,created_at"
-    #         try:
-    #             r = requests.get(req_url, headers=headers)
-    #         except Exception as e:
-    #             print(e)
-    #             print("Error during API request, returning blank")
-    #             return metadata
-    #
-    #         data = r.json()
-    #         try:
-    #             tweet = data["data"]["text"]
-    #         except KeyError as e:
-    #             tweet = ""
-    #         try:
-    #             d = data["data"]["created_at"]
-    #             metadata["upload_time"] = parser.parse(d).replace(tzinfo=None)
-    #         except (KeyError, ParserError) as e:
-    #             metadata["upload_time"] = datetime.now()
-    #
-    #         metadata["desc"] = remove_links(tweet).lstrip().rstrip().strip("\t")[:1024]
-    #         metadata["title"] = remove_emoji(remove_links(tweet.split("\n")[0]))[:256].lstrip().rstrip().strip("\t")
-    #
-    #     elif API_SITES[u.netloc] == "reddit":
-    #         try:
-    #             page = reddit.submission(url=url)
-    #             if page:
-    #                 d = page.created_utc
-    #                 metadata["upload_time"] = datetime.utcfromtimestamp(d)
-    #                 metadata["desc"] = remove_links(page.selftext)
-    #                 metadata["title"] = remove_emoji(page.title)
-    #         except Exception as e:
-    #             log.error(e)
-    #
-    # return metadata
-
