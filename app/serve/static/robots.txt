@@ -1,0 +1,16 @@
+User-Agent: *
+
+Disallow: /dashboard/*
+Disallow: /dashboard
+Disallow: *.mp4
+Disallow: /login*
+Disallow: /logout*
+Disallow: /report_video*
+Disallow: /edit_video*
+Disallow: /api/*
+Disallow: /remove*
+Disallow: /handle*
+Disallow: /create*
+Disallow: /pending*
+Disallow: /check*
+Disallow: /submit*

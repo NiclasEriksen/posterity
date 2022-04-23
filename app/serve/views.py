@@ -5,9 +5,9 @@ import mimetypes
 from dotenv import load_dotenv
 import json
 from datetime import datetime
-from flask import Blueprint, current_app, request, abort,\
-    render_template, send_from_directory, url_for, flash,\
-    redirect, get_flashed_messages, Response, session
+from flask import Blueprint, current_app, request, abort, \
+    render_template, send_from_directory, url_for, flash, \
+    redirect, get_flashed_messages, Response, session, make_response
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import login_user, login_required, logout_user, current_user
 from redis.exceptions import ConnectionError
@@ -136,9 +136,48 @@ def inject_status_codes_for_all_templates():
     )
 
 @serve.route('/robots.txt')
-@serve.route('/sitemap.xml')
 def static_from_root():
-    return send_from_directory(serve.static_folder, request.path[1:])
+    return send_from_directory(serve.static_folder, "robots.txt")
+
+
+@serve.route("/sitemap")
+@serve.route("/sitemap/")
+@serve.route("/sitemap.xml")
+def sitemap():
+    """
+        Route to dynamically generate a sitemap of your website/application.
+        lastmod and priority tags omitted on static pages.
+        lastmod included on dynamic content such as blog posts.
+    """
+    from urllib.parse import urlparse
+
+    host_components = urlparse(request.host_url)
+    host_base = host_components.scheme + "://" + host_components.netloc
+
+    # Static routes with static content
+    static_urls = list()
+
+    for p in ["", "about", "download_archive", "register"]:
+        url = {
+            "loc": f"{host_base}/{p}"
+        }
+        static_urls.append(url)
+
+    # Dynamic routes with dynamic content
+    dynamic_urls = list()
+    videos = db_session.query(Video).filter_by(verified=True).filter_by(private=False).limit(25000).all()
+    for post in videos:
+        url = {
+            "loc": f"{host_base}/{post.video_id}",
+            "lastmod": post.upload_time.strftime("%Y-%m-%dT%H:%M:%SZ")
+            }
+        dynamic_urls.append(url)
+
+    xml_sitemap = render_template("sitemap.xml", static_urls=static_urls, dynamic_urls=dynamic_urls, host_base=host_base)
+    response = make_response(xml_sitemap)
+    response.headers["Content-Type"] = "application/xml"
+
+    return response
 
 
 @serve.route("/", methods=["GET"])
