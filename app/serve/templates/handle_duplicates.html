@@ -7,10 +7,31 @@
             <div class="uk-card uk-card-default uk-card-body">
                 <h4>Video 1:</h4>
                 <fieldset>
-                    <div class="uk-margin">
-                        <label class="uk-form-label uk-text-bold uk-text-large uk-text-center">Keep this one:</label>
-                        <div class="uk-form-controls uk-width-1-1 uk-flex uk-flex-center">
-                            <input class="uk-form-large uk-checkbox" name="video1_keep_checkbox" style="width:64px;height:64px;" type="checkbox" checked>
+                    <div class="uk-margin uk-grid">
+                        <div class="uk-width-1-2 uk-padding-small" style="padding-left:45px;">
+                            <p class="uk-text-small">
+                                <span class="uk-text-meta">Duration:</span> {{ video1.duration_str_verbose }}<br>
+                                <span class="uk-text-meta">Dimensions:</span> {{ video1.dimensions_str }}<br>
+                                <span class="uk-text-meta">Codecs:</span> {{ video1.format_str }}<br>
+                                {% if video1.post_processed %}
+                                <span class="uk-text-meta">FPS:</span> {{ video1.frame_rate_str }} <i>(<span class="uk-text-meta">{{ video1.processed_frame_rate_str }}</span>)</i><br>
+                                <span class="uk-text-meta">Bit rate:</span> {{ video1.bit_rate_str }} <i>(<span class="uk-text-meta">{{ video1.processed_bit_rate_str }}</span>)</i><br>
+                                {% else %}
+                                <span class="uk-text-meta">FPS:</span> {{ video1.frame_rate_str }}<br>
+                                <span class="uk-text-meta">Bit rate:</span> {{ video1.bit_rate_str }}<br>
+                                {% endif %}
+                                {% if video1.post_processed %}
+                                <span class="uk-text-meta">File size:</span> {{ video1.file_size_str }} <i class="uk-text-meta">({{ video1.processed_file_size_str }})</i><br>
+                                {% else %}
+                                <span class="uk-text-meta">File size:</span> {{ video1.file_size_str }}<br>
+                                {% endif %}
+                            </p>
+                        </div>
+                        <div class="uk-width-1-2 uk-padding-small">
+                            <label class="uk-width-1-1 uk-form-label uk-text-bold uk-text-large uk-text-center">Keep this one:</label>
+                            <div class="uk-form-controls uk-width-1-1 uk-flex uk-flex-center">
+                                <input class="uk-form-large uk-checkbox" name="video1_keep_checkbox" style="width:64px;height:64px;" type="checkbox" checked>
+                            </div>
                         </div>
                     </div>
                     <div class="uk-margin">
@@ -54,10 +75,31 @@
             <div class="uk-card uk-card-default uk-card-body">
                 <h4>Video 2:</h4>
                 <fieldset>
-                    <div class="uk-margin">
-                        <label class="uk-form-label uk-text-bold uk-text-large uk-text-center">Keep this one:</label>
-                        <div class="uk-form-controls uk-width-1-1 uk-flex uk-flex-center">
-                            <input class="uk-form-large uk-checkbox" name="video2_keep_checkbox" style="width:64px;height:64px;" type="checkbox">
+                    <div class="uk-margin uk-grid">
+                        <div class="uk-width-1-2 uk-padding-small">
+                            <label class="uk-width-1-1 uk-form-label uk-text-bold uk-text-large uk-text-center">Keep this one:</label>
+                            <div class="uk-form-controls uk-width-1-1 uk-flex uk-flex-center">
+                                <input class="uk-form-large uk-checkbox" name="video2_keep_checkbox" style="width:64px;height:64px;" type="checkbox">
+                            </div>
+                        </div>
+                        <div class="uk-width-1-2 uk-margin">
+                            <p class="uk-text-small">
+                                <span class="uk-text-meta">Duration:</span> {{ video2.duration_str_verbose }}<br>
+                                <span class="uk-text-meta">Dimensions:</span> {{ video2.dimensions_str }}<br>
+                                <span class="uk-text-meta">Codecs:</span> {{ video2.format_str }}<br>
+                                {% if video2.post_processed %}
+                                <span class="uk-text-meta">FPS:</span> {{ video2.frame_rate_str }} <i>(<span class="uk-text-meta">{{ video2.processed_frame_rate_str }}</span>)</i><br>
+                                <span class="uk-text-meta">Bit rate:</span> {{ video2.bit_rate_str }} <i>(<span class="uk-text-meta">{{ video2.processed_bit_rate_str }}</span>)</i><br>
+                                {% else %}
+                                <span class="uk-text-meta">FPS:</span> {{ video2.frame_rate_str }}<br>
+                                <span class="uk-text-meta">Bit rate:</span> {{ video2.bit_rate_str }}<br>
+                                {% endif %}
+                                {% if video2.post_processed %}
+                                <span class="uk-text-meta">File size:</span> {{ video2.file_size_str }} <i class="uk-text-meta">({{ video2.processed_file_size_str }})</i><br>
+                                {% else %}
+                                <span class="uk-text-meta">File size:</span> {{ video2.file_size_str }}
+                                {% endif %}
+                            </p>
                         </div>
                     </div>
                     <div class="uk-margin">
