@@ -832,8 +832,11 @@ class DeletedVideo(Base):
         self.source = video.source
         self.deleted_by = deleted_by
         self.delete_time = datetime.now()
-        self.duplicate = video.has_duplicates
-        self.duplicate_id = video.video_id if self.duplicate else ""
+        if video.has_duplicates:
+            self.duplicate = True
+            self.duplicate_id = video.duplicates[0].video_id
+        else:
+            self.duplicate = False
         for t in video.tags:
             self.tags.append(t)
         for t in video.categories:
