@@ -192,8 +192,8 @@ def start_processing(video_id: str):
 
 @core.route("/start_download/<video_id>", methods=["POST"])
 @limiter.limit("1/second", override_defaults=False)
-def start_download(video_id: str):
-    if not current_user.is_authenticated:
+def start_download(video_id: str, token: str = ""):
+    if not current_user.is_authenticated and (not len(token) or not token == os.environ.get("API_TOKEN")):
         logger.error("Trying to start download without being logged in.")
         return Response("Lacking permissions to initiate download task.", status=401)
     video = db_session.query(Video).filter_by(video_id=video_id).first()
@@ -234,6 +234,7 @@ def post_link():
 
     logger.info("Link posted.")
     data = request.get_json()
+    token = ""
 
     if current_user.is_authenticated:
         if "download_now" in data and isinstance(data["download_now"], bool):
@@ -245,9 +246,11 @@ def post_link():
 
         data["source"] = current_user.username
     elif "token" in data and os.environ.get("API_TOKEN", ""):
+        data["source"] = "Anonymous"
         if not data["token"] == os.environ.get("API_TOKEN"):
-            data["source"] = "Anonymous"
+            pass
         else:
+            token = data["token"]
             if "download_now" in data and isinstance(data["download_now"], bool):
                 download_now = data["download_now"]
     else:
@@ -301,7 +304,7 @@ def post_link():
             return Response("Database error on adding video, weird.", status=400)
 
         if download_now:
-            return start_download(fn)
+            return start_download(fn, token=token)
         else:
             return Response("Video has peen submitted, pending approval.", status=202)
 
