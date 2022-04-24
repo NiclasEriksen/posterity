@@ -18,13 +18,13 @@
                 {% for v in pending_videos %}
                 <tr>
                     <td>
-                        <div style="display: table-cell;">
+                        <div class="uk-position-relative" style="display: table-cell; overflow: hidden;text-overflow: ellipsis;word-wrap: break-word;">
                             <a href="/{{ v.video_id }}">{{ v.title }}</a><br>
-                            <a href="{{ v.url }}" target="_blank">
+                            <a href="{{ v.url }}" target="_blank" style="overflow: hidden;text-overflow: ellipsis;">
                                 {% if v.source_site_name|length %}
                                 <span class="uk-icon-link" uk-icon="icon: {{ v.source_site_name }}; ratio: 0.75"></span>
                                 {% endif %}
-                                <span class="uk-text-small">{{ v.url[:64] }}</span><br>
+                                <span class="uk-text-small" style="overflow: hidden;text-overflow: ellipsis;word-wrap: break-word;white-space: pre-wrap;word-break: break-word;">{{ v.url }}</span><br>
                                 {% set video = v %}
                                 {% include "video_status_icons.html" %}
                                 {% if v.tags|length or v.categories|length or v.theatres|length %}
