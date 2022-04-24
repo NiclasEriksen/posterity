@@ -20,11 +20,11 @@
                     <td>
                         <div style="display: table-cell;">
                             <a href="/{{ v.video_id }}">{{ v.title }}</a><br>
-                            <a href="{{ v.url[:64] }}" target="_blank">
+                            <a href="{{ v.url }}" target="_blank">
                                 {% if v.source_site_name|length %}
                                 <span class="uk-icon-link" uk-icon="icon: {{ v.source_site_name }}; ratio: 0.75"></span>
                                 {% endif %}
-                                <span class="uk-text-small">{{ v.url[:128] }}</span><br>
+                                <span class="uk-text-small">{{ v.url[:64] }}</span><br>
                                 {% set video = v %}
                                 {% include "video_status_icons.html" %}
                                 {% if v.tags|length or v.categories|length or v.theatres|length %}
