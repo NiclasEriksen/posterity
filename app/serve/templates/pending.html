@@ -20,7 +20,7 @@
                     <td>
                         <div style="display: table-cell;">
                             <a href="/{{ v.video_id }}">{{ v.title }}</a><br>
-                            <a href="{{ v.url[:128] }}" target="_blank">
+                            <a href="{{ v.url[:64] }}" target="_blank">
                                 {% if v.source_site_name|length %}
                                 <span class="uk-icon-link" uk-icon="icon: {{ v.source_site_name }}; ratio: 0.75"></span>
                                 {% endif %}
