@@ -19,7 +19,7 @@ def create_app():
     app = Flask(app_config[APPLICATION_ENV].APP_NAME)
     app.config.from_object(app_config[APPLICATION_ENV])
     app.config["SECRET_KEY"] = app_config[APPLICATION_ENV].SECRET_KEY
-    app.configg["SESSION_COOKIE_DOMAIN"] = False
+    app.config["SESSION_COOKIE_DOMAIN"] = False
 
     log = app.logger
     log.info("Loading LoginManager")
